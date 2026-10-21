@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/src/Infrastructure/Database/Connection.php';
+require_once __DIR__ . '/../src/Infrastructure/Database/Connection.php';
 
 use Infrastructure\Database\Connection;
 
