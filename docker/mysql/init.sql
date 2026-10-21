@@ -1,0 +1,1 @@
+--start with mysql create database and user 
