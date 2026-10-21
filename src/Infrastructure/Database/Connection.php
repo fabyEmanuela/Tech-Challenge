@@ -15,10 +15,10 @@ class Connection
         if (self::$instance === null) {
             try {
                 // Credenciais padrão do WAMP
-                $host = '127.0.0.1';
+                $host = 'db';
                 $db   = 'oficina_mecanica';
                 $user = 'root';
-                $pass = ''; 
+                $pass = '';
                 $charset = 'utf8mb4';
 
                 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
