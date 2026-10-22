@@ -1,0 +1,13 @@
+{
+    "autoload": {
+        "psr-4": {
+            "Domain\\": "src/Domain/",
+            "Application\\": "src/Application/",
+            "Infrastructure\\": "src/Infrastructure/"
+        }
+    },
+    "require-dev": {
+        "zircote/swagger-php": "^6.18"
+    }
+}
+

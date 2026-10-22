@@ -29,3 +29,10 @@ COPY docker/php/conf.d/xdebug.ini /usr/local/etc/php/conf.d/99-xdebug.ini
 
 # Define o diretório de trabalho da aplicação
 WORKDIR /var/www/html
+# Instala dependências do sistema necessárias para o Composer descompactar pacotes
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libzip-dev \
+    && docker-php-ext-install pdo pdo_mysql mysqli zip
+
