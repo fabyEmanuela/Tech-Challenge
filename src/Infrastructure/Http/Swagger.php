@@ -13,6 +13,14 @@ use OpenApi\Attributes as OA;
     url: "http://localhost:8080",
     description: "Servidor Local (Docker)"
 )]
+#[OA\Tag(
+    name: "Usuários",
+    description: "Gerenciamento de clientes e usuários do sistema"
+)]
+#[OA\Tag(
+    name: "Status",
+    description: "Verificação de conectividade e saúde da API"
+)]
 class Swagger
 {
 }

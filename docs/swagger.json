@@ -12,6 +12,672 @@
         }
     ],
     "paths": {
+        "/usuarios": {
+            "get": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Lista todos os usuários ou filtra por tipo",
+                "operationId": "b8ba246e72e2d430aaca5feb6c4c21aa",
+                "parameters": [
+                    {
+                        "name": "tipo",
+                        "in": "query",
+                        "description": "Tipo de usuário para filtragem",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "cliente",
+                                "mecanico",
+                                "atendente"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de usuários retornada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "nome": {
+                                                "type": "string",
+                                                "example": "João Silva"
+                                            },
+                                            "email": {
+                                                "type": "string",
+                                                "example": "joao@email.com"
+                                            },
+                                            "telefone": {
+                                                "type": "string",
+                                                "example": "11987654321",
+                                                "nullable": true
+                                            },
+                                            "cpf": {
+                                                "type": "string",
+                                                "example": "123.456.789-00",
+                                                "nullable": true
+                                            },
+                                            "tipo_usuario": {
+                                                "type": "string",
+                                                "example": "cliente",
+                                                "enum": [
+                                                    "cliente",
+                                                    "mecanico",
+                                                    "atendente"
+                                                ]
+                                            },
+                                            "ativo": {
+                                                "type": "boolean",
+                                                "example": true
+                                            },
+                                            "criado_em": {
+                                                "type": "string",
+                                                "example": "2026-10-22 10:00:00"
+                                            },
+                                            "atualizado_em": {
+                                                "type": "string",
+                                                "example": "2026-10-22 10:00:00",
+                                                "nullable": true
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Erro ao listar usuários."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Cadastra um novo usuário",
+                "operationId": "f071d15bff0aecd6d52fcf84d83612b8",
+                "requestBody": {
+                    "description": "Dados para cadastro do usuário",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome",
+                                    "email"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "example": "João Silva"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "joao@email.com"
+                                    },
+                                    "telefone": {
+                                        "type": "string",
+                                        "example": "11987654321",
+                                        "nullable": true
+                                    },
+                                    "cpf": {
+                                        "type": "string",
+                                        "example": "123.456.789-00",
+                                        "nullable": true
+                                    },
+                                    "tipo_usuario": {
+                                        "type": "string",
+                                        "example": "cliente",
+                                        "default": "cliente",
+                                        "enum": [
+                                            "cliente",
+                                            "mecanico",
+                                            "atendente"
+                                        ]
+                                    },
+                                    "senha": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "senha123",
+                                        "nullable": true
+                                    },
+                                    "ativo": {
+                                        "type": "boolean",
+                                        "example": true,
+                                        "default": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuário cadastrado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "nome": {
+                                            "type": "string",
+                                            "example": "João Silva"
+                                        },
+                                        "email": {
+                                            "type": "string",
+                                            "example": "joao@email.com"
+                                        },
+                                        "telefone": {
+                                            "type": "string",
+                                            "example": "11987654321",
+                                            "nullable": true
+                                        },
+                                        "cpf": {
+                                            "type": "string",
+                                            "example": "123.456.789-00",
+                                            "nullable": true
+                                        },
+                                        "tipo_usuario": {
+                                            "type": "string",
+                                            "example": "cliente"
+                                        },
+                                        "ativo": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "criado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-22 10:00:00"
+                                        },
+                                        "atualizado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-22 10:00:00",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dados inválidos / Erro de validação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "O campo 'nome' é obrigatório."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Erro ao criar usuário."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/clientes": {
+            "get": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Lista todos os clientes",
+                "description": "Alias para /usuarios?tipo=cliente",
+                "operationId": "0f8310ead5613264957d39ad122236e6",
+                "responses": {
+                    "200": {
+                        "description": "Lista de clientes retornada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "nome": {
+                                                "type": "string",
+                                                "example": "Maria Santos"
+                                            },
+                                            "email": {
+                                                "type": "string",
+                                                "example": "maria@email.com"
+                                            },
+                                            "telefone": {
+                                                "type": "string",
+                                                "example": "11987654321",
+                                                "nullable": true
+                                            },
+                                            "cpf": {
+                                                "type": "string",
+                                                "example": "123.456.789-00",
+                                                "nullable": true
+                                            },
+                                            "tipo_usuario": {
+                                                "type": "string",
+                                                "example": "cliente"
+                                            },
+                                            "ativo": {
+                                                "type": "boolean",
+                                                "example": true
+                                            },
+                                            "criado_em": {
+                                                "type": "string",
+                                                "example": "2026-10-22 10:00:00"
+                                            },
+                                            "atualizado_em": {
+                                                "type": "string",
+                                                "example": "2026-10-22 10:00:00",
+                                                "nullable": true
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor"
+                    }
+                }
+            }
+        },
+        "/usuarios/{id}": {
+            "get": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Busca um usuário pelo ID",
+                "operationId": "f20df6481e58b829d0e2ce00f2841237",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Usuário encontrado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "nome": {
+                                            "type": "string",
+                                            "example": "João Silva"
+                                        },
+                                        "email": {
+                                            "type": "string",
+                                            "example": "joao@email.com"
+                                        },
+                                        "telefone": {
+                                            "type": "string",
+                                            "example": "11987654321",
+                                            "nullable": true
+                                        },
+                                        "cpf": {
+                                            "type": "string",
+                                            "example": "123.456.789-00",
+                                            "nullable": true
+                                        },
+                                        "tipo_usuario": {
+                                            "type": "string",
+                                            "example": "cliente"
+                                        },
+                                        "ativo": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "criado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-22 10:00:00"
+                                        },
+                                        "atualizado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-22 10:00:00",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuário não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Usuário com ID 1 não encontrado."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Erro ao buscar usuário."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Atualiza os dados de um usuário",
+                "operationId": "947436922e9b6be90711cc1fb2de6447",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do usuário a ser atualizado",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Campos do usuário a serem alterados",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "example": "João da Silva"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "joao.silva@email.com"
+                                    },
+                                    "telefone": {
+                                        "type": "string",
+                                        "example": "11999998888",
+                                        "nullable": true
+                                    },
+                                    "cpf": {
+                                        "type": "string",
+                                        "example": "123.456.789-00",
+                                        "nullable": true
+                                    },
+                                    "tipo_usuario": {
+                                        "type": "string",
+                                        "example": "cliente",
+                                        "enum": [
+                                            "cliente",
+                                            "mecanico",
+                                            "atendente"
+                                        ]
+                                    },
+                                    "senha": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "nova_senha123",
+                                        "nullable": true
+                                    },
+                                    "ativo": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Usuário atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "nome": {
+                                            "type": "string",
+                                            "example": "João da Silva"
+                                        },
+                                        "email": {
+                                            "type": "string",
+                                            "example": "joao.silva@email.com"
+                                        },
+                                        "telefone": {
+                                            "type": "string",
+                                            "example": "11999998888",
+                                            "nullable": true
+                                        },
+                                        "cpf": {
+                                            "type": "string",
+                                            "example": "123.456.789-00",
+                                            "nullable": true
+                                        },
+                                        "tipo_usuario": {
+                                            "type": "string",
+                                            "example": "cliente"
+                                        },
+                                        "ativo": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "criado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-22 10:00:00"
+                                        },
+                                        "atualizado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-22 10:30:00",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuário não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Usuário com ID 1 não encontrado."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dados inválidos / Erro de validação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Já existe outro usuário com este e-mail."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Erro ao atualizar usuário."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Remove um usuário pelo ID",
+                "operationId": "dc3396d26d5bb0490140abd608fe6bd6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do usuário a ser removido",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Usuário removido com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "mensagem": {
+                                            "type": "string",
+                                            "example": "Usuário removido com sucesso."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuário não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Usuário com ID 1 não encontrado."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Erro ao deletar usuário."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/": {
             "get": {
                 "tags": [
@@ -75,8 +741,12 @@
     },
     "tags": [
         {
+            "name": "Usuários",
+            "description": "Gerenciamento de clientes e usuários do sistema"
+        },
+        {
             "name": "Status",
-            "description": "Status"
+            "description": "Verificação de conectividade e saúde da API"
         }
     ]
 }
