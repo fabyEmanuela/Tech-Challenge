@@ -1,0 +1,25 @@
+{
+    "name": "tech-challenge/fase-1",
+    "description": "Tech Challenge Fase 1 - Oficina Mecânica API",
+    "type": "project",
+    "require": {
+        "php": "^8.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Domain\\": "src/Domain/",
+            "Application\\": "src/Application/",
+            "Http\\": "src/Http/",
+            "Infrastructure\\": "src/Infrastructure/",
+            "Repositories\\": "src/Repositories/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "src/tests/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}
