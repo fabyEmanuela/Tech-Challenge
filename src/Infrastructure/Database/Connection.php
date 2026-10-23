@@ -18,7 +18,7 @@ class Connection
                 $host = 'db';
                 $db   = 'oficina_mecanica';
                 $user = 'root';
-                $pass = '';
+                $pass = 'sua_senha';
                 $charset = 'utf8mb4';
 
                 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";

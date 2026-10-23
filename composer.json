@@ -5,6 +5,9 @@
     "require": {
         "php": "^8.3"
     },
+    "require-dev": {
+        "zircote/swagger-php": "^6.18"
+    },
     "autoload": {
         "psr-4": {
             "Domain\\": "src/Domain/",
