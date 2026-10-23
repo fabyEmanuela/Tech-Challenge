@@ -1,0 +1,474 @@
+{
+  "info": {
+    "_postman_id": "b3c9e691-8f12-42da-91e8-782a2da38291",
+    "name": "Tech Challenge - Fase 1 (Oficina Mecânica)",
+    "description": "Collection do Postman com todas as rotas da API REST da Oficina Mecânica (Tech Challenge - Fase 1).\n\nInclui:\n- CRUD completo de Usuários\n- Filtro por tipo de usuário (cliente, mecânico, atendente)\n- Rota de atalho `/clientes`\n- Cenários de validação e tratamento de erros (422, 404)\n- Scripts de teste que salvam dinamicamente o `usuario_id` criado na variável da collection.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Usuários",
+      "description": "Endpoints principais de gerenciamento de usuários (clientes, mecânicos e atendentes).",
+      "item": [
+        {
+          "name": "Listar todos os usuários",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"]
+            },
+            "description": "Retorna a lista completa de usuários cadastrados."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar usuários - Filtro por tipo (Cliente)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios?tipo=cliente",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"],
+              "query": [
+                {
+                  "key": "tipo",
+                  "value": "cliente",
+                  "description": "Filtrar por 'cliente', 'mecanico' ou 'atendente'"
+                }
+              ]
+            },
+            "description": "Filtra usuários pelo tipo 'cliente'."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar usuários - Filtro por tipo (Mecânico)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios?tipo=mecanico",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"],
+              "query": [
+                {
+                  "key": "tipo",
+                  "value": "mecanico"
+                }
+              ]
+            },
+            "description": "Filtra usuários pelo tipo 'mecanico'."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar usuários - Filtro por tipo (Atendente)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios?tipo=atendente",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"],
+              "query": [
+                {
+                  "key": "tipo",
+                  "value": "atendente"
+                }
+              ]
+            },
+            "description": "Filtra usuários pelo tipo 'atendente'."
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar usuário por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios/{{usuario_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "{{usuario_id}}"]
+            },
+            "description": "Busca detalhes de um usuário pelo seu ID numérico."
+          },
+          "response": []
+        },
+        {
+          "name": "Criar usuário (Cliente)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code é 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    var data = pm.response.json();",
+                  "    if (data.id) {",
+                  "        pm.collectionVariables.set(\"usuario_id\", data.id);",
+                  "        console.log(\"usuario_id atualizado para:\", data.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"João da Silva\",\n  \"email\": \"joao.silva@exemplo.com\",\n  \"telefone\": \"(11) 98765-4321\",\n  \"cpf\": \"529.982.247-25\",\n  \"tipo_usuario\": \"cliente\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"]
+            },
+            "description": "Cria um novo usuário do tipo cliente com CPF e telefone válidos. O ID gerado é automaticamente salvo na variável `usuario_id`."
+          },
+          "response": []
+        },
+        {
+          "name": "Criar usuário (Mecânico com senha)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code é 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Carlos Mecanico\",\n  \"email\": \"carlos.mecanico@oficina.com\",\n  \"telefone\": \"(11) 91234-5678\",\n  \"tipo_usuario\": \"mecanico\",\n  \"senha\": \"senhaForte123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"]
+            },
+            "description": "Cria um usuário mecânico fornecendo senha para login."
+          },
+          "response": []
+        },
+        {
+          "name": "Criar usuário (Atendente com senha)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code é 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Ana Atendente\",\n  \"email\": \"ana.atendente@oficina.com\",\n  \"telefone\": \"(11) 97654-3210\",\n  \"tipo_usuario\": \"atendente\",\n  \"senha\": \"senhaForte123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"]
+            },
+            "description": "Cria um usuário atendente."
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar usuário",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"João da Silva Atualizado\",\n  \"telefone\": \"(11) 99999-8888\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios/{{usuario_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "{{usuario_id}}"]
+            },
+            "description": "Atualiza campos de um usuário existente (PATCH-like). Apenas os campos informados são modificados."
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar usuário",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios/{{usuario_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "{{usuario_id}}"]
+            },
+            "description": "Remove um usuário do banco de dados pelo seu ID."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Clientes (Alias)",
+      "description": "Rotas específicas e atalhos para consulta de clientes.",
+      "item": [
+        {
+          "name": "Listar clientes via rota /clientes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clientes",
+              "host": ["{{base_url}}"],
+              "path": ["clientes"]
+            },
+            "description": "Atalho configurado no router que filtra e retorna exclusivamente usuários com `tipo_usuario = 'cliente'`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Validações e Testes de Erro",
+      "description": "Casos de teste para validar o comportamento da API diante de dados inválidos ou recursos inexistentes.",
+      "item": [
+        {
+          "name": "Erro 422 - Nome inválido (muito curto)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Jo\",\n  \"email\": \"jo@exemplo.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"]
+            },
+            "description": "Espera status 422: Nome deve ter pelo menos 3 caracteres."
+          },
+          "response": []
+        },
+        {
+          "name": "Erro 422 - E-mail com formato inválido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Nome Valido\",\n  \"email\": \"email-sem-arroba-e-sem-dominio\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"]
+            },
+            "description": "Espera status 422: Formato de e-mail inválido."
+          },
+          "response": []
+        },
+        {
+          "name": "Erro 422 - CPF com dígitos verificadores incorretos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Usuario Cpf Invalido\",\n  \"email\": \"cpf.invalido@exemplo.com\",\n  \"cpf\": \"123.456.789-00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"]
+            },
+            "description": "Espera status 422: CPF rejeitado pelo algoritmo oficial de dígitos verificadores."
+          },
+          "response": []
+        },
+        {
+          "name": "Erro 422 - Tipo de usuário inválido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Usuario Tipo Invalido\",\n  \"email\": \"tipo.invalido@exemplo.com\",\n  \"tipo_usuario\": \"gerente\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"]
+            },
+            "description": "Espera status 422: Tipo inválido (valores permitidos: cliente, mecanico, atendente)."
+          },
+          "response": []
+        },
+        {
+          "name": "Erro 404 - Buscar usuário inexistente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios/999999",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "999999"]
+            },
+            "description": "Espera status 404: Usuário com ID especificado não encontrado."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "usuario_id",
+      "value": "1",
+      "type": "string"
+    }
+  ]
+}
