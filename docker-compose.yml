@@ -25,5 +25,16 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
 
+  swagger:
+    image: swaggerapi/swagger-ui
+    container_name: tech-challenge-swagger
+    ports:
+      - "8081:8080"
+    environment:
+      SWAGGER_JSON: /docs/swagger.json
+    volumes:
+      - ./docs:/docs
+
 volumes:
   mysql_data:
+
