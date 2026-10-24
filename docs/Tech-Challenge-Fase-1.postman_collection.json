@@ -326,7 +326,232 @@
       ]
     },
     {
-      "name": "3. Validações e Testes de Erro",
+      "name": "3. Veículos",
+      "description": "Endpoints completos para gestão de veículos vinculados a clientes.",
+      "item": [
+        {
+          "name": "Listar todos os veículos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/veiculos",
+              "host": ["{{base_url}}"],
+              "path": ["veiculos"]
+            },
+            "description": "Retorna todos os veículos cadastrados na oficina mecânica."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar veículos - Filtrar por cliente (query param)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/veiculos?cliente_id={{usuario_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["veiculos"],
+              "query": [
+                {
+                  "key": "cliente_id",
+                  "value": "{{usuario_id}}",
+                  "description": "ID do cliente proprietário"
+                }
+              ]
+            },
+            "description": "Filtra e retorna apenas os veículos pertencentes a um cliente específico."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar veículos do cliente via /clientes/{id}/veiculos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clientes/{{usuario_id}}/veiculos",
+              "host": ["{{base_url}}"],
+              "path": ["clientes", "{{usuario_id}}", "veiculos"]
+            },
+            "description": "Rota de atalho RESTful para listar veículos diretamente a partir do ID do cliente."
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar veículo por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/veiculos/{{veiculo_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["veiculos", "{{veiculo_id}}"]
+            },
+            "description": "Retorna os detalhes de um veículo específico pelo ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Cadastrar veículo (Padrão Mercosul)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code é 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.id) {",
+                  "    pm.collectionVariables.set(\"veiculo_id\", jsonData.id.toString());",
+                  "    console.log(\"veiculo_id salvo na collection:\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente_id\": 1,\n  \"placa\": \"BRA2E19\",\n  \"marca\": \"Volkswagen\",\n  \"modelo\": \"Gol 1.0\",\n  \"ano\": 2022,\n  \"cor\": \"Branco\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/veiculos",
+              "host": ["{{base_url}}"],
+              "path": ["veiculos"]
+            },
+            "description": "Cadastra um veículo com placa no padrão Mercosul (ex: BRA2E19) e armazena o `veiculo_id` nas variáveis da collection."
+          },
+          "response": []
+        },
+        {
+          "name": "Cadastrar veículo (Padrão Tradicional ABC-1234)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente_id\": 1,\n  \"placa\": \"ABC-1234\",\n  \"marca\": \"Chevrolet\",\n  \"modelo\": \"Onix 1.0 Turbo\",\n  \"ano\": 2020,\n  \"cor\": \"Prata\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/veiculos",
+              "host": ["{{base_url}}"],
+              "path": ["veiculos"]
+            },
+            "description": "Cadastra um veículo com placa tradicional antiga (ex: ABC-1234 com hífen)."
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar veículo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente_id\": 1,\n  \"placa\": \"BRA2E19\",\n  \"marca\": \"Volkswagen\",\n  \"modelo\": \"Gol 1.6 MSI\",\n  \"ano\": 2023,\n  \"cor\": \"Cinza Chumbo\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/veiculos/{{veiculo_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["veiculos", "{{veiculo_id}}"]
+            },
+            "description": "Atualiza os dados de modelo, ano ou marca de um veículo existente."
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar veículo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code é 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Mensagem de sucesso retornada\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.mensagem).to.eql(\"Veículo removido com sucesso.\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/veiculos/{{veiculo_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["veiculos", "{{veiculo_id}}"]
+            },
+            "description": "Remove um veículo pelo seu ID."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Validações e Testes de Erro",
       "description": "Casos de teste para validar o comportamento da API diante de dados inválidos ou recursos inexistentes.",
       "item": [
         {
@@ -455,6 +680,79 @@
             "description": "Espera status 404: Usuário com ID especificado não encontrado."
           },
           "response": []
+        },
+        {
+          "name": "Erro 422 - Placa de veículo com formato inválido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente_id\": 1,\n  \"placa\": \"ABC-123\",\n  \"marca\": \"Volkswagen\",\n  \"modelo\": \"Gol\",\n  \"ano\": 2022\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/veiculos",
+              "host": ["{{base_url}}"],
+              "path": ["veiculos"]
+            },
+            "description": "Espera status 422: Placa deve conter 7 caracteres alfanuméricos no padrão Mercosul ou Tradicional."
+          },
+          "response": []
+        },
+        {
+          "name": "Erro 422 - Veículo com cliente inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente_id\": 999999,\n  \"placa\": \"XYZ9K88\",\n  \"marca\": \"Fiat\",\n  \"modelo\": \"Palio\",\n  \"ano\": 2021\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/veiculos",
+              "host": ["{{base_url}}"],
+              "path": ["veiculos"]
+            },
+            "description": "Espera status 422: Cliente não encontrado no sistema."
+          },
+          "response": []
+        },
+        {
+          "name": "Erro 404 - Buscar veículo inexistente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/veiculos/999999",
+              "host": ["{{base_url}}"],
+              "path": ["veiculos", "999999"]
+            },
+            "description": "Espera status 404: Veículo com ID especificado não encontrado."
+          },
+          "response": []
         }
       ]
     }
@@ -467,6 +765,11 @@
     },
     {
       "key": "usuario_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "veiculo_id",
       "value": "1",
       "type": "string"
     }

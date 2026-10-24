@@ -153,8 +153,17 @@ class UsuarioPdoRepository implements UsuarioRepositoryInterface
 
     public function deletar(int $id): bool
     {
-        $stmt = $this->pdo->prepare('DELETE FROM usuarios WHERE id = :id');
-        $stmt->execute([':id' => $id]);
-        return $stmt->rowCount() > 0;
+        try {
+            $stmt = $this->pdo->prepare('DELETE FROM usuarios WHERE id = :id');
+            $stmt->execute([':id' => $id]);
+            return $stmt->rowCount() > 0;
+        } catch (\PDOException $e) {
+            if ($e->getCode() === '23000' || (isset($e->errorInfo[1]) && $e->errorInfo[1] === 1451)) {
+                throw new \Domain\Exceptions\ValidacaoException(
+                    'Não é possível remover este cliente porque existem veículos vinculados a ele. Remova os veículos antes de excluir o cliente.'
+                );
+            }
+            throw $e;
+        }
     }
 }
