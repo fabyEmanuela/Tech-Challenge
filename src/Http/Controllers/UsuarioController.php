@@ -401,6 +401,8 @@ class UsuarioController
         try {
             $this->deletarUseCase->executar((int) $params['id']);
             JsonResponse::send(['mensagem' => 'Usuário removido com sucesso.']);
+        } catch (\Domain\Exceptions\ValidacaoException | InvalidArgumentException $e) {
+            JsonResponse::send(['erro' => $e->getMessage()], 422);
         } catch (RuntimeException $e) {
             JsonResponse::send(['erro' => $e->getMessage()], 404);
         } catch (Throwable $e) {
