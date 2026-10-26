@@ -4,14 +4,22 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+use Application\Servico\AtualizarServicoUseCase;
+use Application\Servico\BuscarServicoPorIdUseCase;
+use Application\Servico\BuscarServicoPorNomeUseCase;
+use Application\Servico\CriarServicoUseCase;
+use Application\Servico\DeletarServicoUseCase;
+use Application\Servico\ListarServicosUseCase;
 use Application\Usuario\AtualizarUsuarioUseCase;
 use Application\Usuario\BuscarUsuarioPorIdUseCase;
 use Application\Usuario\CriarUsuarioUseCase;
 use Application\Usuario\DeletarUsuarioUseCase;
 use Application\Usuario\ListarUsuariosUseCase;
+use Http\Controllers\ServicoController;
 use Http\Controllers\UsuarioController;
 use Http\Router;
 use Infrastructure\Database\Connection;
+use Repositories\Servico\ServicoPdoRepository;
 use Repositories\Usuario\UsuarioPdoRepository;
 
 // -----------------------------------------------------------------------
@@ -22,13 +30,22 @@ $pdo = Connection::getInstance();
 
 // Repositórios
 $usuarioRepository = new UsuarioPdoRepository($pdo);
+$servicoRepository = new ServicoPdoRepository($pdo);
 
-// Use Cases
+// Use Cases - Usuários
 $criarUsuario     = new CriarUsuarioUseCase($usuarioRepository);
 $listarUsuarios   = new ListarUsuariosUseCase($usuarioRepository);
 $buscarUsuario    = new BuscarUsuarioPorIdUseCase($usuarioRepository);
 $atualizarUsuario = new AtualizarUsuarioUseCase($usuarioRepository);
 $deletarUsuario   = new DeletarUsuarioUseCase($usuarioRepository);
+
+// Use Cases - Serviços
+$criarServico         = new CriarServicoUseCase($servicoRepository);
+$listarServicos       = new ListarServicosUseCase($servicoRepository);
+$buscarServicoPorId   = new BuscarServicoPorIdUseCase($servicoRepository);
+$buscarServicoPorNome = new BuscarServicoPorNomeUseCase($servicoRepository);
+$atualizarServico     = new AtualizarServicoUseCase($servicoRepository);
+$deletarServico       = new DeletarServicoUseCase($servicoRepository);
 
 // Controllers
 $usuarioController = new UsuarioController(
@@ -37,6 +54,15 @@ $usuarioController = new UsuarioController(
     $buscarUsuario,
     $atualizarUsuario,
     $deletarUsuario,
+);
+
+$servicoController = new ServicoController(
+    $criarServico,
+    $listarServicos,
+    $buscarServicoPorId,
+    $buscarServicoPorNome,
+    $atualizarServico,
+    $deletarServico,
 );
 
 // -----------------------------------------------------------------------
@@ -57,6 +83,14 @@ $router->add('GET', '/clientes', function (array $params) use ($usuarioControlle
     $_GET['tipo'] = 'cliente';
     $usuarioController->listar($params);
 });
+
+// Serviços
+$router->add('GET',    '/servicos',        [$servicoController, 'listar']);
+$router->add('GET',    '/servicos/buscar', [$servicoController, 'buscarPorNome']);
+$router->add('GET',    '/servicos/{id}',   [$servicoController, 'exibir']);
+$router->add('POST',   '/servicos',        [$servicoController, 'criar']);
+$router->add('PUT',    '/servicos/{id}',   [$servicoController, 'atualizar']);
+$router->add('DELETE', '/servicos/{id}',   [$servicoController, 'remover']);
 
 // -----------------------------------------------------------------------
 // Dispatch
