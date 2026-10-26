@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     nome          VARCHAR(100)    NOT NULL,
     email         VARCHAR(150)    NOT NULL UNIQUE,
     telefone      VARCHAR(20)     NULL,
-    cpf           VARCHAR(14)     NULL UNIQUE,
+    cpf           VARCHAR(14)     NOT NULL UNIQUE,
     tipo_usuario  ENUM('cliente', 'mecanico', 'atendente') NOT NULL DEFAULT 'cliente',
     senha_hash    VARCHAR(255)    NULL COMMENT 'Hash bcrypt — usado apenas por mecânico e atendente',
     ativo         TINYINT(1)      NOT NULL DEFAULT 1,

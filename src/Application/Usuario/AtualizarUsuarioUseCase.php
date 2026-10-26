@@ -62,6 +62,10 @@ class AtualizarUsuarioUseCase
         }
 
         // --- cpf ---
+        if (array_key_exists('cpf', $dados) && empty($dados['cpf'])) {
+            throw new InvalidArgumentException('O campo "cpf" é obrigatório.');
+        }
+
         if (!empty($dados['cpf'])) {
             $dados['cpf'] = Validator::cpf($dados['cpf']);
 

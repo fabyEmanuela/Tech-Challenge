@@ -33,6 +33,26 @@
                                 "atendente"
                             ]
                         }
+                    },
+                    {
+                        "name": "nome",
+                        "in": "query",
+                        "description": "Termo para busca parcial no nome do usuário",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "João"
+                        }
+                    },
+                    {
+                        "name": "cpf",
+                        "in": "query",
+                        "description": "CPF do usuário para busca exata",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "123.456.789-00"
+                        }
                     }
                 ],
                 "responses": {
@@ -127,7 +147,8 @@
                             "schema": {
                                 "required": [
                                     "nome",
-                                    "email"
+                                    "email",
+                                    "cpf"
                                 ],
                                 "properties": {
                                     "nome": {
@@ -146,8 +167,7 @@
                                     },
                                     "cpf": {
                                         "type": "string",
-                                        "example": "123.456.789-00",
-                                        "nullable": true
+                                        "example": "123.456.789-00"
                                     },
                                     "tipo_usuario": {
                                         "type": "string",

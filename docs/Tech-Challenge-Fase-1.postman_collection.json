@@ -201,7 +201,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Carlos Mecanico\",\n  \"email\": \"carlos.mecanico@oficina.com\",\n  \"telefone\": \"(11) 91234-5678\",\n  \"tipo_usuario\": \"mecanico\",\n  \"senha\": \"senhaForte123\"\n}"
+              "raw": "{\n  \"nome\": \"Carlos Mecanico\",\n  \"email\": \"carlos.mecanico@oficina.com\",\n  \"telefone\": \"(11) 91234-5678\",\n  \"cpf\": \"111.444.777-35\",\n  \"tipo_usuario\": \"mecanico\",\n  \"senha\": \"senhaForte123\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/usuarios",
@@ -241,7 +241,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Ana Atendente\",\n  \"email\": \"ana.atendente@oficina.com\",\n  \"telefone\": \"(11) 97654-3210\",\n  \"tipo_usuario\": \"atendente\",\n  \"senha\": \"senhaForte123\"\n}"
+              "raw": "{\n  \"nome\": \"Ana Atendente\",\n  \"email\": \"ana.atendente@oficina.com\",\n  \"telefone\": \"(11) 97654-3210\",\n  \"cpf\": \"935.411.347-80\",\n  \"tipo_usuario\": \"atendente\",\n  \"senha\": \"senhaForte123\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/usuarios",
@@ -841,7 +841,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Usuario Tipo Invalido\",\n  \"email\": \"tipo.invalido@exemplo.com\",\n  \"tipo_usuario\": \"gerente\"\n}"
+              "raw": "{\n  \"nome\": \"Usuario Tipo Invalido\",\n  \"email\": \"tipo.invalido@exemplo.com\",\n  \"cpf\": \"111.444.777-35\",\n  \"tipo_usuario\": \"gerente\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/usuarios",
