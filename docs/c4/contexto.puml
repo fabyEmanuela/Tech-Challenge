@@ -1,0 +1,19 @@
+@startuml C4_Contexto_Oficina_Mecanica
+!include <C4/C4_Context>
+
+title C4 - Diagrama de Contexto - Sistema de Gestão de Oficina Mecânica
+LAYOUT_LEFT_RIGHT()
+
+Person(cliente, "Cliente", "Mantém os seus dados e os dados do veículo cadastrados.")
+Person(atendente, "Atendente", "Gerenciam cadastros dos clientes e veículos.")
+Person(mecanico, "Mecânico", "Fazem a execução da parte técnica.")
+
+System(sistema_oficina, "Sistema de Gestão de Oficina Mecânica", "API REST que gerencia usuários, clientes, veículos, peças, serviços e ordem de serviço.")
+
+Rel(cliente, sistema_oficina, "Tem os dados e veículos gerenciados por")
+Rel(atendente, sistema_oficina, "Gerencia cadastros", "HTTP/JSON")
+Rel(mecanico, sistema_oficina, "Gerencia OS", "HTTP/JSON")
+Rel(sistema_oficina, cliente, "Notifica atualizações", "E-mail")
+
+SHOW_LEGEND()
+@enduml

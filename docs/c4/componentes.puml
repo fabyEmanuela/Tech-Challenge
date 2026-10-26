@@ -1,0 +1,44 @@
+@startuml C4_Componentes_API_Oficina
+!include <C4/C4_Component>
+
+title C4 - Diagrama de Componentes - API da Oficina
+LAYOUT_LEFT_RIGHT()
+
+Person(equipe_oficina, "Equipe da oficina", "Atendentes e mecânicos que gerenciam cadastros.")
+System_Ext(swagger_ui, "Swagger UI", "Interface web para consultar e testar a API.")
+
+Container_Boundary(api_boundary, "API da oficina (PHP 8.3 / Apache)") {
+    Component(router, "Router", "PHP", "Mapeia requisições HTTP para os controllers.")
+    Component(usuario_controller, "UsuarioController", "PHP", "Recebe e responde às operações de usuários e clientes.")
+    Component(veiculo_controller, "VeiculoController", "PHP", "Recebe e responde às operações de veículos.")
+
+    Component(usuario_use_cases, "Casos de uso de usuário", "PHP", "Cria, consulta, atualiza e remove usuários.")
+    Component(veiculo_use_cases, "Casos de uso de veículo", "PHP", "Cria, consulta, atualiza e remove veículos.")
+    Component(notificacao_service, "Serviço de notificação", "PHP / SMTP", "Envia e-mails ao cliente após atualizações de cadastro ou veículo.")
+
+    Component(domain, "Domínio", "PHP", "Entidades, value objects, validações e interfaces de repositório.")
+    Component(usuario_repository, "UsuarioPdoRepository", "PHP / PDO", "Implementa a persistência de usuários.")
+    Component(veiculo_repository, "VeiculoPdoRepository", "PHP / PDO", "Implementa a persistência de veículos.")
+}
+
+ContainerDb(banco, "Banco de dados", "MySQL 8.4", "Armazena usuários e veículos.")
+Container(smtp_local, "Servidor SMTP local", "Mailpit / Docker", "Recebe e-mails de notificação no ambiente local.")
+
+Rel(equipe_oficina, router, "Gerencia cadastros", "HTTP/JSON")
+Rel(swagger_ui, router, "Consulta e testa endpoints", "HTTP/JSON")
+Rel(router, usuario_controller, "Encaminha rotas de usuários")
+Rel(router, veiculo_controller, "Encaminha rotas de veículos")
+Rel(usuario_controller, usuario_use_cases, "Executa")
+Rel(veiculo_controller, veiculo_use_cases, "Executa")
+Rel(usuario_use_cases, domain, "Aplica regras e contratos")
+Rel(veiculo_use_cases, domain, "Aplica regras e contratos")
+Rel(usuario_use_cases, usuario_repository, "Persiste usuários")
+Rel(veiculo_use_cases, veiculo_repository, "Persiste veículos")
+Rel(usuario_use_cases, notificacao_service, "Notifica após atualização")
+Rel(veiculo_use_cases, notificacao_service, "Notifica após atualização")
+Rel(usuario_repository, banco, "Lê e grava", "PDO / SQL")
+Rel(veiculo_repository, banco, "Lê e grava", "PDO / SQL")
+Rel(notificacao_service, smtp_local, "Envia e-mail", "SMTP")
+
+SHOW_LEGEND()
+@enduml

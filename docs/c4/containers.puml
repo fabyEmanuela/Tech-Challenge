@@ -1,0 +1,24 @@
+@startuml C4_Containers_Oficina_Mecanica
+!include <C4/C4_Container>
+
+title C4 - Diagrama de Contêineres - Sistema de Gestão de Oficina Mecânica
+LAYOUT_LEFT_RIGHT()
+
+Person(equipe_oficina, "Equipe da oficina", "Atendentes e mecânicos que gerenciam cadastros.")
+Person(cliente, "Cliente", "Clientes que rebecem notificação.")
+System_Ext(swagger_ui, "Swagger UI", "Interface web para consultar e testar a API.")
+
+System_Boundary(sistema_oficina, "Sistema de Gestão de Oficina Mecânica") {
+    Container(api, "API da oficina", "PHP 8.3 / Apache", "Expõe endpoints REST e orquestra os casos de uso de usuários, veículos, peças, serviços e ordem de serviço")
+    ContainerDb(banco, "Banco de dados", "MySQL 8.4", "Armazena usuários, veículos, peças, serviços e ordem de serviço.")
+    Container(smtp_local, "Sistema de envio de email", "Mailpit / Docker", "Recebe os e-mails de notificação no ambiente local (smtp via docker).")
+}
+
+Rel(equipe_oficina, api, "Gerencia cadastros", "HTTP/JSON")
+Rel(swagger_ui, api, "Consulta e testa endpoints", "HTTP/JSON")
+Rel(api, banco, "Lê e grava dados", "PDO / SQL")
+Rel(api, smtp_local, "Envia notificações de atualização", "SMTP")
+Rel(smtp_local, cliente, "Recebe email de notificação", "Interface web")
+
+SHOW_LEGEND()
+@enduml
