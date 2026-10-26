@@ -678,6 +678,492 @@
                 }
             }
         },
+        "/veiculos": {
+            "get": {
+                "tags": [
+                    "Veículos"
+                ],
+                "summary": "Lista todos os veículos ou filtra por cliente",
+                "operationId": "2f51966bbfe286e68f859870d3f7bd5a",
+                "parameters": [
+                    {
+                        "name": "cliente_id",
+                        "in": "query",
+                        "description": "Filtrar veículos pelo ID do cliente",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de veículos retornada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "cliente_id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "placa": {
+                                                "type": "string",
+                                                "example": "ABC1D23"
+                                            },
+                                            "placa_formatada": {
+                                                "type": "string",
+                                                "example": "ABC1D23"
+                                            },
+                                            "mercosul": {
+                                                "type": "boolean",
+                                                "example": true
+                                            },
+                                            "marca": {
+                                                "type": "string",
+                                                "example": "Volkswagen"
+                                            },
+                                            "modelo": {
+                                                "type": "string",
+                                                "example": "Gol 1.0"
+                                            },
+                                            "ano": {
+                                                "type": "integer",
+                                                "example": 2022
+                                            },
+                                            "cor": {
+                                                "type": "string",
+                                                "example": "Prata",
+                                                "nullable": true
+                                            },
+                                            "criado_em": {
+                                                "type": "string",
+                                                "example": "2026-10-23 10:00:00"
+                                            },
+                                            "atualizado_em": {
+                                                "type": "string",
+                                                "example": "2026-10-23 10:00:00",
+                                                "nullable": true
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Veículos"
+                ],
+                "summary": "Cadastra um novo veículo vinculado a um cliente",
+                "operationId": "3d5d1e636429bdb7a275fff6f68ad891",
+                "requestBody": {
+                    "description": "Dados para cadastro do veículo",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "cliente_id",
+                                    "placa",
+                                    "marca",
+                                    "modelo",
+                                    "ano"
+                                ],
+                                "properties": {
+                                    "cliente_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "placa": {
+                                        "type": "string",
+                                        "example": "ABC1D23"
+                                    },
+                                    "marca": {
+                                        "type": "string",
+                                        "example": "Volkswagen"
+                                    },
+                                    "modelo": {
+                                        "type": "string",
+                                        "example": "Gol 1.0"
+                                    },
+                                    "ano": {
+                                        "type": "integer",
+                                        "example": 2022
+                                    },
+                                    "cor": {
+                                        "type": "string",
+                                        "example": "Prata",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Veículo cadastrado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "cliente_id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "placa": {
+                                            "type": "string",
+                                            "example": "ABC1D23"
+                                        },
+                                        "marca": {
+                                            "type": "string",
+                                            "example": "Volkswagen"
+                                        },
+                                        "modelo": {
+                                            "type": "string",
+                                            "example": "Gol 1.0"
+                                        },
+                                        "ano": {
+                                            "type": "integer",
+                                            "example": 2022
+                                        },
+                                        "cor": {
+                                            "type": "string",
+                                            "example": "Prata",
+                                            "nullable": true
+                                        },
+                                        "criado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-23 10:00:00"
+                                        },
+                                        "atualizado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-23 10:00:00",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erro de validação dos dados",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Placa inválida."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/veiculos/{id}": {
+            "get": {
+                "tags": [
+                    "Veículos"
+                ],
+                "summary": "Busca um veículo pelo ID",
+                "operationId": "a272a818a7908b34beb6d09174c1c44f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do veículo",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Veículo encontrado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "cliente_id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "placa": {
+                                            "type": "string",
+                                            "example": "ABC1D23"
+                                        },
+                                        "placa_formatada": {
+                                            "type": "string",
+                                            "example": "ABC1D23"
+                                        },
+                                        "mercosul": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "marca": {
+                                            "type": "string",
+                                            "example": "Volkswagen"
+                                        },
+                                        "modelo": {
+                                            "type": "string",
+                                            "example": "Gol 1.0"
+                                        },
+                                        "ano": {
+                                            "type": "integer",
+                                            "example": 2022
+                                        },
+                                        "cor": {
+                                            "type": "string",
+                                            "example": "Prata",
+                                            "nullable": true
+                                        },
+                                        "criado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-23 10:00:00"
+                                        },
+                                        "atualizado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-23 10:00:00",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Veículo não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Veículo não encontrado."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Veículos"
+                ],
+                "summary": "Atualiza os dados de um veículo",
+                "operationId": "9113b49997999bf161fd0a9beba4e17b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do veículo a ser atualizado",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Dados a serem atualizados",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "cliente_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "placa": {
+                                        "type": "string",
+                                        "example": "ABC1D23"
+                                    },
+                                    "marca": {
+                                        "type": "string",
+                                        "example": "Volkswagen"
+                                    },
+                                    "modelo": {
+                                        "type": "string",
+                                        "example": "Gol 1.6"
+                                    },
+                                    "ano": {
+                                        "type": "integer",
+                                        "example": 2023
+                                    },
+                                    "cor": {
+                                        "type": "string",
+                                        "example": "Prata",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Veículo atualizado com sucesso"
+                    },
+                    "404": {
+                        "description": "Veículo não encontrado"
+                    },
+                    "422": {
+                        "description": "Erro de validação dos dados"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Veículos"
+                ],
+                "summary": "Remove um veículo pelo ID",
+                "operationId": "539925349339d29eb4fb0a89ff80c96f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do veículo a ser removido",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Veículo removido com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "mensagem": {
+                                            "type": "string",
+                                            "example": "Veículo removido com sucesso."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Veículo não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Veículo com ID 1 não encontrado."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/clientes/{id}/veiculos": {
+            "get": {
+                "tags": [
+                    "Veículos"
+                ],
+                "summary": "Lista todos os veículos de um determinado cliente",
+                "operationId": "86ae93e2089fcf8446ce1977152c49ee",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do cliente",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de veículos do cliente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/servicos": {
             "get": {
                 "tags": [
@@ -1330,6 +1816,10 @@
         {
             "name": "Usuários",
             "description": "Gerenciamento de clientes e usuários do sistema"
+        },
+{
+            "name": "Veículos",
+            "description": "Gerenciamento de veículos de clientes"
         },
         {
             "name": "Serviços",
