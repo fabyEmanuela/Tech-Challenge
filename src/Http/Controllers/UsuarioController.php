@@ -52,7 +52,7 @@ class UsuarioController
                 description: "CPF do usuário para busca exata",
                 in: "query",
                 required: false,
-                schema: new OA\Schema(type: "string", example: "123.456.789-00")
+                schema: new OA\Schema(type: "string", example: "529.982.247-25")
             )
         ],
         responses: [
@@ -215,7 +215,7 @@ class UsuarioController
                     new OA\Property(property: "nome", type: "string", example: "João Silva"),
                     new OA\Property(property: "email", type: "string", format: "email", example: "joao@email.com"),
                     new OA\Property(property: "telefone", type: "string", nullable: true, example: "11987654321"),
-                    new OA\Property(property: "cpf", type: "string", example: "123.456.789-00"),
+                    new OA\Property(property: "cpf", type: "string", example: "529.982.247-25"),
                     new OA\Property(property: "tipo_usuario", type: "string", enum: ["cliente", "mecanico", "atendente"], default: "cliente", example: "cliente"),
                     new OA\Property(property: "senha", type: "string", format: "password", nullable: true, example: "senha123"),
                     new OA\Property(property: "ativo", type: "boolean", default: true, example: true)

@@ -51,7 +51,7 @@
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "example": "123.456.789-00"
+                            "example": "529.982.247-25"
                         }
                     }
                 ],
@@ -167,7 +167,7 @@
                                     },
                                     "cpf": {
                                         "type": "string",
-                                        "example": "123.456.789-00"
+                                        "example": "529.982.247-25"
                                     },
                                     "tipo_usuario": {
                                         "type": "string",

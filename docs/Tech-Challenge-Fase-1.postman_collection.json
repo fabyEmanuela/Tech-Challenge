@@ -125,6 +125,58 @@
           "response": []
         },
         {
+          "name": "Buscar usuários por nome",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios?nome=João",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"],
+              "query": [
+                {
+                  "key": "nome",
+                  "value": "João",
+                  "description": "Busca parcial pelo nome do usuário"
+                }
+              ]
+            },
+            "description": "Retorna os usuários cujo nome contém o termo informado."
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar usuário por CPF",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios?cpf=529.982.247-25",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"],
+              "query": [
+                {
+                  "key": "cpf",
+                  "value": "529.982.247-25",
+                  "description": "Busca exata pelo CPF do usuário"
+                }
+              ]
+            },
+            "description": "Retorna o usuário correspondente ao CPF informado."
+          },
+          "response": []
+        },
+        {
           "name": "Criar usuário (Cliente)",
           "event": [
             {
