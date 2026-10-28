@@ -34,16 +34,34 @@ class UsuarioPdoRepository implements UsuarioRepositoryInterface
     // Consultas
     // ------------------------------------------------------------------
 
-    public function listarTodos(?TipoUsuario $tipo = null): array
+    public function listarTodos(?TipoUsuario $tipo = null, ?string $nome = null, ?string $cpf = null): array
     {
+        $condicoes = [];
+        $params    = [];
+
         if ($tipo !== null) {
-            $stmt = $this->pdo->prepare(
-                'SELECT * FROM usuarios WHERE tipo_usuario = :tipo ORDER BY nome'
-            );
-            $stmt->execute([':tipo' => $tipo->value]);
-        } else {
-            $stmt = $this->pdo->query('SELECT * FROM usuarios ORDER BY nome');
+            $condicoes[] = 'tipo_usuario = :tipo';
+            $params[':tipo'] = $tipo->value;
         }
+
+        if ($nome !== null) {
+            $condicoes[] = 'nome LIKE :nome';
+            $params[':nome'] = '%' . $nome . '%';
+        }
+
+        if ($cpf !== null) {
+            $condicoes[] = 'cpf = :cpf';
+            $params[':cpf'] = $cpf;
+        }
+
+        $sql = 'SELECT * FROM usuarios';
+        if ($condicoes !== []) {
+            $sql .= ' WHERE ' . implode(' AND ', $condicoes);
+        }
+        $sql .= ' ORDER BY nome';
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
 
         return array_map(
             fn(array $linha) => $this->montarUsuario($linha),

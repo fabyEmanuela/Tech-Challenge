@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     nome          VARCHAR(100)    NOT NULL,
     email         VARCHAR(150)    NOT NULL UNIQUE,
     telefone      VARCHAR(20)     NULL,
-    cpf           VARCHAR(14)     NULL UNIQUE,
+    cpf           VARCHAR(14)     NOT NULL UNIQUE,
     tipo_usuario  ENUM('cliente', 'mecanico', 'atendente') NOT NULL DEFAULT 'cliente',
     senha_hash    VARCHAR(255)    NULL COMMENT 'Hash bcrypt — usado apenas por mecânico e atendente',
     ativo         TINYINT(1)      NOT NULL DEFAULT 1,
@@ -50,4 +50,20 @@ CREATE TABLE IF NOT EXISTS veiculos (
         REFERENCES usuarios (id)
         ON DELETE RESTRICT
         ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------------------
+-- Tabela: serviços
+-- Armazena informações sobre os serviços oferecidos
+-- -----------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS servicos (
+    id                   INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+    nome                 VARCHAR(100)    NOT NULL,
+    descricao            VARCHAR(255)    NULL,
+    preco                DECIMAL(10, 2)  NOT NULL,
+    tempo_estimado_horas DECIMAL(10, 2)  NOT NULL,
+    ativo                TINYINT(1)      NOT NULL DEFAULT 1,
+    criado_em            DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em        DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

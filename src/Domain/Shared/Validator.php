@@ -158,7 +158,7 @@ class Validator
     // ------------------------------------------------------------------
 
     /**
-     * Valida o nome:
+     * Valida o nome de uma pessoa:
      *  - obrigatório
      *  - mínimo 3 caracteres (letras)
      *  - máximo 100 caracteres
@@ -192,6 +192,94 @@ class Validator
         }
 
         return $nome;
+    }
+
+    /**
+     * Valida o nome de um serviço:
+     *  - obrigatório
+     *  - mínimo 3 caracteres
+     *  - máximo 100 caracteres
+     *  - permite letras, números, espaços e hífens
+     *
+     * @throws InvalidArgumentException
+     */
+    public static function nomeServico(string $nome): string
+    {
+        $nome = trim($nome);
+
+        if (mb_strlen($nome) < 3) {
+            throw new InvalidArgumentException(
+                'Nome do serviço inválido: deve ter pelo menos 3 caracteres.'
+            );
+        }
+
+        if (mb_strlen($nome) > 100) {
+            throw new InvalidArgumentException(
+                'Nome do serviço inválido: máximo de 100 caracteres.'
+            );
+        }
+
+        return self::textoLivre($nome, 'Nome do serviço');
+    }
+
+    // ------------------------------------------------------------------
+    // Preço
+    // ------------------------------------------------------------------
+
+    /**
+     * Valida o preço:
+     *  - obrigatório / numérico
+     *  - não pode ser negativo (< 0)
+     *
+     * @throws InvalidArgumentException
+     */
+    public static function preco(mixed $preco): float
+    {
+        if (!is_numeric($preco)) {
+            throw new InvalidArgumentException(
+                'Preço inválido: deve ser um valor numérico.'
+            );
+        }
+
+        $precoFloat = (float) $preco;
+
+        if ($precoFloat < 0) {
+            throw new InvalidArgumentException(
+                'Preço inválido: o valor não pode ser negativo.'
+            );
+        }
+
+        return round($precoFloat, 2);
+    }
+
+    // ------------------------------------------------------------------
+    // Tempo Estimado em Horas
+    // ------------------------------------------------------------------
+
+    /**
+     * Valida o tempo estimado em horas de um serviço:
+     *  - numérico
+     *  - não pode ser negativo (< 0)
+     *
+     * @throws InvalidArgumentException
+     */
+    public static function tempoEstimadoHoras(mixed $tempo): float
+    {
+        if (!is_numeric($tempo)) {
+            throw new InvalidArgumentException(
+                'Tempo estimado inválido: deve ser um valor numérico.'
+            );
+        }
+
+        $tempoFloat = (float) $tempo;
+
+        if ($tempoFloat < 0) {
+            throw new InvalidArgumentException(
+                'Tempo estimado inválido: o valor não pode ser negativo.'
+            );
+        }
+
+        return round($tempoFloat, 2);
     }
 
     // ------------------------------------------------------------------

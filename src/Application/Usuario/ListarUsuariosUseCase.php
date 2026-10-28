@@ -4,6 +4,7 @@ namespace Application\Usuario;
 
 use Domain\Usuario\TipoUsuario;
 use Domain\Usuario\Usuario;
+use Domain\Shared\Validator;
 use Repositories\Usuario\UsuarioRepositoryInterface;
 
 class ListarUsuariosUseCase
@@ -15,7 +16,7 @@ class ListarUsuariosUseCase
     /**
      * @return Usuario[]
      */
-    public function executar(?string $tipoFiltro = null): array
+    public function executar(?string $tipoFiltro = null, ?string $nome = null, ?string $cpf = null): array
     {
         $tipo = null;
 
@@ -23,6 +24,18 @@ class ListarUsuariosUseCase
             $tipo = TipoUsuario::tryFrom($tipoFiltro);
         }
 
-        return $this->repository->listarTodos($tipo);
+        if ($nome !== null && trim($nome) !== '') {
+            $nome = trim($nome);
+        } else {
+            $nome = null;
+        }
+
+        if ($cpf !== null && trim($cpf) !== '') {
+            $cpf = Validator::cpf($cpf);
+        } else {
+            $cpf = null;
+        }
+
+        return $this->repository->listarTodos($tipo, $nome, $cpf);
     }
 }

@@ -17,6 +17,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
+use Application\Servico\AtualizarServicoUseCase;
+use Application\Servico\BuscarServicoPorIdUseCase;
+use Application\Servico\BuscarServicoPorNomeUseCase;
+use Application\Servico\CriarServicoUseCase;
+use Application\Servico\DeletarServicoUseCase;
+use Application\Servico\ListarServicosUseCase;
 use Application\Usuario\AtualizarUsuarioUseCase;
 use Application\Usuario\BuscarUsuarioPorIdUseCase;
 use Application\Usuario\CriarUsuarioUseCase;
@@ -27,11 +33,13 @@ use Application\Veiculo\BuscarVeiculoPorIdUseCase;
 use Application\Veiculo\CriarVeiculoUseCase;
 use Application\Veiculo\DeletarVeiculoUseCase;
 use Application\Veiculo\ListarVeiculosUseCase;
+use Http\Controllers\ServicoController;
 use Http\Controllers\UsuarioController;
 use Http\Controllers\VeiculoController;
 use Http\Router;
 use Infrastructure\Database\Connection;
 use Infrastructure\Repositories\VeiculoPdoRepository;
+use Repositories\Servico\ServicoPdoRepository;
 use Repositories\Usuario\UsuarioPdoRepository;
 
 // -----------------------------------------------------------------------
@@ -42,6 +50,7 @@ $pdo = Connection::getInstance();
 
 // Repositórios
 $usuarioRepository = new UsuarioPdoRepository($pdo);
+$servicoRepository = new ServicoPdoRepository($pdo);
 $veiculoRepository = new VeiculoPdoRepository($pdo);
 
 // Use Cases - Usuários
@@ -58,6 +67,14 @@ $buscarVeiculo    = new BuscarVeiculoPorIdUseCase($veiculoRepository);
 $atualizarVeiculo = new AtualizarVeiculoUseCase($veiculoRepository, $usuarioRepository);
 $deletarVeiculo   = new DeletarVeiculoUseCase($veiculoRepository);
 
+// Use Cases - Serviços
+$criarServico         = new CriarServicoUseCase($servicoRepository);
+$listarServicos       = new ListarServicosUseCase($servicoRepository);
+$buscarServicoPorId   = new BuscarServicoPorIdUseCase($servicoRepository);
+$buscarServicoPorNome = new BuscarServicoPorNomeUseCase($servicoRepository);
+$atualizarServico     = new AtualizarServicoUseCase($servicoRepository);
+$deletarServico       = new DeletarServicoUseCase($servicoRepository);
+
 // Controllers
 $usuarioController = new UsuarioController(
     $criarUsuario,
@@ -73,6 +90,15 @@ $veiculoController = new VeiculoController(
     $buscarVeiculo,
     $atualizarVeiculo,
     $deletarVeiculo,
+);
+
+$servicoController = new ServicoController(
+    $criarServico,
+    $listarServicos,
+    $buscarServicoPorId,
+    $buscarServicoPorNome,
+    $atualizarServico,
+    $deletarServico,
 );
 
 // -----------------------------------------------------------------------
@@ -101,6 +127,14 @@ $router->add('POST',   '/veiculos',              [$veiculoController, 'criar']);
 $router->add('PUT',    '/veiculos/{id}',         [$veiculoController, 'atualizar']);
 $router->add('DELETE', '/veiculos/{id}',         [$veiculoController, 'remover']);
 $router->add('GET',    '/clientes/{id}/veiculos', [$veiculoController, 'listarPorCliente']);
+
+// Serviços
+$router->add('GET',    '/servicos',        [$servicoController, 'listar']);
+$router->add('GET',    '/servicos/buscar', [$servicoController, 'buscarPorNome']);
+$router->add('GET',    '/servicos/{id}',   [$servicoController, 'exibir']);
+$router->add('POST',   '/servicos',        [$servicoController, 'criar']);
+$router->add('PUT',    '/servicos/{id}',   [$servicoController, 'atualizar']);
+$router->add('DELETE', '/servicos/{id}',   [$servicoController, 'remover']);
 
 // -----------------------------------------------------------------------
 // Dispatch

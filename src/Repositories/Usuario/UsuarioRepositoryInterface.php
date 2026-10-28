@@ -7,7 +7,7 @@ use Domain\Usuario\Usuario;
 
 interface UsuarioRepositoryInterface
 {
-    public function listarTodos(?TipoUsuario $tipo = null): array;
+    public function listarTodos(?TipoUsuario $tipo = null, ?string $nome = null, ?string $cpf = null): array;
 
     public function buscarPorId(int $id): ?Usuario;
 
