@@ -17,6 +17,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
+use Application\Peca\AtualizarPecaUseCase;
+use Application\Peca\BuscarPecaPorIdUseCase;
+use Application\Peca\CriarPecaUseCase;
+use Application\Peca\DeletarPecaUseCase;
+use Application\Peca\ListarPecasUseCase;
 use Application\Servico\AtualizarServicoUseCase;
 use Application\Servico\BuscarServicoPorIdUseCase;
 use Application\Servico\BuscarServicoPorNomeUseCase;
@@ -33,12 +38,14 @@ use Application\Veiculo\BuscarVeiculoPorIdUseCase;
 use Application\Veiculo\CriarVeiculoUseCase;
 use Application\Veiculo\DeletarVeiculoUseCase;
 use Application\Veiculo\ListarVeiculosUseCase;
+use Http\Controllers\PecaController;
 use Http\Controllers\ServicoController;
 use Http\Controllers\UsuarioController;
 use Http\Controllers\VeiculoController;
 use Http\Router;
 use Infrastructure\Database\Connection;
 use Infrastructure\Repositories\VeiculoPdoRepository;
+use Repositories\Peca\PecaPdoRepository;
 use Repositories\Servico\ServicoPdoRepository;
 use Repositories\Usuario\UsuarioPdoRepository;
 
@@ -52,6 +59,7 @@ $pdo = Connection::getInstance();
 $usuarioRepository = new UsuarioPdoRepository($pdo);
 $servicoRepository = new ServicoPdoRepository($pdo);
 $veiculoRepository = new VeiculoPdoRepository($pdo);
+$pecaRepository    = new PecaPdoRepository($pdo);
 
 // Use Cases - Usuários
 $criarUsuario     = new CriarUsuarioUseCase($usuarioRepository);
@@ -74,6 +82,13 @@ $buscarServicoPorId   = new BuscarServicoPorIdUseCase($servicoRepository);
 $buscarServicoPorNome = new BuscarServicoPorNomeUseCase($servicoRepository);
 $atualizarServico     = new AtualizarServicoUseCase($servicoRepository);
 $deletarServico       = new DeletarServicoUseCase($servicoRepository);
+
+// Use Cases - Peças
+$criarPeca     = new CriarPecaUseCase($pecaRepository);
+$listarPecas   = new ListarPecasUseCase($pecaRepository);
+$buscarPeca    = new BuscarPecaPorIdUseCase($pecaRepository);
+$atualizarPeca = new AtualizarPecaUseCase($pecaRepository);
+$deletarPeca   = new DeletarPecaUseCase($pecaRepository);
 
 // Controllers
 $usuarioController = new UsuarioController(
@@ -101,6 +116,14 @@ $servicoController = new ServicoController(
     $deletarServico,
 );
 
+$pecaController = new PecaController(
+    $criarPeca,
+    $listarPecas,
+    $buscarPeca,
+    $atualizarPeca,
+    $deletarPeca,
+);
+
 // -----------------------------------------------------------------------
 // Roteamento
 // -----------------------------------------------------------------------
@@ -121,11 +144,11 @@ $router->add('GET', '/clientes', function (array $params) use ($usuarioControlle
 });
 
 // Veículos
-$router->add('GET',    '/veiculos',              [$veiculoController, 'listar']);
-$router->add('GET',    '/veiculos/{id}',         [$veiculoController, 'exibir']);
-$router->add('POST',   '/veiculos',              [$veiculoController, 'criar']);
-$router->add('PUT',    '/veiculos/{id}',         [$veiculoController, 'atualizar']);
-$router->add('DELETE', '/veiculos/{id}',         [$veiculoController, 'remover']);
+$router->add('GET',    '/veiculos',               [$veiculoController, 'listar']);
+$router->add('GET',    '/veiculos/{id}',          [$veiculoController, 'exibir']);
+$router->add('POST',   '/veiculos',               [$veiculoController, 'criar']);
+$router->add('PUT',    '/veiculos/{id}',          [$veiculoController, 'atualizar']);
+$router->add('DELETE', '/veiculos/{id}',          [$veiculoController, 'remover']);
 $router->add('GET',    '/clientes/{id}/veiculos', [$veiculoController, 'listarPorCliente']);
 
 // Serviços
@@ -135,6 +158,13 @@ $router->add('GET',    '/servicos/{id}',   [$servicoController, 'exibir']);
 $router->add('POST',   '/servicos',        [$servicoController, 'criar']);
 $router->add('PUT',    '/servicos/{id}',   [$servicoController, 'atualizar']);
 $router->add('DELETE', '/servicos/{id}',   [$servicoController, 'remover']);
+
+// Peças
+$router->add('GET',    '/pecas',       [$pecaController, 'listar']);
+$router->add('GET',    '/pecas/{id}',  [$pecaController, 'exibir']);
+$router->add('POST',   '/pecas',       [$pecaController, 'criar']);
+$router->add('PUT',    '/pecas/{id}',  [$pecaController, 'atualizar']);
+$router->add('DELETE', '/pecas/{id}',  [$pecaController, 'remover']);
 
 // -----------------------------------------------------------------------
 // Dispatch

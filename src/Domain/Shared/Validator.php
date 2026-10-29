@@ -223,6 +223,80 @@ class Validator
     }
 
     // ------------------------------------------------------------------
+    // Peças e Insumos
+    // ------------------------------------------------------------------
+
+    /**
+     * Valida o nome de uma peça:
+     *  - obrigatório
+     *  - mínimo 3 caracteres
+     *  - máximo 100 caracteres
+     *  - sem caracteres especiais proibidos
+     *
+     * @throws InvalidArgumentException
+     */
+    public static function nomePeca(string $nome): string
+    {
+        $nome = trim($nome);
+
+        if (mb_strlen($nome) < 3) {
+            throw new InvalidArgumentException(
+                'Nome da peça inválido: deve ter pelo menos 3 caracteres.'
+            );
+        }
+
+        if (mb_strlen($nome) > 100) {
+            throw new InvalidArgumentException(
+                'Nome da peça inválido: máximo de 100 caracteres.'
+            );
+        }
+
+        return self::textoLivre($nome, 'Nome da peça');
+    }
+
+    /**
+     * Valida o valor unitário de uma peça:
+     *  - numérico e não negativo (>= 0)
+     *
+     * @throws InvalidArgumentException
+     */
+    public static function valorUnitario(mixed $valor): float
+    {
+        if (!is_numeric($valor)) {
+            throw new InvalidArgumentException(
+                'Valor unitário inválido: deve ser um valor numérico.'
+            );
+        }
+
+        $valorFloat = (float) $valor;
+
+        if ($valorFloat < 0) {
+            throw new InvalidArgumentException(
+                'Valor unitário inválido: o valor não pode ser negativo.'
+            );
+        }
+
+        return round($valorFloat, 2);
+    }
+
+    /**
+     * Valida uma quantidade inteira de estoque (saldo ou estoque mínimo):
+     *  - numérico inteiro e não negativo (>= 0)
+     *
+     * @throws InvalidArgumentException
+     */
+    public static function quantidadeEstoque(mixed $quantidade, string $nomeCampo = 'Quantidade'): int
+    {
+        if (!is_numeric($quantidade) || (int) $quantidade < 0) {
+            throw new InvalidArgumentException(
+                "$nomeCampo inválida: deve ser um número inteiro não negativo."
+            );
+        }
+
+        return (int) $quantidade;
+    }
+
+    // ------------------------------------------------------------------
     // Preço
     // ------------------------------------------------------------------
 

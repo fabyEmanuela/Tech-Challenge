@@ -12,6 +12,1135 @@
         }
     ],
     "paths": {
+        "/pecas": {
+            "get": {
+                "tags": [
+                    "Peças"
+                ],
+                "summary": "Lista todas as peças ou filtra por status de ativação",
+                "operationId": "5a1570d969bef8844e2f5321d4fea2d2",
+                "parameters": [
+                    {
+                        "name": "ativo",
+                        "in": "query",
+                        "description": "Filtrar por peças ativas (true/1) ou inativas (false/0)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "example": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de peças retornada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "nome": {
+                                                "type": "string",
+                                                "example": "Filtro de Óleo"
+                                            },
+                                            "descricao": {
+                                                "type": "string",
+                                                "example": "Filtro de óleo para motores 1.0 e 1.6",
+                                                "nullable": true
+                                            },
+                                            "valor_unitario": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 45.9
+                                            },
+                                            "quantidade_estoque": {
+                                                "type": "integer",
+                                                "example": 25
+                                            },
+                                            "estoque_minimo": {
+                                                "type": "integer",
+                                                "example": 5
+                                            },
+                                            "abaixo_minimo": {
+                                                "type": "boolean",
+                                                "example": false
+                                            },
+                                            "ativo": {
+                                                "type": "boolean",
+                                                "example": true
+                                            },
+                                            "criado_em": {
+                                                "type": "string",
+                                                "example": "2026-10-28 10:00:00"
+                                            },
+                                            "atualizado_em": {
+                                                "type": "string",
+                                                "example": "2026-10-28 10:00:00",
+                                                "nullable": true
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Erro ao listar peças."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Peças"
+                ],
+                "summary": "Cadastra uma nova peça ou insumo",
+                "operationId": "6685d06edee531db6a4520adfac94dd1",
+                "requestBody": {
+                    "description": "Dados para cadastro da peça",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome",
+                                    "valor_unitario"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "example": "Filtro de Óleo"
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "example": "Filtro de óleo para motores 1.0 e 1.6",
+                                        "nullable": true
+                                    },
+                                    "valor_unitario": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 45.9
+                                    },
+                                    "quantidade_estoque": {
+                                        "type": "integer",
+                                        "example": 25,
+                                        "default": 0
+                                    },
+                                    "estoque_minimo": {
+                                        "type": "integer",
+                                        "example": 5,
+                                        "default": 0
+                                    },
+                                    "ativo": {
+                                        "type": "boolean",
+                                        "example": true,
+                                        "default": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Peça cadastrada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "mensagem": {
+                                            "type": "string",
+                                            "example": "Peça cadastrada com sucesso."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dados inválidos / Erro de validação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "O campo \"nome\" é obrigatório."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Erro ao criar peça."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pecas/{id}": {
+            "get": {
+                "tags": [
+                    "Peças"
+                ],
+                "summary": "Busca uma peça pelo ID",
+                "operationId": "e7347e49ea8ac7138a248bc7a405c537",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID da peça",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Peça encontrada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "nome": {
+                                            "type": "string",
+                                            "example": "Filtro de Óleo"
+                                        },
+                                        "descricao": {
+                                            "type": "string",
+                                            "example": "Filtro de óleo para motores 1.0 e 1.6",
+                                            "nullable": true
+                                        },
+                                        "valor_unitario": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 45.9
+                                        },
+                                        "quantidade_estoque": {
+                                            "type": "integer",
+                                            "example": 25
+                                        },
+                                        "estoque_minimo": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "abaixo_minimo": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "ativo": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "criado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-28 10:00:00"
+                                        },
+                                        "atualizado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-28 10:00:00",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Peça não encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Peça com ID 1 não encontrada."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Erro ao buscar peça."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Peças"
+                ],
+                "summary": "Atualiza os dados e o saldo de estoque de uma peça",
+                "operationId": "2900f1b55a8e0189dba73c8ec9f87799",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID da peça a ser atualizada",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Campos da peça a serem alterados",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "example": "Filtro de Óleo Sintético"
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "example": "Filtro de óleo para motores 1.0 e 1.6",
+                                        "nullable": true
+                                    },
+                                    "valor_unitario": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 49.9
+                                    },
+                                    "quantidade_estoque": {
+                                        "type": "integer",
+                                        "example": 20
+                                    },
+                                    "estoque_minimo": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "ativo": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Peça atualizada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "nome": {
+                                            "type": "string",
+                                            "example": "Filtro de Óleo Sintético"
+                                        },
+                                        "descricao": {
+                                            "type": "string",
+                                            "example": "Filtro de óleo para motores 1.0 e 1.6",
+                                            "nullable": true
+                                        },
+                                        "valor_unitario": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 49.9
+                                        },
+                                        "quantidade_estoque": {
+                                            "type": "integer",
+                                            "example": 20
+                                        },
+                                        "estoque_minimo": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "abaixo_minimo": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "ativo": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "criado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-28 10:00:00"
+                                        },
+                                        "atualizado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-28 10:30:00",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Peça não encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Peça com ID 1 não encontrada."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dados inválidos / Erro de validação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Nome da peça inválido: deve ter pelo menos 3 caracteres."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Erro ao atualizar peça."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Peças"
+                ],
+                "summary": "Remove uma peça pelo ID",
+                "operationId": "537506b2688be23ca69958b2f5f0a2e4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID da peça a ser removida",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Peça removida com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "mensagem": {
+                                            "type": "string",
+                                            "example": "Peça removida com sucesso."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Peça não encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Peça com ID 1 não encontrada."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Erro ao deletar peça."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/servicos": {
+            "get": {
+                "tags": [
+                    "Serviços"
+                ],
+                "summary": "Lista todos os serviços ou busca por termo no nome",
+                "operationId": "a376eccc2a119aafd00ec3800a505ae2",
+                "parameters": [
+                    {
+                        "name": "nome",
+                        "in": "query",
+                        "description": "Termo para busca parcial no nome do serviço",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "óleo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de serviços retornada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "nome": {
+                                                "type": "string",
+                                                "example": "Troca de Óleo"
+                                            },
+                                            "descricao": {
+                                                "type": "string",
+                                                "example": "Troca de óleo do motor e substituição do filtro.",
+                                                "nullable": true
+                                            },
+                                            "preco": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 150
+                                            },
+                                            "tempo_estimado_horas": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 1.5
+                                            },
+                                            "ativo": {
+                                                "type": "boolean",
+                                                "example": true
+                                            },
+                                            "criado_em": {
+                                                "type": "string",
+                                                "example": "2026-10-25 10:00:00"
+                                            },
+                                            "atualizado_em": {
+                                                "type": "string",
+                                                "example": "2026-10-25 10:00:00",
+                                                "nullable": true
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Erro ao listar serviços."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Serviços"
+                ],
+                "summary": "Cadastra um novo serviço",
+                "operationId": "f21388a9100219cf60391b279e9140a7",
+                "requestBody": {
+                    "description": "Dados para cadastro do serviço",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome",
+                                    "preco",
+                                    "tempo_estimado_horas"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "example": "Troca de Pastilhas de Freio"
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "example": "Substituição completa do jogo de pastilhas dianteiras.",
+                                        "nullable": true
+                                    },
+                                    "preco": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 220.5
+                                    },
+                                    "tempo_estimado_horas": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 2
+                                    },
+                                    "ativo": {
+                                        "type": "boolean",
+                                        "example": true,
+                                        "default": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Serviço cadastrado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "nome": {
+                                            "type": "string",
+                                            "example": "Troca de Pastilhas de Freio"
+                                        },
+                                        "descricao": {
+                                            "type": "string",
+                                            "example": "Substituição completa do jogo de pastilhas dianteiras.",
+                                            "nullable": true
+                                        },
+                                        "preco": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 220.5
+                                        },
+                                        "tempo_estimado_horas": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 2
+                                        },
+                                        "ativo": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "criado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-25 10:00:00"
+                                        },
+                                        "atualizado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-25 10:00:00",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dados inválidos / Erro de validação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Preço inválido: o valor não pode ser negativo."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor"
+                    }
+                }
+            }
+        },
+        "/servicos/buscar": {
+            "get": {
+                "tags": [
+                    "Serviços"
+                ],
+                "summary": "Busca serviços por correspondência parcial no nome",
+                "operationId": "eef2202cca8af2298f053e9873cd1f70",
+                "parameters": [
+                    {
+                        "name": "nome",
+                        "in": "query",
+                        "description": "Termo a ser buscado no nome dos serviços",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "Troca"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Serviços encontrados com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "nome": {
+                                                "type": "string",
+                                                "example": "Troca de Óleo"
+                                            },
+                                            "descricao": {
+                                                "type": "string",
+                                                "example": "Troca de óleo e filtro",
+                                                "nullable": true
+                                            },
+                                            "preco": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 150
+                                            },
+                                            "tempo_estimado_horas": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 1.5
+                                            },
+                                            "ativo": {
+                                                "type": "boolean",
+                                                "example": true
+                                            },
+                                            "criado_em": {
+                                                "type": "string",
+                                                "example": "2026-10-25 10:00:00"
+                                            },
+                                            "atualizado_em": {
+                                                "type": "string",
+                                                "example": "2026-10-25 10:00:00",
+                                                "nullable": true
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Parâmetro de busca inválido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "O parâmetro 'nome' é obrigatório para a busca."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor"
+                    }
+                }
+            }
+        },
+        "/servicos/{id}": {
+            "get": {
+                "tags": [
+                    "Serviços"
+                ],
+                "summary": "Busca um serviço pelo ID",
+                "operationId": "a178fab58621cf8c2ffd8b5617137e4b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do serviço",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Serviço encontrado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "nome": {
+                                            "type": "string",
+                                            "example": "Alinhamento e Balanceamento"
+                                        },
+                                        "descricao": {
+                                            "type": "string",
+                                            "example": "Alinhamento a laser e balanceamento 3D",
+                                            "nullable": true
+                                        },
+                                        "preco": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 120
+                                        },
+                                        "tempo_estimado_horas": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 1
+                                        },
+                                        "ativo": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "criado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-25 10:00:00"
+                                        },
+                                        "atualizado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-25 10:00:00",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Serviço não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Serviço com ID 1 não encontrado."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Serviços"
+                ],
+                "summary": "Atualiza os dados de um serviço",
+                "operationId": "b2af28a5d7ec1cda4372a3f264444d69",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do serviço a ser atualizado",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Campos do serviço a serem alterados",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "example": "Troca de Pastilhas e Fluido de Freio"
+                                    },
+                                    "descricao": {
+                                        "type": "string",
+                                        "example": "Substituição de pastilhas e sangria do fluido.",
+                                        "nullable": true
+                                    },
+                                    "preco": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 280
+                                    },
+                                    "tempo_estimado_horas": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 2.5
+                                    },
+                                    "ativo": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Serviço atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "nome": {
+                                            "type": "string",
+                                            "example": "Troca de Pastilhas e Fluido de Freio"
+                                        },
+                                        "descricao": {
+                                            "type": "string",
+                                            "example": "Substituição de pastilhas e sangria do fluido.",
+                                            "nullable": true
+                                        },
+                                        "preco": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 280
+                                        },
+                                        "tempo_estimado_horas": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 2.5
+                                        },
+                                        "ativo": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "criado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-25 10:00:00"
+                                        },
+                                        "atualizado_em": {
+                                            "type": "string",
+                                            "example": "2026-10-25 10:30:00",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Serviço não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Serviço com ID 1 não encontrado."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dados inválidos / Erro de validação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Preço inválido: o valor não pode ser negativo."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Serviços"
+                ],
+                "summary": "Remove um serviço pelo ID",
+                "operationId": "3ebdc7da24ce0f36353ad8bf5430954b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do serviço a ser removido",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Serviço removido com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "mensagem": {
+                                            "type": "string",
+                                            "example": "Serviço removido com sucesso."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Serviço não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Serviço com ID 1 não encontrado."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor"
+                    }
+                }
+            }
+        },
         "/usuarios": {
             "get": {
                 "tags": [
@@ -1184,593 +2313,6 @@
                 }
             }
         },
-        "/servicos": {
-            "get": {
-                "tags": [
-                    "Serviços"
-                ],
-                "summary": "Lista todos os serviços ou busca por termo no nome",
-                "operationId": "servicos_listar",
-                "parameters": [
-                    {
-                        "name": "nome",
-                        "in": "query",
-                        "description": "Termo para busca parcial no nome do serviço",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "example": "óleo"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Lista de serviços retornada com sucesso",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "properties": {
-                                            "id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            },
-                                            "nome": {
-                                                "type": "string",
-                                                "example": "Troca de Óleo"
-                                            },
-                                            "descricao": {
-                                                "type": "string",
-                                                "example": "Troca de óleo do motor e substituição do filtro.",
-                                                "nullable": true
-                                            },
-                                            "preco": {
-                                                "type": "number",
-                                                "format": "float",
-                                                "example": 150
-                                            },
-                                            "tempo_estimado_horas": {
-                                                "type": "number",
-                                                "format": "float",
-                                                "example": 1.5
-                                            },
-                                            "ativo": {
-                                                "type": "boolean",
-                                                "example": true
-                                            },
-                                            "criado_em": {
-                                                "type": "string",
-                                                "example": "2026-10-25 10:00:00"
-                                            },
-                                            "atualizado_em": {
-                                                "type": "string",
-                                                "example": "2026-10-25 10:00:00",
-                                                "nullable": true
-                                            }
-                                        },
-                                        "type": "object"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Erro interno no servidor",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "erro": {
-                                            "type": "string",
-                                            "example": "Erro ao listar serviços."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Serviços"
-                ],
-                "summary": "Cadastra um novo serviço",
-                "operationId": "servicos_criar",
-                "requestBody": {
-                    "description": "Dados para cadastro do serviço",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "nome",
-                                    "preco",
-                                    "tempo_estimado_horas"
-                                ],
-                                "properties": {
-                                    "nome": {
-                                        "type": "string",
-                                        "example": "Troca de Pastilhas de Freio"
-                                    },
-                                    "descricao": {
-                                        "type": "string",
-                                        "example": "Substituição completa do jogo de pastilhas dianteiras.",
-                                        "nullable": true
-                                    },
-                                    "preco": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 220.5
-                                    },
-                                    "tempo_estimado_horas": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 2
-                                    },
-                                    "ativo": {
-                                        "type": "boolean",
-                                        "example": true,
-                                        "default": true
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Serviço cadastrado com sucesso",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "nome": {
-                                            "type": "string",
-                                            "example": "Troca de Pastilhas de Freio"
-                                        },
-                                        "descricao": {
-                                            "type": "string",
-                                            "example": "Substituição completa do jogo de pastilhas dianteiras.",
-                                            "nullable": true
-                                        },
-                                        "preco": {
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 220.5
-                                        },
-                                        "tempo_estimado_horas": {
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 2
-                                        },
-                                        "ativo": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "criado_em": {
-                                            "type": "string",
-                                            "example": "2026-10-25 10:00:00"
-                                        },
-                                        "atualizado_em": {
-                                            "type": "string",
-                                            "example": "2026-10-25 10:00:00",
-                                            "nullable": true
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Dados inválidos / Erro de validação",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "erro": {
-                                            "type": "string",
-                                            "example": "Preço inválido: o valor não pode ser negativo."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Erro interno no servidor"
-                    }
-                }
-            }
-        },
-        "/servicos/buscar": {
-            "get": {
-                "tags": [
-                    "Serviços"
-                ],
-                "summary": "Busca serviços por correspondência parcial no nome",
-                "operationId": "servicos_buscar_por_nome",
-                "parameters": [
-                    {
-                        "name": "nome",
-                        "in": "query",
-                        "description": "Termo a ser buscado no nome dos serviços",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "example": "Troca"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Serviços encontrados com sucesso",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "properties": {
-                                            "id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            },
-                                            "nome": {
-                                                "type": "string",
-                                                "example": "Troca de Óleo"
-                                            },
-                                            "descricao": {
-                                                "type": "string",
-                                                "example": "Troca de óleo e filtro",
-                                                "nullable": true
-                                            },
-                                            "preco": {
-                                                "type": "number",
-                                                "format": "float",
-                                                "example": 150
-                                            },
-                                            "tempo_estimado_horas": {
-                                                "type": "number",
-                                                "format": "float",
-                                                "example": 1.5
-                                            },
-                                            "ativo": {
-                                                "type": "boolean",
-                                                "example": true
-                                            },
-                                            "criado_em": {
-                                                "type": "string",
-                                                "example": "2026-10-25 10:00:00"
-                                            },
-                                            "atualizado_em": {
-                                                "type": "string",
-                                                "example": "2026-10-25 10:00:00",
-                                                "nullable": true
-                                            }
-                                        },
-                                        "type": "object"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Parâmetro de busca inválido",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "erro": {
-                                            "type": "string",
-                                            "example": "O parâmetro 'nome' é obrigatório para a busca."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Erro interno no servidor"
-                    }
-                }
-            }
-        },
-        "/servicos/{id}": {
-            "get": {
-                "tags": [
-                    "Serviços"
-                ],
-                "summary": "Busca um serviço pelo ID",
-                "operationId": "servicos_buscar_por_id",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID do serviço",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Serviço encontrado com sucesso",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "nome": {
-                                            "type": "string",
-                                            "example": "Alinhamento e Balanceamento"
-                                        },
-                                        "descricao": {
-                                            "type": "string",
-                                            "example": "Alinhamento a laser e balanceamento 3D",
-                                            "nullable": true
-                                        },
-                                        "preco": {
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 120
-                                        },
-                                        "tempo_estimado_horas": {
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 1
-                                        },
-                                        "ativo": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "criado_em": {
-                                            "type": "string",
-                                            "example": "2026-10-25 10:00:00"
-                                        },
-                                        "atualizado_em": {
-                                            "type": "string",
-                                            "example": "2026-10-25 10:00:00",
-                                            "nullable": true
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Serviço não encontrado",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "erro": {
-                                            "type": "string",
-                                            "example": "Serviço com ID 1 não encontrado."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Erro interno no servidor"
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "Serviços"
-                ],
-                "summary": "Atualiza os dados de um serviço",
-                "operationId": "servicos_atualizar",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID do serviço a ser atualizado",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "description": "Campos do serviço a serem alterados",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "nome": {
-                                        "type": "string",
-                                        "example": "Troca de Pastilhas e Fluido de Freio"
-                                    },
-                                    "descricao": {
-                                        "type": "string",
-                                        "example": "Substituição de pastilhas e sangria do fluido.",
-                                        "nullable": true
-                                    },
-                                    "preco": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 280
-                                    },
-                                    "tempo_estimado_horas": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 2.5
-                                    },
-                                    "ativo": {
-                                        "type": "boolean",
-                                        "example": true
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Serviço atualizado com sucesso",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "nome": {
-                                            "type": "string",
-                                            "example": "Troca de Pastilhas e Fluido de Freio"
-                                        },
-                                        "descricao": {
-                                            "type": "string",
-                                            "example": "Substituição de pastilhas e sangria do fluido.",
-                                            "nullable": true
-                                        },
-                                        "preco": {
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 280
-                                        },
-                                        "tempo_estimado_horas": {
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 2.5
-                                        },
-                                        "ativo": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "criado_em": {
-                                            "type": "string",
-                                            "example": "2026-10-25 10:00:00"
-                                        },
-                                        "atualizado_em": {
-                                            "type": "string",
-                                            "example": "2026-10-25 10:30:00",
-                                            "nullable": true
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Serviço não encontrado",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "erro": {
-                                            "type": "string",
-                                            "example": "Serviço com ID 1 não encontrado."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Dados inválidos / Erro de validação",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "erro": {
-                                            "type": "string",
-                                            "example": "Preço inválido: o valor não pode ser negativo."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Erro interno no servidor"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Serviços"
-                ],
-                "summary": "Remove um serviço pelo ID",
-                "operationId": "servicos_deletar",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID do serviço a ser removido",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Serviço removido com sucesso",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "mensagem": {
-                                            "type": "string",
-                                            "example": "Serviço removido com sucesso."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Serviço não encontrado",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "erro": {
-                                            "type": "string",
-                                            "example": "Serviço com ID 1 não encontrado."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Erro interno no servidor"
-                    }
-                }
-            }
-        },
         "/": {
             "get": {
                 "tags": [
@@ -1834,16 +2376,20 @@
     },
     "tags": [
         {
-            "name": "Usuários",
-            "description": "Gerenciamento de clientes e usuários do sistema"
-        },
-{
             "name": "Veículos",
             "description": "Gerenciamento de veículos de clientes"
         },
         {
+            "name": "Usuários",
+            "description": "Gerenciamento de clientes e usuários do sistema"
+        },
+        {
             "name": "Serviços",
             "description": "Gerenciamento do catálogo de serviços da oficina mecânica"
+        },
+        {
+            "name": "Peças",
+            "description": "Gerenciamento de peças, insumos e controle de estoque"
         },
         {
             "name": "Status",
