@@ -13,9 +13,9 @@ use Domain\Exceptions\ValidacaoException;
 use Infrastructure\Http\JsonResponse;
 use InvalidArgumentException;
 use OpenApi\Attributes as OA;
+use RuntimeException;
 use Throwable;
 
-#[OA\Tag(name: "Veículos", description: "Endpoints para gerenciamento de veículos vinculados a clientes")]
 class VeiculoController
 {
     public function __construct(
@@ -76,14 +76,13 @@ class VeiculoController
     )]
     public function listar(array $params = []): void
     {
-        try {
-            $clienteId = !empty($_GET['cliente_id']) ? (int) $_GET['cliente_id'] : null;
-            $veiculos = $this->listarUseCase->executar($clienteId);
+        $clienteId = !empty($_GET['cliente_id']) ? (int) $_GET['cliente_id'] : null;
 
-            $dados = array_map(fn($v) => $v->toArray(), $veiculos);
-            JsonResponse::send($dados, 200);
+        try {
+            $veiculos = $this->listarUseCase->executar($clienteId);
+            JsonResponse::send(array_map(fn($v) => $v->paraArray(), $veiculos));
         } catch (Throwable $e) {
-            JsonResponse::send(['erro' => 'Erro ao listar veículos: ' . $e->getMessage()], 500);
+            JsonResponse::send(['erro' => $e->getMessage()], 500);
         }
     }
 
@@ -127,7 +126,7 @@ class VeiculoController
                 response: 404,
                 description: "Veículo não encontrado",
                 content: new OA\JsonContent(
-                    properties: [new OA\Property(property: "erro", type: "string", example: "Veículo não encontrado.")]
+                    properties: [new OA\Property(property: "erro", type: "string", example: "Veículo com ID 1 não encontrado.")]
                 )
             )
         ]
@@ -135,19 +134,12 @@ class VeiculoController
     public function exibir(array $params): void
     {
         try {
-            $id = $this->lerId($params);
-            $veiculo = $this->buscarUseCase->executar($id);
-
-            if ($veiculo === null) {
-                JsonResponse::send(['erro' => 'Veículo não encontrado.'], 404);
-                return;
-            }
-
-            JsonResponse::send($veiculo->toArray(), 200);
-        } catch (InvalidArgumentException $e) {
-            JsonResponse::send(['erro' => $e->getMessage()], 400);
+            $veiculo = $this->buscarUseCase->executar((int) $params['id']);
+            JsonResponse::send($veiculo->paraArray());
+        } catch (RuntimeException $e) {
+            JsonResponse::send(['erro' => $e->getMessage()], 404);
         } catch (Throwable $e) {
-            JsonResponse::send(['erro' => 'Erro ao buscar veículo.'], 500);
+            JsonResponse::send(['erro' => $e->getMessage()], 500);
         }
     }
 
@@ -182,6 +174,8 @@ class VeiculoController
                         new OA\Property(property: "id", type: "integer", example: 1),
                         new OA\Property(property: "cliente_id", type: "integer", example: 1),
                         new OA\Property(property: "placa", type: "string", example: "ABC1D23"),
+                        new OA\Property(property: "placa_formatada", type: "string", example: "ABC1D23"),
+                        new OA\Property(property: "mercosul", type: "boolean", example: true),
                         new OA\Property(property: "marca", type: "string", example: "Volkswagen"),
                         new OA\Property(property: "modelo", type: "string", example: "Gol 1.0"),
                         new OA\Property(property: "ano", type: "integer", example: 2022),
@@ -210,13 +204,13 @@ class VeiculoController
     public function criar(array $params = []): void
     {
         try {
-            $dados = $this->lerCorpo();
+            $dados   = $this->lerCorpo();
             $veiculo = $this->criarUseCase->executar($dados);
-            JsonResponse::send($veiculo->toArray(), 201);
-        } catch (ValidacaoException | InvalidArgumentException $e) {
+            JsonResponse::send($veiculo->paraArray(), 201);
+        } catch (InvalidArgumentException $e) {
             JsonResponse::send(['erro' => $e->getMessage()], 422);
         } catch (Throwable $e) {
-            JsonResponse::send(['erro' => 'Erro ao criar veículo: ' . $e->getMessage()], 500);
+            JsonResponse::send(['erro' => $e->getMessage()], 500);
         }
     }
 
@@ -268,15 +262,15 @@ class VeiculoController
     public function atualizar(array $params): void
     {
         try {
-            $id = $this->lerId($params);
-            $dados = $this->lerCorpo();
-            $veiculo = $this->atualizarUseCase->executar($id, $dados);
-            JsonResponse::send($veiculo->toArray(), 200);
-        } catch (ValidacaoException | InvalidArgumentException $e) {
-            $status = str_contains($e->getMessage(), 'não encontrado') ? 404 : 422;
-            JsonResponse::send(['erro' => $e->getMessage()], $status);
+            $dados   = $this->lerCorpo();
+            $veiculo = $this->atualizarUseCase->executar((int) $params['id'], $dados);
+            JsonResponse::send($veiculo->paraArray());
+        } catch (InvalidArgumentException $e) {
+            JsonResponse::send(['erro' => $e->getMessage()], 422);
+        } catch (RuntimeException $e) {
+            JsonResponse::send(['erro' => $e->getMessage()], 404);
         } catch (Throwable $e) {
-            JsonResponse::send(['erro' => 'Erro ao atualizar veículo: ' . $e->getMessage()], 500);
+            JsonResponse::send(['erro' => $e->getMessage()], 500);
         }
     }
 
@@ -310,19 +304,27 @@ class VeiculoController
                 content: new OA\JsonContent(
                     properties: [new OA\Property(property: "erro", type: "string", example: "Veículo com ID 1 não encontrado.")]
                 )
+            ),
+            new OA\Response(
+                response: 422,
+                description: "Conflito de integridade (ex.: ordens de serviço vinculadas)",
+                content: new OA\JsonContent(
+                    properties: [new OA\Property(property: "erro", type: "string", example: "Não é possível remover este veículo porque existem ordens de serviço vinculadas a ele.")]
+                )
             )
         ]
     )]
     public function remover(array $params): void
     {
         try {
-            $id = $this->lerId($params);
-            $this->deletarUseCase->executar($id);
-            JsonResponse::send(['mensagem' => 'Veículo removido com sucesso.'], 200);
-        } catch (ValidacaoException $e) {
+            $this->deletarUseCase->executar((int) $params['id']);
+            JsonResponse::send(['mensagem' => 'Veículo removido com sucesso.']);
+        } catch (ValidacaoException | InvalidArgumentException $e) {
+            JsonResponse::send(['erro' => $e->getMessage()], 422);
+        } catch (RuntimeException $e) {
             JsonResponse::send(['erro' => $e->getMessage()], 404);
         } catch (Throwable $e) {
-            JsonResponse::send(['erro' => 'Erro ao remover veículo: ' . $e->getMessage()], 500);
+            JsonResponse::send(['erro' => $e->getMessage()], 500);
         }
     }
 
@@ -353,35 +355,25 @@ class VeiculoController
     public function listarPorCliente(array $params): void
     {
         try {
-            $clienteId = $this->lerId($params);
-            $veiculos = $this->listarUseCase->executar($clienteId);
-            $dados = array_map(fn($v) => $v->toArray(), $veiculos);
-            JsonResponse::send($dados, 200);
+            $veiculos = $this->listarUseCase->executar((int) $params['id']);
+            JsonResponse::send(array_map(fn($v) => $v->paraArray(), $veiculos));
         } catch (Throwable $e) {
-            JsonResponse::send(['erro' => 'Erro ao listar veículos do cliente: ' . $e->getMessage()], 500);
+            JsonResponse::send(['erro' => $e->getMessage()], 500);
         }
     }
 
     // ------------------------------------------------------------------
-    // Métodos Auxiliares
+    // Auxiliares
     // ------------------------------------------------------------------
-    private function lerId(array $params): int
-    {
-        $id = isset($params['id']) ? (int) $params['id'] : 0;
-        if ($id <= 0) {
-            throw new InvalidArgumentException('ID inválido.');
-        }
-        return $id;
-    }
 
     private function lerCorpo(): array
     {
-        $input = file_get_contents('php://input');
-        if (empty($input)) {
+        $corpo = file_get_contents('php://input');
+        if ($corpo === '' || $corpo === false) {
             return [];
         }
 
-        $dados = json_decode($input, true);
+        $dados = json_decode($corpo, true);
         if (!is_array($dados)) {
             throw new InvalidArgumentException('JSON inválido no corpo da requisição.');
         }

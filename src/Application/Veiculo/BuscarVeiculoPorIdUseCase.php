@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Application\Veiculo;
 
-use Domain\Entities\Veiculo;
-use Domain\Repositories\VeiculoRepositoryInterface;
+use Domain\Veiculo\Veiculo;
+use Repositories\Veiculo\VeiculoRepositoryInterface;
+use RuntimeException;
 
 class BuscarVeiculoPorIdUseCase
 {
@@ -13,8 +14,14 @@ class BuscarVeiculoPorIdUseCase
         private VeiculoRepositoryInterface $repository
     ) {}
 
-    public function executar(int $id): ?Veiculo
+    public function executar(int $id): Veiculo
     {
-        return $this->repository->buscarPorId($id);
+        $veiculo = $this->repository->buscarPorId($id);
+
+        if ($veiculo === null) {
+            throw new RuntimeException("Veículo com ID $id não encontrado.");
+        }
+
+        return $veiculo;
     }
 }

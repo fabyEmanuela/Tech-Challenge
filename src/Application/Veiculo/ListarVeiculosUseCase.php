@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Application\Veiculo;
 
-use Domain\Entities\Veiculo;
-use Domain\Repositories\VeiculoRepositoryInterface;
+use Domain\Veiculo\Veiculo;
+use Repositories\Veiculo\VeiculoRepositoryInterface;
 
 class ListarVeiculosUseCase
 {
