@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Application\Veiculo;
 
 use Domain\Shared\Validator;
@@ -49,7 +47,7 @@ class AtualizarVeiculoUseCase
      */
     private function validarESanitizar(array $dados, Veiculo $veiculoAtual): array
     {
-        $id = (int) $veiculoAtual->getId();
+        $id = $veiculoAtual->getId();
 
         // --- cliente_id ---
         if (array_key_exists('cliente_id', $dados)) {
@@ -64,11 +62,7 @@ class AtualizarVeiculoUseCase
         }
 
         // --- placa ---
-        if (array_key_exists('placa', $dados)) {
-            if (empty($dados['placa'])) {
-                throw new InvalidArgumentException('O campo "placa" é obrigatório.');
-            }
-
+        if (isset($dados['placa'])) {
             $dados['placa'] = Validator::placa((string) $dados['placa']);
 
             if ($this->veiculoRepository->placaJaCadastrada($dados['placa'], $id)) {
@@ -79,20 +73,12 @@ class AtualizarVeiculoUseCase
         }
 
         // --- marca ---
-        if (array_key_exists('marca', $dados)) {
-            if (empty($dados['marca'])) {
-                throw new InvalidArgumentException('O campo "marca" é obrigatório.');
-            }
-
+        if (isset($dados['marca'])) {
             $dados['marca'] = Validator::marcaVeiculo((string) $dados['marca']);
         }
 
         // --- modelo ---
-        if (array_key_exists('modelo', $dados)) {
-            if (trim((string) $dados['modelo']) === '') {
-                throw new InvalidArgumentException('O campo "modelo" é obrigatório.');
-            }
-
+        if (isset($dados['modelo'])) {
             $dados['modelo'] = Validator::modeloVeiculo((string) $dados['modelo']);
         }
 
@@ -127,7 +113,7 @@ class AtualizarVeiculoUseCase
         if (isset($dados['modelo'])) {
             $veiculo->setModelo($dados['modelo']);
         }
-        if (isset($dados['ano'])) {
+        if (array_key_exists('ano', $dados)) {
             $veiculo->setAno($dados['ano']);
         }
         if (array_key_exists('cor', $dados)) {

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Tests\Unit\Veiculo;
 
 use Application\Veiculo\ListarVeiculosUseCase;
@@ -16,14 +14,11 @@ class ListarVeiculosUseCaseTest extends TestCase
     {
         $repositoryMock = $this->createMock(VeiculoRepositoryInterface::class);
         $veiculos = [
-            new Veiculo(1, 10, new Placa('ABC1D23'), 'Volkswagen', 'Gol 1.0', 2022, 'Prata'),
-            new Veiculo(2, 15, new Placa('XYZ-9876'), 'Chevrolet', 'Onix 1.0', 2020, 'Branco'),
+            new Veiculo(1, 10, new Placa('ABC1D23'), 'Volkswagen', 'Gol 1.0', 2022, 'Prata', null, null),
+            new Veiculo(2, 15, new Placa('XYZ-9876'), 'Chevrolet', 'Onix 1.0', 2020, 'Branco', null, null),
         ];
 
-        $repositoryMock
-            ->expects($this->once())
-            ->method('listarTodos')
-            ->willReturn($veiculos);
+        $repositoryMock->expects($this->once())->method('listarTodos')->willReturn($veiculos);
 
         $useCase   = new ListarVeiculosUseCase($repositoryMock);
         $resultado = $useCase->executar();
@@ -35,14 +30,10 @@ class ListarVeiculosUseCaseTest extends TestCase
     {
         $repositoryMock = $this->createMock(VeiculoRepositoryInterface::class);
         $veiculos = [
-            new Veiculo(1, 10, new Placa('ABC1D23'), 'Volkswagen', 'Gol 1.0', 2022, 'Prata'),
+            new Veiculo(1, 10, new Placa('ABC1D23'), 'Volkswagen', 'Gol 1.0', 2022, 'Prata', null, null),
         ];
 
-        $repositoryMock
-            ->expects($this->once())
-            ->method('listarPorClienteId')
-            ->with(10)
-            ->willReturn($veiculos);
+        $repositoryMock->expects($this->once())->method('listarPorClienteId')->with(10)->willReturn($veiculos);
 
         $useCase   = new ListarVeiculosUseCase($repositoryMock);
         $resultado = $useCase->executar(10);
@@ -51,4 +42,3 @@ class ListarVeiculosUseCaseTest extends TestCase
         $this->assertSame(10, $resultado[0]->getClienteId());
     }
 }
-

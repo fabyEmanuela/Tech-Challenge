@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Tests\Unit\Veiculo;
 
 use Domain\Veiculo\Placa;
@@ -51,16 +49,7 @@ class VeiculoTest extends TestCase
 
     public function testDeveAlterarPropriedadesComSetters(): void
     {
-        $veiculo = new Veiculo(
-            id:        1,
-            clienteId: 10,
-            placa:     new Placa('ABC1D23'),
-            marca:     'Volkswagen',
-            modelo:    'Gol 1.0',
-            ano:       2020,
-            cor:       'Branco',
-        );
-
+        $veiculo = new Veiculo(1, 10, new Placa('ABC1D23'), 'Volkswagen', 'Gol 1.0', 2020, 'Branco', null, null);
         $novaPlaca = new Placa('XYZ-9876');
 
         $veiculo->setClienteId(25);
@@ -80,4 +69,3 @@ class VeiculoTest extends TestCase
         $this->assertNull($veiculo->getCor());
     }
 }
-

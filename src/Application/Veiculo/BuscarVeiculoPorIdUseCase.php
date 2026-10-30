@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Application\Veiculo;
 
 use Domain\Veiculo\Veiculo;

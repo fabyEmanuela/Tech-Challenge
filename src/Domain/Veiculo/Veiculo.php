@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Domain\Veiculo;
 
 class Veiculo
@@ -13,9 +11,9 @@ class Veiculo
         private string  $marca,
         private string  $modelo,
         private int     $ano,
-        private ?string $cor = null,
-        private ?string $criadoEm = null,
-        private ?string $atualizadoEm = null,
+        private ?string $cor,
+        private ?string $criadoEm,
+        private ?string $atualizadoEm,
     ) {}
 
     // --- Getters ---
@@ -99,8 +97,6 @@ class Veiculo
 
     /**
      * Serializa o veículo para array.
-     *
-     * @return array<string, mixed>
      */
     public function paraArray(): array
     {
@@ -119,4 +115,3 @@ class Veiculo
         ];
     }
 }
-

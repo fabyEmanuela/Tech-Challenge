@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Tests\Unit\Veiculo;
 
 use Application\Veiculo\CriarVeiculoUseCase;
@@ -19,7 +17,7 @@ class CriarVeiculoUseCaseTest extends TestCase
     public function testDeveCriarVeiculoComDadosValidos(): void
     {
         $veiculoRepoMock = $this->createMock(VeiculoRepositoryInterface::class);
-        $usuarioRepoStub = $this->createStub(UsuarioRepositoryInterface::class);
+        $usuarioRepoMock = $this->createMock(UsuarioRepositoryInterface::class);
 
         $cliente = new Usuario(
             id: 1,
@@ -34,8 +32,8 @@ class CriarVeiculoUseCaseTest extends TestCase
             atualizadoEm: null,
         );
 
-        $usuarioRepoStub->method('buscarPorId')->willReturn($cliente);
-        $veiculoRepoMock->method('placaJaCadastrada')->willReturn(false);
+        $usuarioRepoMock->expects($this->once())->method('buscarPorId')->with(1)->willReturn($cliente);
+        $veiculoRepoMock->expects($this->once())->method('placaJaCadastrada')->willReturn(false);
 
         $veiculoSalvo = new Veiculo(
             id: 10,
@@ -54,7 +52,7 @@ class CriarVeiculoUseCaseTest extends TestCase
             ->method('salvar')
             ->willReturn($veiculoSalvo);
 
-        $useCase   = new CriarVeiculoUseCase($veiculoRepoMock, $usuarioRepoStub);
+        $useCase   = new CriarVeiculoUseCase($veiculoRepoMock, $usuarioRepoMock);
         $resultado = $useCase->executar([
             'cliente_id' => 1,
             'placa'      => 'abc1d23',
@@ -72,10 +70,10 @@ class CriarVeiculoUseCaseTest extends TestCase
     public function testDeveLancarExcecaoQuandoClienteNaoExistir(): void
     {
         $veiculoRepoStub = $this->createStub(VeiculoRepositoryInterface::class);
-        $usuarioRepoStub = $this->createStub(UsuarioRepositoryInterface::class);
-        $usuarioRepoStub->method('buscarPorId')->willReturn(null);
+        $usuarioRepoMock = $this->createMock(UsuarioRepositoryInterface::class);
+        $usuarioRepoMock->expects($this->once())->method('buscarPorId')->with(99)->willReturn(null);
 
-        $useCase = new CriarVeiculoUseCase($veiculoRepoStub, $usuarioRepoStub);
+        $useCase = new CriarVeiculoUseCase($veiculoRepoStub, $usuarioRepoMock);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Cliente com ID 99 não encontrado.');
@@ -91,14 +89,14 @@ class CriarVeiculoUseCaseTest extends TestCase
 
     public function testDeveLancarExcecaoQuandoPlacaJaEstiverCadastrada(): void
     {
-        $veiculoRepoStub = $this->createStub(VeiculoRepositoryInterface::class);
-        $usuarioRepoStub = $this->createStub(UsuarioRepositoryInterface::class);
+        $veiculoRepoMock = $this->createMock(VeiculoRepositoryInterface::class);
+        $usuarioRepoMock = $this->createMock(UsuarioRepositoryInterface::class);
 
         $cliente = new Usuario(1, 'João Silva', 'joao@email.com', null, '529.982.247-25', TipoUsuario::CLIENTE, null, true, null, null);
-        $usuarioRepoStub->method('buscarPorId')->willReturn($cliente);
-        $veiculoRepoStub->method('placaJaCadastrada')->willReturn(true);
+        $usuarioRepoMock->expects($this->once())->method('buscarPorId')->with(1)->willReturn($cliente);
+        $veiculoRepoMock->expects($this->once())->method('placaJaCadastrada')->willReturn(true);
 
-        $useCase = new CriarVeiculoUseCase($veiculoRepoStub, $usuarioRepoStub);
+        $useCase = new CriarVeiculoUseCase($veiculoRepoMock, $usuarioRepoMock);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Já existe um veículo cadastrado com a placa 'ABC-1234'.");
@@ -114,14 +112,14 @@ class CriarVeiculoUseCaseTest extends TestCase
 
     public function testDeveLancarExcecaoQuandoMarcaContiverCaracteresProibidos(): void
     {
-        $veiculoRepoStub = $this->createStub(VeiculoRepositoryInterface::class);
-        $usuarioRepoStub = $this->createStub(UsuarioRepositoryInterface::class);
+        $veiculoRepoMock = $this->createMock(VeiculoRepositoryInterface::class);
+        $usuarioRepoMock = $this->createMock(UsuarioRepositoryInterface::class);
 
         $cliente = new Usuario(1, 'João Silva', 'joao@email.com', null, '529.982.247-25', TipoUsuario::CLIENTE, null, true, null, null);
-        $usuarioRepoStub->method('buscarPorId')->willReturn($cliente);
-        $veiculoRepoStub->method('placaJaCadastrada')->willReturn(false);
+        $usuarioRepoMock->expects($this->once())->method('buscarPorId')->with(1)->willReturn($cliente);
+        $veiculoRepoMock->expects($this->once())->method('placaJaCadastrada')->willReturn(false);
 
-        $useCase = new CriarVeiculoUseCase($veiculoRepoStub, $usuarioRepoStub);
+        $useCase = new CriarVeiculoUseCase($veiculoRepoMock, $usuarioRepoMock);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Marca contém caracteres não permitidos');
@@ -137,14 +135,14 @@ class CriarVeiculoUseCaseTest extends TestCase
 
     public function testDeveLancarExcecaoQuandoAnoForInvalido(): void
     {
-        $veiculoRepoStub = $this->createStub(VeiculoRepositoryInterface::class);
-        $usuarioRepoStub = $this->createStub(UsuarioRepositoryInterface::class);
+        $veiculoRepoMock = $this->createMock(VeiculoRepositoryInterface::class);
+        $usuarioRepoMock = $this->createMock(UsuarioRepositoryInterface::class);
 
         $cliente = new Usuario(1, 'João Silva', 'joao@email.com', null, '529.982.247-25', TipoUsuario::CLIENTE, null, true, null, null);
-        $usuarioRepoStub->method('buscarPorId')->willReturn($cliente);
-        $veiculoRepoStub->method('placaJaCadastrada')->willReturn(false);
+        $usuarioRepoMock->expects($this->once())->method('buscarPorId')->with(1)->willReturn($cliente);
+        $veiculoRepoMock->expects($this->once())->method('placaJaCadastrada')->willReturn(false);
 
-        $useCase = new CriarVeiculoUseCase($veiculoRepoStub, $usuarioRepoStub);
+        $useCase = new CriarVeiculoUseCase($veiculoRepoMock, $usuarioRepoMock);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Ano inválido: deve estar entre 1900');
@@ -158,4 +156,3 @@ class CriarVeiculoUseCaseTest extends TestCase
         ]);
     }
 }
-

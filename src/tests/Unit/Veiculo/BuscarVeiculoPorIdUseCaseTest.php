@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Tests\Unit\Veiculo;
 
 use Application\Veiculo\BuscarVeiculoPorIdUseCase;
@@ -16,13 +14,9 @@ class BuscarVeiculoPorIdUseCaseTest extends TestCase
     public function testDeveRetornarVeiculoQuandoEncontrado(): void
     {
         $repositoryMock = $this->createMock(VeiculoRepositoryInterface::class);
-        $veiculo = new Veiculo(1, 10, new Placa('ABC1D23'), 'Volkswagen', 'Gol 1.0', 2022, 'Prata');
+        $veiculo = new Veiculo(1, 10, new Placa('ABC1D23'), 'Volkswagen', 'Gol 1.0', 2022, 'Prata', null, null);
 
-        $repositoryMock
-            ->expects($this->once())
-            ->method('buscarPorId')
-            ->with(1)
-            ->willReturn($veiculo);
+        $repositoryMock->expects($this->once())->method('buscarPorId')->with(1)->willReturn($veiculo);
 
         $useCase   = new BuscarVeiculoPorIdUseCase($repositoryMock);
         $resultado = $useCase->executar(1);
@@ -35,12 +29,7 @@ class BuscarVeiculoPorIdUseCaseTest extends TestCase
     public function testDeveLancarExcecaoQuandoVeiculoNaoEncontrado(): void
     {
         $repositoryMock = $this->createMock(VeiculoRepositoryInterface::class);
-
-        $repositoryMock
-            ->expects($this->once())
-            ->method('buscarPorId')
-            ->with(99)
-            ->willReturn(null);
+        $repositoryMock->expects($this->once())->method('buscarPorId')->with(99)->willReturn(null);
 
         $useCase = new BuscarVeiculoPorIdUseCase($repositoryMock);
 
@@ -50,4 +39,3 @@ class BuscarVeiculoPorIdUseCaseTest extends TestCase
         $useCase->executar(99);
     }
 }
-

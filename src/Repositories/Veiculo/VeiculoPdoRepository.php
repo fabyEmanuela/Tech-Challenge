@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Repositories\Veiculo;
 
 use Domain\Exceptions\ValidacaoException;
@@ -43,58 +41,41 @@ class VeiculoPdoRepository implements VeiculoRepositoryInterface
 
     public function listarTodos(): array
     {
-        $stmt = $this->pdo->query(
-            'SELECT id, cliente_id, placa, marca, modelo, ano_fabricacao, ano_modelo, cor, criado_em, atualizado_em
-             FROM veiculos
-             ORDER BY id DESC'
-        );
+        $stmt = $this->pdo->query('SELECT * FROM veiculos ORDER BY id DESC');
 
         return array_map(
             fn(array $linha) => $this->montarVeiculo($linha),
-            $stmt->fetchAll(PDO::FETCH_ASSOC)
+            $stmt->fetchAll()
         );
     }
 
     public function listarPorClienteId(int $clienteId): array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT id, cliente_id, placa, marca, modelo, ano_fabricacao, ano_modelo, cor, criado_em, atualizado_em
-             FROM veiculos
-             WHERE cliente_id = :cliente_id
-             ORDER BY id DESC'
+            'SELECT * FROM veiculos WHERE cliente_id = :cliente_id ORDER BY id DESC'
         );
         $stmt->execute([':cliente_id' => $clienteId]);
 
         return array_map(
             fn(array $linha) => $this->montarVeiculo($linha),
-            $stmt->fetchAll(PDO::FETCH_ASSOC)
+            $stmt->fetchAll()
         );
     }
 
     public function buscarPorId(int $id): ?Veiculo
     {
-        $stmt = $this->pdo->prepare(
-            'SELECT id, cliente_id, placa, marca, modelo, ano_fabricacao, ano_modelo, cor, criado_em, atualizado_em
-             FROM veiculos
-             WHERE id = :id
-             LIMIT 1'
-        );
+        $stmt = $this->pdo->prepare('SELECT * FROM veiculos WHERE id = :id');
         $stmt->execute([':id' => $id]);
-        $linha = $stmt->fetch(PDO::FETCH_ASSOC);
+        $linha = $stmt->fetch();
 
         return $linha ? $this->montarVeiculo($linha) : null;
     }
 
     public function buscarPorPlaca(Placa $placa): ?Veiculo
     {
-        $stmt = $this->pdo->prepare(
-            'SELECT id, cliente_id, placa, marca, modelo, ano_fabricacao, ano_modelo, cor, criado_em, atualizado_em
-             FROM veiculos
-             WHERE placa = :placa
-             LIMIT 1'
-        );
+        $stmt = $this->pdo->prepare('SELECT * FROM veiculos WHERE placa = :placa');
         $stmt->execute([':placa' => $placa->getValor()]);
-        $linha = $stmt->fetch(PDO::FETCH_ASSOC);
+        $linha = $stmt->fetch();
 
         return $linha ? $this->montarVeiculo($linha) : null;
     }
@@ -111,7 +92,6 @@ class VeiculoPdoRepository implements VeiculoRepositoryInterface
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
-
         return (int) $stmt->fetchColumn() > 0;
     }
 
@@ -164,7 +144,7 @@ class VeiculoPdoRepository implements VeiculoRepositoryInterface
             ':cor'            => $veiculo->getCor(),
         ]);
 
-        return $this->buscarPorId((int) $veiculo->getId());
+        return $this->buscarPorId($veiculo->getId());
     }
 
     public function deletar(int $id): bool
@@ -172,7 +152,6 @@ class VeiculoPdoRepository implements VeiculoRepositoryInterface
         try {
             $stmt = $this->pdo->prepare('DELETE FROM veiculos WHERE id = :id');
             $stmt->execute([':id' => $id]);
-
             return $stmt->rowCount() > 0;
         } catch (PDOException $e) {
             if ($e->getCode() === '23000' || (isset($e->errorInfo[1]) && $e->errorInfo[1] === 1451)) {
@@ -184,4 +163,3 @@ class VeiculoPdoRepository implements VeiculoRepositoryInterface
         }
     }
 }
-

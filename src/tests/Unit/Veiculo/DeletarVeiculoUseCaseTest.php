@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Tests\Unit\Veiculo;
 
 use Application\Veiculo\DeletarVeiculoUseCase;
@@ -16,7 +14,7 @@ class DeletarVeiculoUseCaseTest extends TestCase
     public function testDeveDeletarVeiculoComSucesso(): void
     {
         $repositoryMock = $this->createMock(VeiculoRepositoryInterface::class);
-        $veiculo = new Veiculo(1, 10, new Placa('ABC1D23'), 'Volkswagen', 'Gol 1.0', 2022, 'Prata');
+        $veiculo = new Veiculo(1, 10, new Placa('ABC1D23'), 'Volkswagen', 'Gol 1.0', 2022, 'Prata', null, null);
 
         $repositoryMock->expects($this->once())->method('buscarPorId')->with(1)->willReturn($veiculo);
         $repositoryMock->expects($this->once())->method('deletar')->with(1)->willReturn(true);
@@ -38,4 +36,3 @@ class DeletarVeiculoUseCaseTest extends TestCase
         $useCase->executar(99);
     }
 }
-

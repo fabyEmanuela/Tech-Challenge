@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Application\Veiculo;
 
 use Domain\Shared\Validator;
@@ -38,7 +36,7 @@ class CriarVeiculoUseCase
             marca:        $dados['marca'],
             modelo:       $dados['modelo'],
             ano:          $dados['ano'],
-            cor:          $dados['cor'],
+            cor:          $dados['cor'] ?? null,
             criadoEm:     null,
             atualizadoEm: null,
         );
@@ -47,7 +45,7 @@ class CriarVeiculoUseCase
     }
 
     /**
-     * Valida e sanitiza todos os campos de entrada via Validator.
+     * Valida e sanitiza todos os campos de entrada.
      *
      * @throws InvalidArgumentException
      */
@@ -64,7 +62,7 @@ class CriarVeiculoUseCase
         }
 
         // --- placa (obrigatório) ---
-        if (empty($dados['placa'])) {
+        if (empty($dados['placa']) || trim((string) $dados['placa']) === '') {
             throw new InvalidArgumentException('O campo "placa" é obrigatório.');
         }
         $dados['placa'] = Validator::placa((string) $dados['placa']);
@@ -76,13 +74,13 @@ class CriarVeiculoUseCase
         }
 
         // --- marca (obrigatório) ---
-        if (empty($dados['marca'])) {
+        if (empty($dados['marca']) || trim((string) $dados['marca']) === '') {
             throw new InvalidArgumentException('O campo "marca" é obrigatório.');
         }
         $dados['marca'] = Validator::marcaVeiculo((string) $dados['marca']);
 
         // --- modelo (obrigatório) ---
-        if (!isset($dados['modelo']) || trim((string) $dados['modelo']) === '') {
+        if (empty($dados['modelo']) || trim((string) $dados['modelo']) === '') {
             throw new InvalidArgumentException('O campo "modelo" é obrigatório.');
         }
         $dados['modelo'] = Validator::modeloVeiculo((string) $dados['modelo']);
@@ -94,7 +92,7 @@ class CriarVeiculoUseCase
         $dados['ano'] = Validator::anoVeiculo($dados['ano']);
 
         // --- cor (opcional) ---
-        if (isset($dados['cor']) && trim((string) $dados['cor']) !== '') {
+        if (isset($dados['cor']) && $dados['cor'] !== null && trim((string) $dados['cor']) !== '') {
             $dados['cor'] = Validator::corVeiculo((string) $dados['cor']);
         } else {
             $dados['cor'] = null;

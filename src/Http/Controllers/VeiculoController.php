@@ -74,7 +74,7 @@ class VeiculoController
             )
         ]
     )]
-    public function listar(array $params = []): void
+    public function listar(array $params): void
     {
         $clienteId = !empty($_GET['cliente_id']) ? (int) $_GET['cliente_id'] : null;
 
@@ -201,7 +201,7 @@ class VeiculoController
             )
         ]
     )]
-    public function criar(array $params = []): void
+    public function criar(array $params): void
     {
         try {
             $dados   = $this->lerCorpo();
@@ -369,15 +369,7 @@ class VeiculoController
     private function lerCorpo(): array
     {
         $corpo = file_get_contents('php://input');
-        if ($corpo === '' || $corpo === false) {
-            return [];
-        }
-
         $dados = json_decode($corpo, true);
-        if (!is_array($dados)) {
-            throw new InvalidArgumentException('JSON inválido no corpo da requisição.');
-        }
-
-        return $dados;
+        return is_array($dados) ? $dados : [];
     }
 }

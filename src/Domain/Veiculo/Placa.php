@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Domain\Veiculo;
 
 use InvalidArgumentException;
@@ -15,7 +13,7 @@ use InvalidArgumentException;
  *
  * Garante que a placa seja imutável, válida e normalizada em letras maiúsculas.
  */
-final class Placa
+class Placa
 {
     private const REGEX_ANTIGA   = '/^[A-Z]{3}[0-9]{4}$/';
     private const REGEX_MERCOSUL = '/^[A-Z]{3}[0-9][A-Z][0-9]{2}$/';
@@ -31,14 +29,14 @@ final class Placa
 
     /**
      * Remove espaços e hífens e converte para maiúsculo.
-     * Rejeita caracteres especiais inválidos antes da normalização.
+     *
+     * @throws InvalidArgumentException
      */
     private function sanitizar(string $valor): string
     {
         $valor = strtoupper(trim($valor));
 
-        // Permite apenas letras, números, hífen opcional e espaços internos
-        if (!preg_match('/^[A-Z0-9\-\s]+$/', $valor)) {
+        if ($valor !== '' && !preg_match('/^[A-Z0-9\-\s]+$/', $valor)) {
             throw new InvalidArgumentException(
                 'Placa inválida: contém caracteres especiais não permitidos.'
             );
@@ -70,17 +68,11 @@ final class Placa
         }
     }
 
-    /**
-     * Retorna a placa normalizada sem traço (7 caracteres).
-     */
     public function getValor(): string
     {
         return $this->valor;
     }
 
-    /**
-     * Retorna a placa formatada para exibição (ABC-1234 para padrão antigo ou ABC1D23 para Mercosul).
-     */
     public function getFormatada(): string
     {
         if ($this->isAntiga()) {
@@ -110,4 +102,3 @@ final class Placa
         return $this->valor;
     }
 }
-
