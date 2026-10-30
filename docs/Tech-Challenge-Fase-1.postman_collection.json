@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "b3c9e691-8f12-42da-91e8-782a2da38291",
     "name": "Tech Challenge - Fase 1 (Oficina Mecânica)",
-    "description": "Collection do Postman com todas as rotas da API REST da Oficina Mecânica (Tech Challenge - Fase 1).\n\nInclui:\n- CRUD completo de Usuários\n- CRUD completo de Serviços com busca por nome parcial e validação de preço não negativo\n- Filtro por tipo de usuário (cliente, mecânico, atendente)\n- Rota de atalho `/clientes`\n- Cenários de validação e tratamento de erros (422, 404)\n- Scripts de teste que salvam dinamicamente `usuario_id` e `servico_id` criados nas variáveis da collection.",
+    "description": "Collection do Postman com todas as rotas da API REST da Oficina Mecânica (Tech Challenge - Fase 1).\n\nInclui:\n- CRUD completo de Usuários (clientes, mecânicos e atendentes) + atalho `/clientes`\n- CRUD completo de Veículos (placas Tradicional ABC-1234 e Mercosul ABC1D23, vinculação a cliente e atualização parcial)\n- CRUD completo de Serviços com busca por nome parcial\n- CRUD completo de Peças e Insumos com controle de estoque\n- Cenários de validação via `Validator` e tratamento de erros (422, 404)\n- Scripts de teste que salvam dinamicamente `usuario_id`, `veiculo_id`, `servico_id` e `peca_id` nas variáveis da collection.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -190,7 +190,7 @@
                   "if (pm.response.code === 201) {",
                   "    var data = pm.response.json();",
                   "    if (data.id) {",
-                  "        pm.collectionVariables.set(\"usuario_id\", data.id);",
+                  "        pm.collectionVariables.set(\"usuario_id\", data.id.toString());",
                   "        console.log(\"usuario_id atualizado para:\", data.id);",
                   "    }",
                   "}"
@@ -352,9 +352,34 @@
         }
       ]
     },
-{
+    {
+      "name": "2. Clientes (Alias)",
+      "description": "Rotas específicas e atalhos para consulta de clientes.",
+      "item": [
+        {
+          "name": "Listar clientes via rota /clientes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clientes",
+              "host": ["{{base_url}}"],
+              "path": ["clientes"]
+            },
+            "description": "Atalho configurado no router que filtra e retorna exclusivamente usuários com `tipo_usuario = 'cliente'`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "3. Veículos",
-      "description": "Endpoints completos para gestão de veículos vinculados a clientes.",
+      "description": "Endpoints completos para gestão de veículos vinculados a clientes (com validação centralizada via `Validator` e Value Object `Placa`).",
       "item": [
         {
           "name": "Listar todos os veículos",
@@ -450,10 +475,12 @@
                   "    pm.response.to.have.status(201);",
                   "});",
                   "",
-                  "var jsonData = pm.response.json();",
-                  "if (jsonData && jsonData.id) {",
-                  "    pm.collectionVariables.set(\"veiculo_id\", jsonData.id.toString());",
-                  "    console.log(\"veiculo_id salvo na collection:\", jsonData.id);",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData && jsonData.id) {",
+                  "        pm.collectionVariables.set(\"veiculo_id\", jsonData.id.toString());",
+                  "        console.log(\"veiculo_id salvo na collection:\", jsonData.id);",
+                  "    }",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -474,7 +501,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"cliente_id\": 1,\n  \"placa\": \"BRA2E19\",\n  \"marca\": \"Volkswagen\",\n  \"modelo\": \"Gol 1.0\",\n  \"ano\": 2022,\n  \"cor\": \"Branco\"\n}"
+              "raw": "{\n  \"cliente_id\": {{usuario_id}},\n  \"placa\": \"BRA2E19\",\n  \"marca\": \"Volkswagen\",\n  \"modelo\": \"Gol 1.0\",\n  \"ano\": 2022,\n  \"cor\": \"Branco\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/veiculos",
@@ -501,7 +528,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"cliente_id\": 1,\n  \"placa\": \"ABC-1234\",\n  \"marca\": \"Chevrolet\",\n  \"modelo\": \"Onix 1.0 Turbo\",\n  \"ano\": 2020,\n  \"cor\": \"Prata\"\n}"
+              "raw": "{\n  \"cliente_id\": {{usuario_id}},\n  \"placa\": \"ABC-1234\",\n  \"marca\": \"Chevrolet\",\n  \"modelo\": \"Onix 1.0 Turbo\",\n  \"ano\": 2020,\n  \"cor\": \"Prata\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/veiculos",
@@ -513,7 +540,7 @@
           "response": []
         },
         {
-          "name": "Atualizar veículo",
+          "name": "Atualizar veículo (parcial / completo)",
           "request": {
             "method": "PUT",
             "header": [
@@ -528,14 +555,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"cliente_id\": 1,\n  \"placa\": \"BRA2E19\",\n  \"marca\": \"Volkswagen\",\n  \"modelo\": \"Gol 1.6 MSI\",\n  \"ano\": 2023,\n  \"cor\": \"Cinza Chumbo\"\n}"
+              "raw": "{\n  \"modelo\": \"Gol 1.6 MSI\",\n  \"ano\": 2023,\n  \"cor\": \"Cinza Chumbo\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/veiculos/{{veiculo_id}}",
               "host": ["{{base_url}}"],
               "path": ["veiculos", "{{veiculo_id}}"]
             },
-            "description": "Atualiza os dados de modelo, ano ou marca de um veículo existente."
+            "description": "Atualiza campos informados de um veículo existente (PATCH-like), validando via `Validator`."
           },
           "response": []
         },
@@ -578,7 +605,7 @@
       ]
     },
     {
-      "name": "2. Serviços",
+      "name": "4. Serviços",
       "description": "Endpoints principais de gerenciamento do catálogo de serviços da oficina mecânica.",
       "item": [
         {
@@ -666,7 +693,7 @@
                   "if (pm.response.code === 201) {",
                   "    var data = pm.response.json();",
                   "    if (data.id) {",
-                  "        pm.collectionVariables.set(\"servico_id\", data.id);",
+                  "        pm.collectionVariables.set(\"servico_id\", data.id.toString());",
                   "        console.log(\"servico_id atualizado para:\", data.id);",
                   "    }",
                   "}"
@@ -768,11 +795,11 @@
       ]
     },
     {
-      "name": "3. Clientes (Alias)",
-      "description": "Rotas específicas e atalhos para consulta de clientes.",
+      "name": "5. Peças e Estoque",
+      "description": "Endpoints para gerenciamento de peças, insumos automotivos e controle de saldo de estoque.",
       "item": [
         {
-          "name": "Listar clientes via rota /clientes",
+          "name": "Listar todas as peças",
           "request": {
             "method": "GET",
             "header": [
@@ -782,19 +809,150 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/clientes",
+              "raw": "{{base_url}}/pecas",
               "host": ["{{base_url}}"],
-              "path": ["clientes"]
+              "path": ["pecas"]
             },
-            "description": "Atalho configurado no router que filtra e retorna exclusivamente usuários com `tipo_usuario = 'cliente'`."
+            "description": "Retorna o catálogo completo de peças e seu saldo em estoque."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar peças ativas (/pecas?ativo=true)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pecas?ativo=true",
+              "host": ["{{base_url}}"],
+              "path": ["pecas"],
+              "query": [
+                {
+                  "key": "ativo",
+                  "value": "true",
+                  "description": "Filtrar apenas peças ativas"
+                }
+              ]
+            },
+            "description": "Filtra as peças pelo status ativo."
+          },
+          "response": []
+        },
+        {
+          "name": "Cadastrar peça",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code é 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Filtro de Óleo\",\n  \"descricao\": \"Filtro de óleo para motores 1.0 e 1.6\",\n  \"valor_unitario\": 45.90,\n  \"quantidade_estoque\": 25,\n  \"estoque_minimo\": 5,\n  \"ativo\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pecas",
+              "host": ["{{base_url}}"],
+              "path": ["pecas"]
+            },
+            "description": "Cadastra uma nova peça ou insumo no estoque."
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar peça por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pecas/{{peca_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["pecas", "{{peca_id}}"]
+            },
+            "description": "Busca detalhes de uma peça pelo ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar peça e saldo de estoque",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valor_unitario\": 49.90,\n  \"quantidade_estoque\": 30\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pecas/{{peca_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["pecas", "{{peca_id}}"]
+            },
+            "description": "Atualiza valor unitário e/ou saldo em estoque de uma peça existente."
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar peça",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pecas/{{peca_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["pecas", "{{peca_id}}"]
+            },
+            "description": "Remove uma peça pelo ID."
           },
           "response": []
         }
       ]
     },
     {
-      "name": "4. Validações e Testes de Erro",
-      "description": "Casos de teste para validar o comportamento da API diante de dados inválidos ou recursos inexistentes.",
+      "name": "6. Validações e Testes de Erro",
+      "description": "Casos de teste para validar o comportamento da API diante de dados inválidos (422 via `Validator`) ou recursos inexistentes (404).",
       "item": [
         {
           "name": "Erro 422 - Nome inválido (muito curto)",
@@ -924,6 +1082,79 @@
           "response": []
         },
         {
+          "name": "Erro 422 - Veículo com placa inválida",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente_id\": 1,\n  \"placa\": \"1234-ABC\",\n  \"marca\": \"Volkswagen\",\n  \"modelo\": \"Gol 1.0\",\n  \"ano\": 2022\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/veiculos",
+              "host": ["{{base_url}}"],
+              "path": ["veiculos"]
+            },
+            "description": "Espera status 422: Placa fora dos padrões Tradicional (ABC-1234) e Mercosul (ABC1D23)."
+          },
+          "response": []
+        },
+        {
+          "name": "Erro 422 - Veículo com ano inválido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente_id\": 1,\n  \"placa\": \"ABC1D23\",\n  \"marca\": \"Volkswagen\",\n  \"modelo\": \"Gol 1.0\",\n  \"ano\": 1850\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/veiculos",
+              "host": ["{{base_url}}"],
+              "path": ["veiculos"]
+            },
+            "description": "Espera status 422: Ano do veículo fora do intervalo permitido (1900 até ano atual + 1)."
+          },
+          "response": []
+        },
+        {
+          "name": "Erro 404 - Buscar veículo inexistente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/veiculos/999999",
+              "host": ["{{base_url}}"],
+              "path": ["veiculos", "999999"]
+            },
+            "description": "Espera status 404: Veículo com ID especificado não encontrado."
+          },
+          "response": []
+        },
+        {
           "name": "Erro 422 - Serviço com preço negativo",
           "request": {
             "method": "POST",
@@ -968,6 +1199,52 @@
             "description": "Espera status 404: Serviço com ID inexistente."
           },
           "response": []
+        },
+        {
+          "name": "Erro 422 - Peça com valor unitário negativo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Filtro de Ar\",\n  \"valor_unitario\": -20.00\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pecas",
+              "host": ["{{base_url}}"],
+              "path": ["pecas"]
+            },
+            "description": "Espera status 422: Valor unitário da peça não pode ser negativo."
+          },
+          "response": []
+        },
+        {
+          "name": "Erro 404 - Buscar peça inexistente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pecas/999999",
+              "host": ["{{base_url}}"],
+              "path": ["pecas", "999999"]
+            },
+            "description": "Espera status 404: Peça com ID inexistente."
+          },
+          "response": []
         }
       ]
     }
@@ -984,7 +1261,17 @@
       "type": "string"
     },
     {
+      "key": "veiculo_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
       "key": "servico_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "peca_id",
       "value": "1",
       "type": "string"
     }

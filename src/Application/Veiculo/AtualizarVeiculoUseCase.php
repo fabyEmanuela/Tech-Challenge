@@ -1,20 +1,19 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Application\Veiculo;
 
-use Domain\Entities\Veiculo;
-use Domain\Exceptions\ValidacaoException;
-use Domain\Repositories\VeiculoRepositoryInterface;
-use Domain\ValueObjects\Placa;
+use Domain\Shared\Validator;
+use Domain\Veiculo\Veiculo;
+use InvalidArgumentException;
 use Repositories\Usuario\UsuarioRepositoryInterface;
+use Repositories\Veiculo\VeiculoRepositoryInterface;
+use RuntimeException;
 
 class AtualizarVeiculoUseCase
 {
     public function __construct(
         private VeiculoRepositoryInterface $veiculoRepository,
-        private UsuarioRepositoryInterface $usuarioRepository
+        private UsuarioRepositoryInterface $usuarioRepository,
     ) {}
 
     /**
@@ -30,37 +29,95 @@ class AtualizarVeiculoUseCase
     public function executar(int $id, array $dados): Veiculo
     {
         $veiculo = $this->veiculoRepository->buscarPorId($id);
+
         if ($veiculo === null) {
-            throw new ValidacaoException("Veículo com ID {$id} não encontrado.");
+            throw new RuntimeException("Veículo com ID $id não encontrado.");
         }
 
-        $clienteId = isset($dados['cliente_id']) ? (int) $dados['cliente_id'] : $veiculo->clienteId();
-        if ($clienteId !== $veiculo->clienteId()) {
-            $cliente = $this->usuarioRepository->buscarPorId($clienteId);
-            if ($cliente === null) {
-                throw new ValidacaoException("Cliente com ID {$clienteId} não encontrado.");
+        $dados = $this->validarESanitizar($dados, $veiculo);
+        $this->aplicarAlteracoes($veiculo, $dados);
+
+        return $this->veiculoRepository->atualizar($veiculo);
+    }
+
+    /**
+     * Valida e sanitiza somente os campos presentes no payload (PATCH-like).
+     *
+     * @throws InvalidArgumentException
+     */
+    private function validarESanitizar(array $dados, Veiculo $veiculoAtual): array
+    {
+        $id = $veiculoAtual->getId();
+
+        // --- cliente_id ---
+        if (array_key_exists('cliente_id', $dados)) {
+            $dados['cliente_id'] = Validator::idPositivo($dados['cliente_id'], 'cliente_id');
+
+            if (
+                $dados['cliente_id'] !== $veiculoAtual->getClienteId()
+                && $this->usuarioRepository->buscarPorId($dados['cliente_id']) === null
+            ) {
+                throw new InvalidArgumentException("Cliente com ID {$dados['cliente_id']} não encontrado.");
             }
         }
 
-        $placa = isset($dados['placa']) ? new Placa((string) $dados['placa']) : $veiculo->placa();
-        if ($this->veiculoRepository->placaJaExiste($placa, $id)) {
-            throw new ValidacaoException("Já existe outro veículo cadastrado com a placa '{$placa->formatada()}'.");
+        // --- placa ---
+        if (isset($dados['placa'])) {
+            $dados['placa'] = Validator::placa((string) $dados['placa']);
+
+            if ($this->veiculoRepository->placaJaCadastrada($dados['placa'], $id)) {
+                throw new InvalidArgumentException(
+                    "Já existe outro veículo cadastrado com a placa '{$dados['placa']->getFormatada()}'."
+                );
+            }
         }
 
-        $marca  = isset($dados['marca']) ? (string) $dados['marca'] : $veiculo->marca();
-        $modelo = isset($dados['modelo']) ? (string) $dados['modelo'] : $veiculo->modelo();
-        $ano    = isset($dados['ano']) ? (int) $dados['ano'] : $veiculo->ano();
-        $cor    = array_key_exists('cor', $dados) ? ($dados['cor'] !== null ? (string) $dados['cor'] : null) : $veiculo->cor();
+        // --- marca ---
+        if (isset($dados['marca'])) {
+            $dados['marca'] = Validator::marcaVeiculo((string) $dados['marca']);
+        }
 
-        $veiculo->atualizar(
-            clienteId: $clienteId,
-            placa:     $placa,
-            marca:     $marca,
-            modelo:    $modelo,
-            ano:       $ano,
-            cor:       $cor
-        );
+        // --- modelo ---
+        if (isset($dados['modelo'])) {
+            $dados['modelo'] = Validator::modeloVeiculo((string) $dados['modelo']);
+        }
 
-        return $this->veiculoRepository->atualizar($veiculo);
+        // --- ano ---
+        if (array_key_exists('ano', $dados)) {
+            $dados['ano'] = Validator::anoVeiculo($dados['ano']);
+        }
+
+        // --- cor ---
+        if (array_key_exists('cor', $dados)) {
+            if ($dados['cor'] !== null && trim((string) $dados['cor']) !== '') {
+                $dados['cor'] = Validator::corVeiculo((string) $dados['cor']);
+            } else {
+                $dados['cor'] = null;
+            }
+        }
+
+        return $dados;
+    }
+
+    private function aplicarAlteracoes(Veiculo $veiculo, array $dados): void
+    {
+        if (isset($dados['cliente_id'])) {
+            $veiculo->setClienteId($dados['cliente_id']);
+        }
+        if (isset($dados['placa'])) {
+            $veiculo->setPlaca($dados['placa']);
+        }
+        if (isset($dados['marca'])) {
+            $veiculo->setMarca($dados['marca']);
+        }
+        if (isset($dados['modelo'])) {
+            $veiculo->setModelo($dados['modelo']);
+        }
+        if (array_key_exists('ano', $dados)) {
+            $veiculo->setAno($dados['ano']);
+        }
+        if (array_key_exists('cor', $dados)) {
+            $veiculo->setCor($dados['cor']);
+        }
     }
 }

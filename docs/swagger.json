@@ -1995,6 +1995,14 @@
                                             "type": "string",
                                             "example": "ABC1D23"
                                         },
+                                        "placa_formatada": {
+                                            "type": "string",
+                                            "example": "ABC1D23"
+                                        },
+                                        "mercosul": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
                                         "marca": {
                                             "type": "string",
                                             "example": "Volkswagen"
@@ -2147,7 +2155,7 @@
                                     "properties": {
                                         "erro": {
                                             "type": "string",
-                                            "example": "Veículo não encontrado."
+                                            "example": "Veículo com ID 1 não encontrado."
                                         }
                                     },
                                     "type": "object"
@@ -2275,6 +2283,22 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "description": "Conflito de integridade (ex.: ordens de serviço vinculadas)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Não é possível remover este veículo porque existem ordens de serviço vinculadas a ele."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -2376,12 +2400,12 @@
     },
     "tags": [
         {
-            "name": "Veículos",
-            "description": "Gerenciamento de veículos de clientes"
-        },
-        {
             "name": "Usuários",
             "description": "Gerenciamento de clientes e usuários do sistema"
+        },
+        {
+            "name": "Veículos",
+            "description": "Gerenciamento de veículos de clientes"
         },
         {
             "name": "Serviços",

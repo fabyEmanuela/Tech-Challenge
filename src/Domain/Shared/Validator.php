@@ -2,6 +2,7 @@
 
 namespace Domain\Shared;
 
+use Domain\Veiculo\Placa;
 use InvalidArgumentException;
 
 /**
@@ -23,6 +24,8 @@ class Validator
      * para manter os dados limpos na camada de domínio.
      */
     private const CHARS_PROIBIDOS = '/[<>\'"`;()\[\]{}\\\\?\/|!@#\$%\^&\*=\+]/u';
+
+    private const ANO_MINIMO_VEICULO = 1900;
 
     // ------------------------------------------------------------------
     // CPF
@@ -297,6 +300,145 @@ class Validator
     }
 
     // ------------------------------------------------------------------
+    // Veículos
+    // ------------------------------------------------------------------
+
+    /**
+     * Valida e retorna o Value Object Placa (padrão tradicional ABC-1234 ou Mercosul ABC1D23).
+     *
+     * @throws InvalidArgumentException
+     */
+    public static function placa(string $placa): Placa
+    {
+        return new Placa($placa);
+    }
+
+    /**
+     * Valida a marca de um veículo:
+     *  - obrigatório
+     *  - mínimo 2 caracteres
+     *  - máximo 50 caracteres (compatível com VARCHAR(50) no banco)
+     *  - sem caracteres especiais proibidos
+     *
+     * @throws InvalidArgumentException
+     */
+    public static function marcaVeiculo(string $marca): string
+    {
+        $marca = trim($marca);
+
+        if (mb_strlen($marca) < 2) {
+            throw new InvalidArgumentException(
+                'Marca inválida: deve ter pelo menos 2 caracteres.'
+            );
+        }
+
+        if (mb_strlen($marca) > 50) {
+            throw new InvalidArgumentException(
+                'Marca inválida: máximo de 50 caracteres.'
+            );
+        }
+
+        return self::textoLivre($marca, 'Marca');
+    }
+
+    /**
+     * Valida o modelo de um veículo:
+     *  - obrigatório
+     *  - mínimo 1 caractere (ex.: Ka, Gol 1.0, Corolla 2.0)
+     *  - máximo 50 caracteres (compatível com VARCHAR(50) no banco)
+     *  - sem caracteres especiais proibidos
+     *
+     * @throws InvalidArgumentException
+     */
+    public static function modeloVeiculo(string $modelo): string
+    {
+        $modelo = trim($modelo);
+
+        if (mb_strlen($modelo) < 1) {
+            throw new InvalidArgumentException(
+                'Modelo inválido: deve ter pelo menos 1 caractere.'
+            );
+        }
+
+        if (mb_strlen($modelo) > 50) {
+            throw new InvalidArgumentException(
+                'Modelo inválido: máximo de 50 caracteres.'
+            );
+        }
+
+        return self::textoLivre($modelo, 'Modelo');
+    }
+
+    /**
+     * Valida o ano do veículo:
+     *  - inteiro válido entre 1900 e o próximo ano-modelo (ano atual + 1)
+     *
+     * @throws InvalidArgumentException
+     */
+    public static function anoVeiculo(mixed $ano): int
+    {
+        if (is_bool($ano) || filter_var($ano, FILTER_VALIDATE_INT) === false) {
+            throw new InvalidArgumentException(
+                'Ano inválido: deve ser um número inteiro.'
+            );
+        }
+
+        $anoInt    = (int) $ano;
+        $anoMaximo = (int) date('Y') + 1;
+
+        if ($anoInt < self::ANO_MINIMO_VEICULO || $anoInt > $anoMaximo) {
+            throw new InvalidArgumentException(
+                sprintf('Ano inválido: deve estar entre %d e %d.', self::ANO_MINIMO_VEICULO, $anoMaximo)
+            );
+        }
+
+        return $anoInt;
+    }
+
+    /**
+     * Valida a cor de um veículo:
+     *  - mínimo 2 caracteres
+     *  - máximo 30 caracteres (compatível com VARCHAR(30) no banco)
+     *  - sem caracteres especiais proibidos
+     *
+     * @throws InvalidArgumentException
+     */
+    public static function corVeiculo(string $cor): string
+    {
+        $cor = trim($cor);
+
+        if (mb_strlen($cor) < 2) {
+            throw new InvalidArgumentException(
+                'Cor inválida: deve ter pelo menos 2 caracteres.'
+            );
+        }
+
+        if (mb_strlen($cor) > 30) {
+            throw new InvalidArgumentException(
+                'Cor inválida: máximo de 30 caracteres.'
+            );
+        }
+
+        return self::textoLivre($cor, 'Cor');
+    }
+
+    /**
+     * Valida um identificador inteiro positivo (> 0).
+     *
+     * @throws InvalidArgumentException
+     */
+    public static function idPositivo(mixed $id, string $nomeCampo = 'ID'): int
+    {
+        if (is_bool($id) || filter_var($id, FILTER_VALIDATE_INT) === false || (int) $id <= 0) {
+            throw new InvalidArgumentException(
+                "$nomeCampo inválido: deve ser um número inteiro positivo."
+            );
+        }
+
+        return (int) $id;
+    }
+
+    // ------------------------------------------------------------------
     // Preço
     // ------------------------------------------------------------------
 
@@ -401,6 +543,25 @@ class Validator
         }
 
         return $valor;
+    }
+
+    /**
+     * Valida campos de texto livre com limite padrão de 255 caracteres (ex.: descrições e observações).
+     * Remove espaços nas extremidades, valida o tamanho máximo e bloqueia caracteres proibidos.
+     *
+     * @throws InvalidArgumentException
+     */
+    public static function textoMax255(string $valor, string $nomeCampo = 'Campo'): string
+    {
+        $valor = trim($valor);
+
+        if (mb_strlen($valor) > 255) {
+            throw new InvalidArgumentException(
+                sprintf('O campo "%s" deve ter no máximo 255 caracteres.', $nomeCampo)
+            );
+        }
+
+        return self::textoLivre($valor, $nomeCampo);
     }
 
     // ------------------------------------------------------------------

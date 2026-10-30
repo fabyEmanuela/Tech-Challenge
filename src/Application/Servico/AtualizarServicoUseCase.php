@@ -52,11 +52,7 @@ class AtualizarServicoUseCase
         // --- descricao ---
         if (array_key_exists('descricao', $dados)) {
             if ($dados['descricao'] !== null && trim((string) $dados['descricao']) !== '') {
-                $descricao = trim((string) $dados['descricao']);
-                if (mb_strlen($descricao) > 255) {
-                    throw new InvalidArgumentException('O campo "descricao" deve ter no máximo 255 caracteres.');
-                }
-                $dados['descricao'] = Validator::textoLivre($descricao, 'descricao');
+                $dados['descricao'] = Validator::textoMax255((string) $dados['descricao'], 'descricao');
             } else {
                 $dados['descricao'] = null;
             }

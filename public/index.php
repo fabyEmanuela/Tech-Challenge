@@ -44,10 +44,10 @@ use Http\Controllers\UsuarioController;
 use Http\Controllers\VeiculoController;
 use Http\Router;
 use Infrastructure\Database\Connection;
-use Infrastructure\Repositories\VeiculoPdoRepository;
 use Repositories\Peca\PecaPdoRepository;
 use Repositories\Servico\ServicoPdoRepository;
 use Repositories\Usuario\UsuarioPdoRepository;
+use Repositories\Veiculo\VeiculoPdoRepository;
 
 // -----------------------------------------------------------------------
 // Bootstrap
