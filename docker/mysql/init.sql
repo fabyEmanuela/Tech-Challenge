@@ -85,3 +85,8 @@ CREATE TABLE IF NOT EXISTS pecas (
     PRIMARY KEY (id),
     INDEX idx_pecas_ativo (ativo)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- base para teste de integração
+CREATE DATABASE IF NOT EXISTS oficina_mecanica_test
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;

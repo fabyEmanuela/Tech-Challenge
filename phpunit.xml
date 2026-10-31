@@ -11,6 +11,9 @@
     <testsuites>
         <testsuite name="Unit">
             <directory>src/tests/Unit</directory>
+        </testsuite> 
+        <testsuite name="Integration">
+            <directory>src/tests/Integration</directory>
         </testsuite>
     </testsuites>
 
@@ -20,5 +23,11 @@
             <directory>src/Application</directory>
         </include>
     </source>
-</phpunit>
 
+    <php>
+        <env name="DB_HOST" value="db" force="true"/>
+        <env name="DB_NAME" value="oficina_mecanica_test" force="true"/>
+        <env name="DB_USER" value="root" force="true"/>
+        <env name="DB_PASS" value="sua_senha" force="true"/>
+    </php>
+</phpunit>
