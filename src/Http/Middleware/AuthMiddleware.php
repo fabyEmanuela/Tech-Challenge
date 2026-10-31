@@ -14,6 +14,14 @@ class AuthMiddleware
         return $this->handle();
     }
 
+    /**
+     * Retorna um callable para validar perfis específicos em rotas protegidas (RBAC)
+     */
+    public function comRoles(array $roles): callable
+    {
+        return fn(): bool => $this->handle($roles);
+    }
+
     public function handle(?array $rolesPermitidas = null): bool
     {
         $token = $this->extrairBearerToken();

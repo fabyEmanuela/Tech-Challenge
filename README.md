@@ -44,7 +44,7 @@ A API utiliza autenticação **Bearer Token (JWT)** para proteger as rotas de ne
 | Perfil | E-mail | Senha | Finalidade / Permissões |
 | :--- | :--- | :--- | :--- |
 | **Atendente (Admin)** | `admin@oficina.com` | `123456` | Gerenciamento de clientes, veículos, serviços e peças |
-| **Mecânico** | `mecanico@oficina.com` | `123456` | Consulta e execução de serviços e peças da oficina |
+| **Mecânico** | `mecanico@oficina.com` | `123456` | Consulta e execução de serviços e movimentação de peças |
 
 ### Como se autenticar pelo Swagger UI:
 1. Acesse **[http://localhost:8081](http://localhost:8081)**.
@@ -52,6 +52,26 @@ A API utiliza autenticação **Bearer Token (JWT)** para proteger as rotas de ne
 3. Copie o valor de `access_token` retornado.
 4. Clique no botão verde **Authorize** (no topo direito da página do Swagger), cole o token no campo de texto e clique em **Authorize**.
 5. Pronto! Agora todas as rotas protegidas responderão com sucesso.
+
+---
+
+### 🛡️ Regras de Controle de Acesso por Perfil (RBAC)
+
+O sistema implementa controle de acesso granular baseado no perfil do usuário (`role` contida no token JWT):
+
+| Módulo / Recurso | Endpoints | Atendente (Admin) | Mecânico | Cliente | Regra de Negócio |
+| :--- | :--- | :---: | :---: | :---: | :--- |
+| **Autenticação & Status** | `POST /login`, `GET /` | ✅ | ✅ | ✅ | Rotas públicas (não exigem token) |
+| **Usuários** | `POST /usuarios`, `PUT`, `DELETE`, `GET` | ✅ | ❌ | ❌ | **Apenas Atendente** cadastra e gerencia usuários. Mecânicos e clientes não têm permissão |
+| **Clientes** | `GET /clientes` | ✅ | ✅ | ❌ | Consulta de clientes para ordens de serviço e atendimento |
+| **Veículos (Gestão)** | `POST /veiculos`, `PUT`, `DELETE` | ✅ | ❌ | ❌ | Cadastro e alteração de veículos restritos ao Atendente |
+| **Veículos (Consulta)** | `GET /veiculos`, `GET /veiculos/{id}` | ✅ | ✅ | ❌ | Mecânicos consultam veículos para realizar reparos |
+| **Serviços (Catálogo)** | `POST /servicos`, `PUT`, `DELETE` | ✅ | ❌ | ❌ | Gestão do catálogo e precificação |
+| **Serviços (Consulta)** | `GET /servicos`, `GET /servicos/{id}` | ✅ | ✅ | ❌ | Consulta de serviços disponíveis |
+| **Peças (Estoque)** | `GET`, `POST`, `PUT /pecas` | ✅ | ✅ | ❌ | Consulta e movimentação de entradas/baixas de estoque |
+| **Peças (Exclusão)** | `DELETE /pecas/{id}` | ✅ | ❌ | ❌ | Exclusão definitiva de peças restrita ao Atendente |
+
+> **Nota de Segurança:** Qualquer tentativa de acessar um endpoint com perfil não autorizado resulta em resposta imediata com status `403 Forbidden` (`{"erro": "Acesso negado para este perfil de usuário."}`).
 
 ---
 
