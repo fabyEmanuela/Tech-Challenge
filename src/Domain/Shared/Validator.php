@@ -41,7 +41,7 @@ class Validator
     public static function cpf(string $cpf): string
     {
         // Remove máscara
-        $apenas_digitos = preg_replace('/\D/', '', $cpf);
+        $apenas_digitos = self::normalizarCpf($cpf);
 
         // Deve ter exatamente 11 dígitos
         if (strlen($apenas_digitos) !== 11) {
@@ -83,6 +83,14 @@ class Validator
              . substr($apenas_digitos, 3, 3) . '.'
              . substr($apenas_digitos, 6, 3) . '-'
              . substr($apenas_digitos, 9, 2);
+    }
+
+    /**
+     * Remove qualquer caractere que não seja numérico de um CPF.
+     */
+    public static function normalizarCpf(string $cpf): string
+    {
+        return preg_replace('/\D/', '', $cpf) ?? '';
     }
 
     /**

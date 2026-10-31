@@ -970,6 +970,73 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "5. Ordens de Serviço",
+      "description": "Criação, orçamento, execução e acompanhamento de Ordens de Serviço.",
+      "item": [
+        {
+          "name": "Listar ordens de serviço",
+          "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": { "raw": "{{base_url}}/ordens-servico", "host": ["{{base_url}}"], "path": ["ordens-servico"] } },
+          "response": []
+        },
+        {
+          "name": "Criar ordem de serviço",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const resposta = pm.response.json();", "if (resposta.id) { pm.collectionVariables.set('ordem_servico_id', resposta.id); }", "if (resposta.numero_os) { pm.collectionVariables.set('numero_os', resposta.numero_os); }", "if (resposta.servicos?.[0]?.id) { pm.collectionVariables.set('item_servico_os_id', resposta.servicos[0].id); }", "if (resposta.pecas?.[0]?.id) { pm.collectionVariables.set('item_peca_os_id', resposta.pecas[0].id); }"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"cliente_id\": {{usuario_id}},\n  \"veiculo_id\": {{veiculo_id}},\n  \"descricao_problema\": \"Ruído ao frear\",\n  \"diagnostico\": \"Pastilhas de freio desgastadas\",\n  \"servicos\": [\n    { \"servico_id\": {{servico_id}}, \"quantidade\": 1 }\n  ],\n  \"pecas\": [\n    { \"descricao\": \"Jogo de pastilhas de freio\", \"quantidade\": 1, \"preco_unitario\": 180.00 }\n  ]\n}" },
+            "url": { "raw": "{{base_url}}/ordens-servico", "host": ["{{base_url}}"], "path": ["ordens-servico"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar ordem de serviço por ID",
+          "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": { "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}", "host": ["{{base_url}}"], "path": ["ordens-servico", "{{ordem_servico_id}}"] } },
+          "response": []
+        },
+        {
+          "name": "Atualizar ordem de serviço",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"diagnostico\": \"Pastilhas e discos de freio desgastados\",\n  \"servicos\": [\n    { \"id\": {{item_servico_os_id}}, \"servico_id\": {{servico_id}}, \"quantidade\": 1 }\n  ],\n  \"pecas\": [\n    { \"id\": {{item_peca_os_id}}, \"descricao\": \"Jogo de pastilhas de freio\", \"quantidade\": 1, \"preco_unitario\": 180.00 }\n  ]\n}" },
+            "url": { "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}", "host": ["{{base_url}}"], "path": ["ordens-servico", "{{ordem_servico_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Enviar orçamento",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"observacao\": \"Orçamento enviado por WhatsApp.\"\n}" }, "url": { "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}/enviar-orcamento", "host": ["{{base_url}}"], "path": ["ordens-servico", "{{ordem_servico_id}}", "enviar-orcamento"] } },
+          "response": []
+        },
+        {
+          "name": "Aprovar orçamento",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"observacao\": \"Aprovado pelo cliente.\"\n}" }, "url": { "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}/aprovar-orcamento", "host": ["{{base_url}}"], "path": ["ordens-servico", "{{ordem_servico_id}}", "aprovar-orcamento"] } },
+          "response": []
+        },
+        {
+          "name": "Atualizar status da OS",
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"status\": \"finalizada\",\n  \"observacao\": \"Serviços concluídos e veículo testado.\"\n}" }, "url": { "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}/status", "host": ["{{base_url}}"], "path": ["ordens-servico", "{{ordem_servico_id}}", "status"] } },
+          "response": []
+        },
+        {
+          "name": "Acompanhar ordem de serviço",
+          "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": { "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}/acompanhamento", "host": ["{{base_url}}"], "path": ["ordens-servico", "{{ordem_servico_id}}", "acompanhamento"] } },
+          "response": []
+        },
+        {
+          "name": "Consultar acompanhamento por número da OS",
+          "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": { "raw": "{{base_url}}/acompanhamento-os?numero_os={{numero_os}}", "host": ["{{base_url}}"], "path": ["acompanhamento-os"], "query": [{ "key": "numero_os", "value": "{{numero_os}}" }] } },
+          "response": []
+        },
+        {
+          "name": "Remover ordem de serviço",
+          "request": { "method": "DELETE", "header": [{ "key": "Accept", "value": "application/json" }], "url": { "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}", "host": ["{{base_url}}"], "path": ["ordens-servico", "{{ordem_servico_id}}"] } },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -985,6 +1052,31 @@
     },
     {
       "key": "servico_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "veiculo_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "ordem_servico_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "numero_os",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "item_servico_os_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "item_peca_os_id",
       "value": "1",
       "type": "string"
     }

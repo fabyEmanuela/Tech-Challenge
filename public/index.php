@@ -9,7 +9,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 // Pro Swagger (porta 8081) consuma a API (porta 8080)
 // -----------------------------------------------------------------------
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Accept");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -17,6 +17,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
+use Application\OrdemServico\AcompanharOrdemServicoUseCase;
+use Application\OrdemServico\AlterarStatusOrdemServicoUseCase;
+use Application\OrdemServico\AprovarOrcamentoUseCase;
+use Application\OrdemServico\AtualizarOrdemServicoUseCase;
+use Application\OrdemServico\BuscarOrdemServicoPorIdUseCase;
+use Application\OrdemServico\CriarOrdemServicoUseCase;
+use Application\OrdemServico\DeletarOrdemServicoUseCase;
+use Application\OrdemServico\EnviarOrcamentoUseCase;
+use Application\OrdemServico\ListarOrdensServicoUseCase;
 use Application\Servico\AtualizarServicoUseCase;
 use Application\Servico\BuscarServicoPorIdUseCase;
 use Application\Servico\BuscarServicoPorNomeUseCase;
@@ -33,11 +42,13 @@ use Application\Veiculo\BuscarVeiculoPorIdUseCase;
 use Application\Veiculo\CriarVeiculoUseCase;
 use Application\Veiculo\DeletarVeiculoUseCase;
 use Application\Veiculo\ListarVeiculosUseCase;
+use Http\Controllers\OrdemServicoController;
 use Http\Controllers\ServicoController;
 use Http\Controllers\UsuarioController;
 use Http\Controllers\VeiculoController;
 use Http\Router;
 use Infrastructure\Database\Connection;
+use Infrastructure\Repositories\OrdemServicoPdoRepository;
 use Infrastructure\Repositories\VeiculoPdoRepository;
 use Repositories\Servico\ServicoPdoRepository;
 use Repositories\Usuario\UsuarioPdoRepository;
@@ -49,9 +60,10 @@ use Repositories\Usuario\UsuarioPdoRepository;
 $pdo = Connection::getInstance();
 
 // Repositórios
-$usuarioRepository = new UsuarioPdoRepository($pdo);
-$servicoRepository = new ServicoPdoRepository($pdo);
-$veiculoRepository = new VeiculoPdoRepository($pdo);
+$usuarioRepository      = new UsuarioPdoRepository($pdo);
+$servicoRepository      = new ServicoPdoRepository($pdo);
+$veiculoRepository      = new VeiculoPdoRepository($pdo);
+$ordemServicoRepository = new OrdemServicoPdoRepository($pdo);
 
 // Use Cases - Usuários
 $criarUsuario     = new CriarUsuarioUseCase($usuarioRepository);
@@ -74,6 +86,17 @@ $buscarServicoPorId   = new BuscarServicoPorIdUseCase($servicoRepository);
 $buscarServicoPorNome = new BuscarServicoPorNomeUseCase($servicoRepository);
 $atualizarServico     = new AtualizarServicoUseCase($servicoRepository);
 $deletarServico       = new DeletarServicoUseCase($servicoRepository);
+
+// Use Cases - Ordens de Serviço
+$criarOrdemServico         = new CriarOrdemServicoUseCase($ordemServicoRepository, $usuarioRepository, $veiculoRepository, $servicoRepository);
+$listarOrdensServico       = new ListarOrdensServicoUseCase($ordemServicoRepository);
+$buscarOrdemServico        = new BuscarOrdemServicoPorIdUseCase($ordemServicoRepository);
+$atualizarOrdemServico     = new AtualizarOrdemServicoUseCase($ordemServicoRepository, $servicoRepository);
+$deletarOrdemServico       = new DeletarOrdemServicoUseCase($ordemServicoRepository);
+$enviarOrcamento           = new EnviarOrcamentoUseCase($ordemServicoRepository);
+$aprovarOrcamento          = new AprovarOrcamentoUseCase($ordemServicoRepository);
+$alterarStatusOrdemServico = new AlterarStatusOrdemServicoUseCase($ordemServicoRepository);
+$acompanharOrdemServico    = new AcompanharOrdemServicoUseCase($ordemServicoRepository);
 
 // Controllers
 $usuarioController = new UsuarioController(
@@ -99,6 +122,18 @@ $servicoController = new ServicoController(
     $buscarServicoPorNome,
     $atualizarServico,
     $deletarServico,
+);
+
+$ordemServicoController = new OrdemServicoController(
+    $criarOrdemServico,
+    $listarOrdensServico,
+    $buscarOrdemServico,
+    $atualizarOrdemServico,
+    $deletarOrdemServico,
+    $enviarOrcamento,
+    $aprovarOrcamento,
+    $alterarStatusOrdemServico,
+    $acompanharOrdemServico,
 );
 
 // -----------------------------------------------------------------------
@@ -135,6 +170,18 @@ $router->add('GET',    '/servicos/{id}',   [$servicoController, 'exibir']);
 $router->add('POST',   '/servicos',        [$servicoController, 'criar']);
 $router->add('PUT',    '/servicos/{id}',   [$servicoController, 'atualizar']);
 $router->add('DELETE', '/servicos/{id}',   [$servicoController, 'remover']);
+
+// Ordens de Serviço (OS)
+$router->add('GET',    '/ordens-servico',                       [$ordemServicoController, 'listar']);
+$router->add('GET',    '/ordens-servico/{id}',                  [$ordemServicoController, 'exibir']);
+$router->add('POST',   '/ordens-servico',                       [$ordemServicoController, 'criar']);
+$router->add('PUT',    '/ordens-servico/{id}',                  [$ordemServicoController, 'atualizar']);
+$router->add('DELETE', '/ordens-servico/{id}',                  [$ordemServicoController, 'remover']);
+$router->add('POST',   '/ordens-servico/{id}/enviar-orcamento', [$ordemServicoController, 'enviarOrcamento']);
+$router->add('POST',   '/ordens-servico/{id}/aprovar-orcamento',[$ordemServicoController, 'aprovarOrcamento']);
+$router->add('PATCH',  '/ordens-servico/{id}/status',           [$ordemServicoController, 'atualizarStatus']);
+$router->add('GET',    '/ordens-servico/{id}/acompanhamento',   [$ordemServicoController, 'acompanhar']);
+$router->add('GET',    '/acompanhamento-os',                    [$ordemServicoController, 'consultarAcompanhamento']);
 
 // -----------------------------------------------------------------------
 // Dispatch
