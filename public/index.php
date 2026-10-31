@@ -43,9 +43,11 @@ use Http\Controllers\PecaController;
 use Http\Controllers\ServicoController;
 use Http\Controllers\UsuarioController;
 use Http\Controllers\VeiculoController;
+use Http\Middleware\AuthMiddleware;
 use Http\Router;
 use Infrastructure\Auth\JwtService;
 use Infrastructure\Database\Connection;
+use Infrastructure\Http\Controllers\HealthController;
 use Repositories\Peca\PecaPdoRepository;
 use Repositories\Servico\ServicoPdoRepository;
 use Repositories\Usuario\UsuarioPdoRepository;
@@ -64,8 +66,9 @@ $veiculoRepository = new VeiculoPdoRepository($pdo);
 $pecaRepository    = new PecaPdoRepository($pdo);
 
 // Autenticação & JWT
-$jwtSecret = getenv('JWT_SECRET') ?: 'sua-chave-secreta-padrao';
-$jwtService = new JwtService($jwtSecret);
+$jwtSecret      = getenv('JWT_SECRET') ?: 'sua-chave-secreta-padrao';
+$jwtService     = new JwtService($jwtSecret);
+$authMiddleware = new AuthMiddleware($jwtService);
 
 // Use Cases - Usuários
 $criarUsuario     = new CriarUsuarioUseCase($usuarioRepository);
@@ -97,6 +100,8 @@ $atualizarPeca = new AtualizarPecaUseCase($pecaRepository);
 $deletarPeca   = new DeletarPecaUseCase($pecaRepository);
 
 // Controllers
+$healthController = new HealthController();
+
 $authController = new AuthController(
     $usuarioRepository,
     $jwtService,
@@ -141,44 +146,51 @@ $pecaController = new PecaController(
 
 $router = new Router();
 
-// Autenticação
+// =======================================================================
+// 1. Rotas Públicas 
+// =======================================================================
+$router->add('GET',  '/',      [$healthController, 'check']);
 $router->add('POST', '/login', [$authController, 'login']);
 
+// =======================================================================
+// 2. Rotas Protegidas 
+// =======================================================================
+
 // Usuários
-$router->add('GET',    '/usuarios',       [$usuarioController, 'listar']);
-$router->add('GET',    '/usuarios/{id}',  [$usuarioController, 'exibir']);
-$router->add('POST',   '/usuarios',       [$usuarioController, 'criar']);
-$router->add('PUT',    '/usuarios/{id}',  [$usuarioController, 'atualizar']);
-$router->add('DELETE', '/usuarios/{id}',  [$usuarioController, 'remover']);
+$router->add('GET',    '/usuarios',       [$usuarioController, 'listar'],    [$authMiddleware]);
+$router->add('GET',    '/usuarios/{id}',  [$usuarioController, 'exibir'],    [$authMiddleware]);
+$router->add('POST',   '/usuarios',       [$usuarioController, 'criar'],     [$authMiddleware]);
+$router->add('PUT',    '/usuarios/{id}',  [$usuarioController, 'atualizar'], [$authMiddleware]);
+$router->add('DELETE', '/usuarios/{id}',  [$usuarioController, 'remover'],   [$authMiddleware]);
 
 // Alias para clientes (filtra por tipo_usuario=cliente)
 $router->add('GET', '/clientes', function (array $params) use ($usuarioController): void {
     $_GET['tipo'] = 'cliente';
     $usuarioController->listar($params);
-});
+}, [$authMiddleware]);
 
 // Veículos
-$router->add('GET',    '/veiculos',               [$veiculoController, 'listar']);
-$router->add('GET',    '/veiculos/{id}',          [$veiculoController, 'exibir']);
-$router->add('POST',   '/veiculos',               [$veiculoController, 'criar']);
-$router->add('PUT',    '/veiculos/{id}',          [$veiculoController, 'atualizar']);
-$router->add('DELETE', '/veiculos/{id}',          [$veiculoController, 'remover']);
-$router->add('GET',    '/clientes/{id}/veiculos', [$veiculoController, 'listarPorCliente']);
+$router->add('GET',    '/veiculos',               [$veiculoController, 'listar'],           [$authMiddleware]);
+$router->add('GET',    '/veiculos/{id}',          [$veiculoController, 'exibir'],           [$authMiddleware]);
+$router->add('POST',   '/veiculos',               [$veiculoController, 'criar'],            [$authMiddleware]);
+$router->add('PUT',    '/veiculos/{id}',          [$veiculoController, 'atualizar'],        [$authMiddleware]);
+$router->add('DELETE', '/veiculos/{id}',          [$veiculoController, 'remover'],          [$authMiddleware]);
+$router->add('GET',    '/clientes/{id}/veiculos', [$veiculoController, 'listarPorCliente'], [$authMiddleware]);
 
 // Serviços
-$router->add('GET',    '/servicos',        [$servicoController, 'listar']);
-$router->add('GET',    '/servicos/buscar', [$servicoController, 'buscarPorNome']);
-$router->add('GET',    '/servicos/{id}',   [$servicoController, 'exibir']);
-$router->add('POST',   '/servicos',        [$servicoController, 'criar']);
-$router->add('PUT',    '/servicos/{id}',   [$servicoController, 'atualizar']);
-$router->add('DELETE', '/servicos/{id}',   [$servicoController, 'remover']);
+$router->add('GET',    '/servicos',        [$servicoController, 'listar'],        [$authMiddleware]);
+$router->add('GET',    '/servicos/buscar', [$servicoController, 'buscarPorNome'], [$authMiddleware]);
+$router->add('GET',    '/servicos/{id}',   [$servicoController, 'exibir'],        [$authMiddleware]);
+$router->add('POST',   '/servicos',        [$servicoController, 'criar'],         [$authMiddleware]);
+$router->add('PUT',    '/servicos/{id}',   [$servicoController, 'atualizar'],     [$authMiddleware]);
+$router->add('DELETE', '/servicos/{id}',   [$servicoController, 'remover'],       [$authMiddleware]);
 
 // Peças
-$router->add('GET',    '/pecas',       [$pecaController, 'listar']);
-$router->add('GET',    '/pecas/{id}',  [$pecaController, 'exibir']);
-$router->add('POST',   '/pecas',       [$pecaController, 'criar']);
-$router->add('PUT',    '/pecas/{id}',  [$pecaController, 'atualizar']);
-$router->add('DELETE', '/pecas/{id}',  [$pecaController, 'remover']);
+$router->add('GET',    '/pecas',       [$pecaController, 'listar'],    [$authMiddleware]);
+$router->add('GET',    '/pecas/{id}',  [$pecaController, 'exibir'],    [$authMiddleware]);
+$router->add('POST',   '/pecas',       [$pecaController, 'criar'],     [$authMiddleware]);
+$router->add('PUT',    '/pecas/{id}',  [$pecaController, 'atualizar'], [$authMiddleware]);
+$router->add('DELETE', '/pecas/{id}',  [$pecaController, 'remover'],   [$authMiddleware]);
 
 // -----------------------------------------------------------------------
 // Dispatch

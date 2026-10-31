@@ -6,12 +6,13 @@ class Router
 {
     private array $routes = [];
 
-    public function add(string $method, string $pattern, callable $handler): void
+    public function add(string $method, string $pattern, callable $handler, array $middlewares = []): void
     {
         $this->routes[] = [
-            'method'  => strtoupper($method),
-            'pattern' => $pattern,
-            'handler' => $handler,
+            'method'        => strtoupper($method),
+            'pattern'       => $pattern,
+            'handler'       => $handler,
+            'middlewares'   =>  $middlewares
         ];
     }
 
@@ -27,6 +28,14 @@ class Router
 
             $params = $this->match($route['pattern'], $uri);
             if ($params !== null) {
+                //executar o middleware 
+                foreach($route['middlewares'] as $middleware){
+                    $autorizado = call_user_func($middleware, $params);
+                    if ($autorizado === false) {
+                        return; 
+                    }
+
+                }
                 call_user_func($route['handler'], $params);
                 return;
             }

@@ -25,6 +25,7 @@ class AuthController
         summary: "Autentica um usuário e retorna o token JWT",
         description: "Valida as credenciais (e-mail e senha) de um usuário cadastrado e retorna um token JWT de acesso com validade de 2 horas contendo o identificador (sub) e o perfil de acesso (role).",
         tags: ["Autenticação"],
+        security: [],
         requestBody: new OA\RequestBody(
             required: true,
             description: "Credenciais de acesso do usuário",

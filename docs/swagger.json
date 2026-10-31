@@ -99,7 +99,8 @@
                             }
                         }
                     }
-                }
+                },
+                "security": []
             }
         },
         "/pecas": {
@@ -2484,7 +2485,8 @@
                             }
                         }
                     }
-                }
+                },
+                "security": []
             }
         }
     },
@@ -2498,6 +2500,11 @@
             }
         }
     },
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
     "tags": [
         {
             "name": "Autenticação",

@@ -4,6 +4,9 @@ namespace Infrastructure\Http;
 
 use OpenApi\Attributes as OA;
 
+#[OA\OpenApi(
+    security: [["bearerAuth" => []]]
+)]
 #[OA\Info(
     version: "1.0.0",
     title: "Tech Challenge API - Oficina Mecânica",
