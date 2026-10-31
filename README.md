@@ -36,49 +36,60 @@ docker compose exec app composer install
 | **Banco MySQL 8.4** | `localhost:3307` | Banco de dados da oficina |
 
 ---
-remover isto anteas da entrega 
-## 👩‍💻 Guia para a Equipe: Como Criar e Documentar Novas Rotas
 
-Para que o time mantenha o mesmo padrão arquitetural e o Swagger sempre atualizado:
+## 🔐 Autenticação & Credenciais Padrão para Avaliação
 
-### 1. Padrão de Resposta HTTP
-Use sempre a classe helper `JsonResponse` para emitir as respostas dos seus Controllers:
-```php
-use Infrastructure\Http\JsonResponse;
+A API utiliza autenticação **Bearer Token (JWT)** para proteger as rotas de negócio. Para que os avaliadores possam testar os endpoints imediatamente após o `docker compose up`, o banco de dados já inicializa com as seguintes credenciais padrão:
 
-JsonResponse::send(["mensagem" => "Sucesso"], 200);
-```
+| Perfil | E-mail | Senha | Finalidade / Permissões |
+| :--- | :--- | :--- | :--- |
+| **Atendente (Admin)** | `admin@oficina.com` | `123456` | Gerenciamento de clientes, veículos, serviços e peças |
+| **Mecânico** | `mecanico@oficina.com` | `123456` | Consulta e execução de serviços e movimentação de peças |
 
-### 2. Documentar o Endpoint no Swagger
-Em cima do método do seu Controller, adicione os atributos OpenAPI:
-```php
-use OpenApi\Attributes as OA;
+### Como se autenticar pelo Swagger UI:
+1. Acesse **[http://localhost:8081](http://localhost:8081)**.
+2. Expanda o endpoint `POST /login` (sob a tag **Autenticação**), clique em **Try it out** e clique em **Execute** (já vem pré-preenchido com `admin@oficina.com` e `123456`).
+3. Copie o valor de `access_token` retornado.
+4. Clique no botão verde **Authorize** (no topo direito da página do Swagger), cole o token no campo de texto e clique em **Authorize**.
+5. Pronto! Agora todas as rotas protegidas responderão com sucesso.
 
-#[OA\Get(
-    path: "/veiculos",
-    summary: "Lista todos os veículos",
-    tags: ["Veículos"],
-    responses: [
-        new OA\Response(response: 200, description: "Lista de veículos retornada com sucesso")
-    ]
-)]
-public function listar(): void
-{
-    // ...
-}
-```
+---
 
-### 3. Como Atualizar a Documentação do Swagger
-Sempre que você criar ou alterar uma rota, rode no terminal:
+### 🛡️ Regras de Controle de Acesso por Perfil (RBAC)
+
+O sistema implementa controle de acesso granular baseado no perfil do usuário (`role` contida no token JWT):
+
+| Módulo / Recurso | Endpoints | Atendente (Admin) | Mecânico | Cliente | Regra de Negócio |
+| :--- | :--- | :---: | :---: | :---: | :--- |
+| **Autenticação & Status** | `POST /login`, `GET /` | ✅ | ✅ | ✅ | Rotas públicas (não exigem token) |
+| **Usuários** | `POST /usuarios`, `PUT`, `DELETE`, `GET` | ✅ | ❌ | ❌ | **Apenas Atendente** cadastra e gerencia usuários. Mecânicos e clientes não têm permissão |
+| **Clientes** | `GET /clientes` | ✅ | ✅ | ❌ | Consulta de clientes para ordens de serviço e atendimento |
+| **Veículos (Gestão)** | `POST /veiculos`, `PUT`, `DELETE` | ✅ | ❌ | ❌ | Cadastro e alteração de veículos restritos ao Atendente |
+| **Veículos (Consulta)** | `GET /veiculos`, `GET /veiculos/{id}` | ✅ | ✅ | ❌ | Mecânicos consultam veículos para realizar reparos |
+| **Serviços (Catálogo)** | `POST /servicos`, `PUT`, `DELETE` | ✅ | ❌ | ❌ | Gestão do catálogo e precificação |
+| **Serviços (Consulta)** | `GET /servicos`, `GET /servicos/{id}` | ✅ | ✅ | ❌ | Consulta de serviços disponíveis |
+| **Peças (Estoque)** | `GET`, `POST`, `PUT /pecas` | ✅ | ✅ | ❌ | Consulta e movimentação de entradas/baixas de estoque |
+| **Peças (Exclusão)** | `DELETE /pecas/{id}` | ✅ | ❌ | ❌ | Exclusão definitiva de peças restrita ao Atendente |
+
+> **Nota de Segurança:** Qualquer tentativa de acessar um endpoint com perfil não autorizado resulta em resposta imediata com status `403 Forbidden` (`{"erro": "Acesso negado para este perfil de usuário."}`).
+
+---
+
+## 🧪 Como Executar a Suíte de Testes Unitários
+
+Para rodar os testes unitários da aplicação via PHPUnit dentro do container Docker:
+
 ```bash
-docker compose exec app ./vendor/bin/openapi src/ -o docs/swagger.json
+docker compose exec app ./vendor/bin/phpunit --testdox
 ```
-Depois, basta atualizar a página **[http://localhost:8081](http://localhost:8081)** para ver as novidades no Swagger!
 
 ---
 
 ## 🏛️ Arquitetura em Camadas (Clean Architecture)
 
-- **`src/Domain/`**: Entidades de negócio, Value Objects e Interfaces (PHP puro, sem SQL/frameworks).
-- **`src/Application/`**: Casos de uso (UseCases) e DTOs de orquestração.
-- **`src/Infrastructure/`**: Conexão com banco (PDO), repositórios SQL, Controllers HTTP e Swagger.
+- **`src/Domain/`**: Entidades de negócio, Value Objects e validações centrais (`Validator.php`).
+- **`src/Application/`**: Casos de uso (UseCases) da aplicação orquestrando regras e interfaces.
+- **`src/Repositories/`**: Interfaces e implementações PDO de persistência em banco.
+- **`src/Http/`**: Roteador, Controllers REST e Middlewares de segurança (`AuthMiddleware`).
+- **`src/Infrastructure/`**: Conexão com banco (`Connection`), serviço de JWT (`JwtService`) e Swagger.
+- **`src/tests/`**: Suíte de testes unitários automatizados com PHPUnit.

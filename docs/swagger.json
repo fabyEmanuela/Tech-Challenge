@@ -12,6 +12,97 @@
         }
     ],
     "paths": {
+        "/login": {
+            "post": {
+                "tags": [
+                    "Autenticação"
+                ],
+                "summary": "Autentica um usuário e retorna o token JWT",
+                "description": "Valida as credenciais (e-mail e senha) de um usuário cadastrado e retorna um token JWT de acesso com validade de 2 horas contendo o identificador (sub) e o perfil de acesso (role).",
+                "operationId": "917db6a5dc740a1305c1fde8bbad171c",
+                "requestBody": {
+                    "description": "Credenciais de acesso do usuário",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "senha"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "description": "E-mail cadastrado do usuário",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "admin@oficina.com"
+                                    },
+                                    "senha": {
+                                        "description": "Senha do usuário",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login realizado com sucesso. Retorna o token JWT para autenticação.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "access_token": {
+                                            "description": "Token JWT assinado com algoritmo HS256",
+                                            "type": "string",
+                                            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJhdGVuZGVudGUiLCJpYXQiOjE2OTg3OTY4MDAsImV4cCI6MTY5ODgwNDAwMH0.abcdef..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "E-mail ou senha não informados na requisição",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "E-mail e senha são obrigatórios."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Credenciais inválidas (usuário inexistente, sem senha cadastrada ou senha incorreta)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "erro": {
+                                            "type": "string",
+                                            "example": "Credenciais inválidas"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
         "/pecas": {
             "get": {
                 "tags": [
@@ -2394,11 +2485,31 @@
                             }
                         }
                     }
-                }
+                },
+                "security": []
             }
         }
     },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Insira o token JWT gerado na rota /login para autenticar as requisições protegidas.",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
     "tags": [
+        {
+            "name": "Autenticação",
+            "description": "Endpoints para login e emissão de tokens JWT de acesso"
+        },
         {
             "name": "Usuários",
             "description": "Gerenciamento de clientes e usuários do sistema"

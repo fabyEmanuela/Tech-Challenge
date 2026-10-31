@@ -38,12 +38,16 @@ use Application\Veiculo\BuscarVeiculoPorIdUseCase;
 use Application\Veiculo\CriarVeiculoUseCase;
 use Application\Veiculo\DeletarVeiculoUseCase;
 use Application\Veiculo\ListarVeiculosUseCase;
+use Http\Controllers\AuthController;
 use Http\Controllers\PecaController;
 use Http\Controllers\ServicoController;
 use Http\Controllers\UsuarioController;
 use Http\Controllers\VeiculoController;
+use Http\Middleware\AuthMiddleware;
 use Http\Router;
+use Infrastructure\Auth\JwtService;
 use Infrastructure\Database\Connection;
+use Infrastructure\Http\Controllers\HealthController;
 use Repositories\Peca\PecaPdoRepository;
 use Repositories\Servico\ServicoPdoRepository;
 use Repositories\Usuario\UsuarioPdoRepository;
@@ -60,6 +64,11 @@ $usuarioRepository = new UsuarioPdoRepository($pdo);
 $servicoRepository = new ServicoPdoRepository($pdo);
 $veiculoRepository = new VeiculoPdoRepository($pdo);
 $pecaRepository    = new PecaPdoRepository($pdo);
+
+// Autenticação & JWT
+$jwtSecret      = getenv('JWT_SECRET') ?: 'sua-chave-secreta-padrao';
+$jwtService     = new JwtService($jwtSecret);
+$authMiddleware = new AuthMiddleware($jwtService);
 
 // Use Cases - Usuários
 $criarUsuario     = new CriarUsuarioUseCase($usuarioRepository);
@@ -91,6 +100,13 @@ $atualizarPeca = new AtualizarPecaUseCase($pecaRepository);
 $deletarPeca   = new DeletarPecaUseCase($pecaRepository);
 
 // Controllers
+$healthController = new HealthController();
+
+$authController = new AuthController(
+    $usuarioRepository,
+    $jwtService,
+);
+
 $usuarioController = new UsuarioController(
     $criarUsuario,
     $listarUsuarios,
@@ -130,41 +146,61 @@ $pecaController = new PecaController(
 
 $router = new Router();
 
-// Usuários
-$router->add('GET',    '/usuarios',       [$usuarioController, 'listar']);
-$router->add('GET',    '/usuarios/{id}',  [$usuarioController, 'exibir']);
-$router->add('POST',   '/usuarios',       [$usuarioController, 'criar']);
-$router->add('PUT',    '/usuarios/{id}',  [$usuarioController, 'atualizar']);
-$router->add('DELETE', '/usuarios/{id}',  [$usuarioController, 'remover']);
+// =======================================================================
+// 1. Rotas Públicas (Sem token)
+// =======================================================================
+$router->add('GET',  '/',      [$healthController, 'check']);
+$router->add('POST', '/login', [$authController, 'login']);
 
-// Alias para clientes (filtra por tipo_usuario=cliente)
+// =======================================================================
+// 2. Middlewares de Controle de Acesso por Perfil 
+// =======================================================================
+$apenasAtendente    = $authMiddleware->comRoles(['atendente']);
+$equipeInterna      = $authMiddleware->comRoles(['atendente', 'mecanico']);
+
+// =======================================================================
+// 3. Rotas de Usuários (Apenas Atendente pode gerenciar usuários/clientes)
+// =======================================================================
+$router->add('GET',    '/usuarios',       [$usuarioController, 'listar'],    [$apenasAtendente]);
+$router->add('GET',    '/usuarios/{id}',  [$usuarioController, 'exibir'],    [$apenasAtendente]);
+$router->add('POST',   '/usuarios',       [$usuarioController, 'criar'],     [$apenasAtendente]);
+$router->add('PUT',    '/usuarios/{id}',  [$usuarioController, 'atualizar'], [$apenasAtendente]);
+$router->add('DELETE', '/usuarios/{id}',  [$usuarioController, 'remover'],   [$apenasAtendente]);
+
+// filtra por tipo_usuario=cliente
 $router->add('GET', '/clientes', function (array $params) use ($usuarioController): void {
     $_GET['tipo'] = 'cliente';
     $usuarioController->listar($params);
-});
+}, [$equipeInterna]);
 
-// Veículos
-$router->add('GET',    '/veiculos',               [$veiculoController, 'listar']);
-$router->add('GET',    '/veiculos/{id}',          [$veiculoController, 'exibir']);
-$router->add('POST',   '/veiculos',               [$veiculoController, 'criar']);
-$router->add('PUT',    '/veiculos/{id}',          [$veiculoController, 'atualizar']);
-$router->add('DELETE', '/veiculos/{id}',          [$veiculoController, 'remover']);
-$router->add('GET',    '/clientes/{id}/veiculos', [$veiculoController, 'listarPorCliente']);
+// =======================================================================
+// 4. Rotas de Veículos
+// =======================================================================
+$router->add('GET',    '/veiculos',               [$veiculoController, 'listar'],           [$equipeInterna]);
+$router->add('GET',    '/veiculos/{id}',          [$veiculoController, 'exibir'],           [$equipeInterna]);
+$router->add('POST',   '/veiculos',               [$veiculoController, 'criar'],            [$apenasAtendente]);
+$router->add('PUT',    '/veiculos/{id}',          [$veiculoController, 'atualizar'],        [$apenasAtendente]);
+$router->add('DELETE', '/veiculos/{id}',          [$veiculoController, 'remover'],          [$apenasAtendente]);
+$router->add('GET',    '/clientes/{id}/veiculos', [$veiculoController, 'listarPorCliente'], [$equipeInterna]);
 
-// Serviços
-$router->add('GET',    '/servicos',        [$servicoController, 'listar']);
-$router->add('GET',    '/servicos/buscar', [$servicoController, 'buscarPorNome']);
-$router->add('GET',    '/servicos/{id}',   [$servicoController, 'exibir']);
-$router->add('POST',   '/servicos',        [$servicoController, 'criar']);
-$router->add('PUT',    '/servicos/{id}',   [$servicoController, 'atualizar']);
-$router->add('DELETE', '/servicos/{id}',   [$servicoController, 'remover']);
+// =======================================================================
+// 5. Rotas de Serviços
+// =======================================================================
+$router->add('GET',    '/servicos',        [$servicoController, 'listar'],        [$equipeInterna]);
+$router->add('GET',    '/servicos/buscar', [$servicoController, 'buscarPorNome'], [$equipeInterna]);
+$router->add('GET',    '/servicos/{id}',   [$servicoController, 'exibir'],        [$equipeInterna]);
+$router->add('POST',   '/servicos',        [$servicoController, 'criar'],         [$apenasAtendente]);
+$router->add('PUT',    '/servicos/{id}',   [$servicoController, 'atualizar'],     [$apenasAtendente]);
+$router->add('DELETE', '/servicos/{id}',   [$servicoController, 'remover'],       [$apenasAtendente]);
 
-// Peças
-$router->add('GET',    '/pecas',       [$pecaController, 'listar']);
-$router->add('GET',    '/pecas/{id}',  [$pecaController, 'exibir']);
-$router->add('POST',   '/pecas',       [$pecaController, 'criar']);
-$router->add('PUT',    '/pecas/{id}',  [$pecaController, 'atualizar']);
-$router->add('DELETE', '/pecas/{id}',  [$pecaController, 'remover']);
+// =======================================================================
+// 6. Rotas de Peças (Atendente e Mecânico)
+// =======================================================================
+$router->add('GET',    '/pecas',       [$pecaController, 'listar'],    [$equipeInterna]);
+$router->add('GET',    '/pecas/{id}',  [$pecaController, 'exibir'],    [$equipeInterna]);
+$router->add('POST',   '/pecas',       [$pecaController, 'criar'],     [$equipeInterna]);
+$router->add('PUT',    '/pecas/{id}',  [$pecaController, 'atualizar'], [$equipeInterna]);
+$router->add('DELETE', '/pecas/{id}',  [$pecaController, 'remover'],   [$apenasAtendente]);
 
 // -----------------------------------------------------------------------
 // Dispatch
