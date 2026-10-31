@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Domain\Repositories;
+namespace Repositories\OrdemServico;
 
 use Domain\OrdemServico\HistoricoStatusOS;
 use Domain\OrdemServico\OrdemServico;

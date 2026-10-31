@@ -10,7 +10,8 @@ use Domain\OrdemServico\ItemPecaOS;
 use Domain\OrdemServico\ItemServicoOS;
 use Domain\OrdemServico\OrdemServico;
 use Domain\OrdemServico\StatusOrdemServico;
-use Domain\Repositories\OrdemServicoRepositoryInterface;
+use Repositories\OrdemServico\OrdemServicoRepositoryInterface;
+use Repositories\Peca\PecaRepositoryInterface;
 use Repositories\Servico\ServicoRepositoryInterface;
 
 class AtualizarOrdemServicoUseCase
@@ -18,6 +19,7 @@ class AtualizarOrdemServicoUseCase
     public function __construct(
         private OrdemServicoRepositoryInterface $ordemServicoRepository,
         private ServicoRepositoryInterface      $servicoRepository,
+        private PecaRepositoryInterface         $pecaRepository,
     ) {}
 
     /**
@@ -131,24 +133,23 @@ class AtualizarOrdemServicoUseCase
 
     private function processarItemPeca(array $item, array $idsExistentes): ItemPecaOS
     {
-        $descricao     = $item['descricao'] ?? null;
-        $quantidade    = isset($item['quantidade']) ? (float) $item['quantidade'] : 1.0;
-        $precoUnitario = isset($item['preco_unitario']) ? (float) $item['preco_unitario'] : null;
-        $pecaId        = !empty($item['peca_id']) ? (int) $item['peca_id'] : null;
-
-        if (!$descricao) {
-            throw new ValidacaoException('A descrição da peça/insumo é obrigatória.');
+        $pecaId = !empty($item['peca_id']) ? (int) $item['peca_id'] : null;
+        if ($pecaId === null) {
+            throw new ValidacaoException('O ID de uma peça cadastrada é obrigatório para incluí-la na OS.');
         }
 
-        if ($precoUnitario === null) {
-            throw new ValidacaoException(sprintf('O preço unitário da peça/insumo "%s" é obrigatório.', $descricao));
+        $pecaDb = $this->pecaRepository->buscarPorId($pecaId);
+        if ($pecaDb === null) {
+            throw new ValidacaoException(sprintf('Peça com ID %d não foi encontrada.', $pecaId));
         }
+
+        $quantidade = isset($item['quantidade']) ? (float) $item['quantidade'] : 1.0;
 
         $itemPeca = ItemPecaOS::criar(
             pecaId: $pecaId,
-            descricao: $descricao,
+            descricao: $pecaDb->getNome(),
             quantidade: $quantidade,
-            precoUnitario: $precoUnitario,
+            precoUnitario: $pecaDb->getValorUnitario(),
         );
 
         $this->definirIdDoItemExistente($itemPeca, $item, $idsExistentes);

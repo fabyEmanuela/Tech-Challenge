@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Application\OrdemServico;
 
 use Domain\OrdemServico\OrdemServico;
-use Domain\Repositories\OrdemServicoRepositoryInterface;
+use Repositories\OrdemServico\OrdemServicoRepositoryInterface;
 
 class ListarOrdensServicoUseCase
 {

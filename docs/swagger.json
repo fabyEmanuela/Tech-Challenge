@@ -2568,22 +2568,13 @@
                                             "properties": {
                                                 "peca_id": {
                                                     "type": "integer",
-                                                    "example": null,
-                                                    "nullable": true
-                                                },
-                                                "descricao": {
-                                                    "type": "string",
-                                                    "example": "Óleo Sintético 5W30 1L"
+                                                    "description": "ID obrigatório de uma peça cadastrada",
+                                                    "example": 1
                                                 },
                                                 "quantidade": {
                                                     "type": "number",
                                                     "format": "float",
                                                     "example": 4
-                                                },
-                                                "preco_unitario": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 45
                                                 }
                                             },
                                             "type": "object"
@@ -2643,7 +2634,7 @@
                     "Ordens de Serviço"
                 ],
                 "summary": "Atualiza uma Ordem de Serviço existente",
-                "description": "Permite atualizar diagnóstico, relato de problema, serviços e peças. O orçamento é recalculado automaticamente.",
+                "description": "Permite atualizar diagnóstico, relato de problema, serviços e peças. Para peças, itens existentes exigem seu ID na OS e novas inclusões exigem um peca_id cadastrado. O orçamento é recalculado automaticamente.",
                 "operationId": "6a06db1d292fdb7eed20216a086d0da8",
                 "parameters": [
                     {
@@ -2683,6 +2674,23 @@
                                     "pecas": {
                                         "type": "array",
                                         "items": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "description": "ID do item já associado à OS, obrigatório para editá-lo",
+                                                    "nullable": true
+                                                },
+                                                "peca_id": {
+                                                    "type": "integer",
+                                                    "description": "ID obrigatório de uma peça cadastrada",
+                                                    "example": 1
+                                                },
+                                                "quantidade": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1
+                                                }
+                                            },
                                             "type": "object"
                                         }
                                     }

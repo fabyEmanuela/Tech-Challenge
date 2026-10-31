@@ -4,20 +4,21 @@ declare(strict_types=1);
 
 namespace Application\OrdemServico;
 
-use Domain\Entities\Veiculo;
 use Domain\Exceptions\ValidacaoException;
 use Domain\OrdemServico\ItemPecaOS;
 use Domain\OrdemServico\ItemServicoOS;
 use Domain\OrdemServico\OrdemServico;
 use Domain\OrdemServico\StatusOrdemServico;
-use Domain\Repositories\OrdemServicoRepositoryInterface;
-use Domain\Repositories\VeiculoRepositoryInterface;
+use Repositories\OrdemServico\OrdemServicoRepositoryInterface;
 use Domain\Shared\Validator;
 use Domain\Usuario\TipoUsuario;
 use Domain\Usuario\Usuario;
-use Domain\ValueObjects\Placa;
+use Domain\Veiculo\Placa;
+use Domain\Veiculo\Veiculo;
+use Repositories\Peca\PecaRepositoryInterface;
 use Repositories\Servico\ServicoRepositoryInterface;
 use Repositories\Usuario\UsuarioRepositoryInterface;
+use Repositories\Veiculo\VeiculoRepositoryInterface;
 
 class CriarOrdemServicoUseCase
 {
@@ -26,6 +27,7 @@ class CriarOrdemServicoUseCase
         private UsuarioRepositoryInterface      $usuarioRepository,
         private VeiculoRepositoryInterface      $veiculoRepository,
         private ServicoRepositoryInterface      $servicoRepository,
+        private PecaRepositoryInterface         $pecaRepository,
     ) {}
 
     /**
@@ -74,7 +76,7 @@ class CriarOrdemServicoUseCase
         $os = OrdemServico::criar(
             numeroOs: $numeroOs,
             clienteId: (int) $cliente->getId(),
-            veiculoId: (int) $veiculo->id(),
+            veiculoId: (int) $veiculo->getId(),
             descricaoProblema: $dados['descricao_problema'] ?? null,
             diagnostico: $dados['diagnostico'] ?? null,
         );
@@ -199,13 +201,16 @@ class CriarOrdemServicoUseCase
             );
         }
 
-        $novoVeiculo = Veiculo::criar(
+        $novoVeiculo = new Veiculo(
+            id: null,
             clienteId: $clienteId,
             placa: $placa,
             marca: $marca,
             modelo: $modelo,
             ano: $ano,
-            cor: $cor
+            cor: $cor,
+            criadoEm: null,
+            atualizadoEm: null,
         );
 
         return $this->veiculoRepository->salvar($novoVeiculo);
@@ -213,7 +218,7 @@ class CriarOrdemServicoUseCase
 
     private function validarVeiculoDoCliente(Veiculo $veiculo, int $clienteId): void
     {
-        if ($veiculo->clienteId() !== $clienteId) {
+        if ($veiculo->getClienteId() !== $clienteId) {
             throw new ValidacaoException('O veículo informado não pertence ao cliente da ordem de serviço.');
         }
     }
@@ -244,24 +249,23 @@ class CriarOrdemServicoUseCase
 
     private function processarItemPeca(array $item): ItemPecaOS
     {
-        $descricao     = $item['descricao'] ?? null;
-        $quantidade    = isset($item['quantidade']) ? (float) $item['quantidade'] : 1.0;
-        $precoUnitario = isset($item['preco_unitario']) ? (float) $item['preco_unitario'] : null;
         $pecaId = !empty($item['peca_id']) ? (int) $item['peca_id'] : null;
-
-        if (!$descricao) {
-            throw new ValidacaoException('A descrição da peça/insumo é obrigatória.');
+        if ($pecaId === null) {
+            throw new ValidacaoException('O ID de uma peça cadastrada é obrigatório para incluí-la na OS.');
         }
 
-        if ($precoUnitario === null) {
-            throw new ValidacaoException(sprintf('O preço unitário da peça/insumo "%s" é obrigatório.', $descricao));
+        $pecaDb = $this->pecaRepository->buscarPorId($pecaId);
+        if ($pecaDb === null) {
+            throw new ValidacaoException(sprintf('Peça com ID %d não foi encontrada.', $pecaId));
         }
+
+        $quantidade = isset($item['quantidade']) ? (float) $item['quantidade'] : 1.0;
 
         return ItemPecaOS::criar(
             pecaId: $pecaId,
-            descricao: $descricao,
+            descricao: $pecaDb->getNome(),
             quantidade: $quantidade,
-            precoUnitario: $precoUnitario,
+            precoUnitario: $pecaDb->getValorUnitario(),
         );
     }
 }

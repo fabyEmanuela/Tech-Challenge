@@ -8,7 +8,7 @@ use Domain\Exceptions\ValidacaoException;
 use Domain\OrdemServico\HistoricoStatusOS;
 use Domain\OrdemServico\OrdemServico;
 use Domain\OrdemServico\StatusOrdemServico;
-use Domain\Repositories\OrdemServicoRepositoryInterface;
+use Repositories\OrdemServico\OrdemServicoRepositoryInterface;
 
 class AlterarStatusOrdemServicoUseCase
 {

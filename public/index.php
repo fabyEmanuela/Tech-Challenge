@@ -54,7 +54,7 @@ use Http\Controllers\UsuarioController;
 use Http\Controllers\VeiculoController;
 use Http\Router;
 use Infrastructure\Database\Connection;
-use Infrastructure\Repositories\OrdemServicoPdoRepository;
+use Repositories\OrdemServico\OrdemServicoPdoRepository;
 use Repositories\Peca\PecaPdoRepository;
 use Repositories\Servico\ServicoPdoRepository;
 use Repositories\Usuario\UsuarioPdoRepository;
@@ -96,10 +96,10 @@ $atualizarServico     = new AtualizarServicoUseCase($servicoRepository);
 $deletarServico       = new DeletarServicoUseCase($servicoRepository);
 
 // Use Cases - Ordens de Serviço
-$criarOrdemServico         = new CriarOrdemServicoUseCase($ordemServicoRepository, $usuarioRepository, $veiculoRepository, $servicoRepository);
+$criarOrdemServico         = new CriarOrdemServicoUseCase($ordemServicoRepository, $usuarioRepository, $veiculoRepository, $servicoRepository, $pecaRepository);
 $listarOrdensServico       = new ListarOrdensServicoUseCase($ordemServicoRepository);
 $buscarOrdemServico        = new BuscarOrdemServicoPorIdUseCase($ordemServicoRepository);
-$atualizarOrdemServico     = new AtualizarOrdemServicoUseCase($ordemServicoRepository, $servicoRepository);
+$atualizarOrdemServico     = new AtualizarOrdemServicoUseCase($ordemServicoRepository, $servicoRepository, $pecaRepository);
 $deletarOrdemServico       = new DeletarOrdemServicoUseCase($ordemServicoRepository);
 $enviarOrcamento           = new EnviarOrcamentoUseCase($ordemServicoRepository);
 $aprovarOrcamento          = new AprovarOrcamentoUseCase($ordemServicoRepository);

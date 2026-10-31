@@ -7,7 +7,7 @@ namespace Application\OrdemServico;
 use Domain\Exceptions\ValidacaoException;
 use Domain\OrdemServico\HistoricoStatusOS;
 use Domain\OrdemServico\OrdemServico;
-use Domain\Repositories\OrdemServicoRepositoryInterface;
+use Repositories\OrdemServico\OrdemServicoRepositoryInterface;
 
 class AprovarOrcamentoUseCase
 {

@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Infrastructure\Repositories;
+namespace Repositories\OrdemServico;
 
 use Domain\OrdemServico\HistoricoStatusOS;
 use Domain\OrdemServico\ItemPecaOS;
 use Domain\OrdemServico\ItemServicoOS;
 use Domain\OrdemServico\OrdemServico;
 use Domain\OrdemServico\StatusOrdemServico;
-use Domain\Repositories\OrdemServicoRepositoryInterface;
 use Domain\Shared\Validator;
 use PDO;
 use Throwable;

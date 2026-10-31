@@ -1263,7 +1263,7 @@
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }],
-            "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"cliente_id\": {{usuario_id}},\n  \"veiculo_id\": {{veiculo_id}},\n  \"descricao_problema\": \"Ruído ao frear\",\n  \"diagnostico\": \"Pastilhas de freio desgastadas\",\n  \"servicos\": [\n    { \"servico_id\": {{servico_id}}, \"quantidade\": 1 }\n  ],\n  \"pecas\": [\n    { \"descricao\": \"Jogo de pastilhas de freio\", \"quantidade\": 1, \"preco_unitario\": 180.00 }\n  ]\n}" },
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"cliente_id\": {{usuario_id}},\n  \"veiculo_id\": {{veiculo_id}},\n  \"descricao_problema\": \"Ruído ao frear\",\n  \"diagnostico\": \"Pastilhas de freio desgastadas\",\n  \"servicos\": [\n    { \"servico_id\": {{servico_id}}, \"quantidade\": 1 }\n  ],\n  \"pecas\": [\n    { \"peca_id\": {{peca_id}}, \"quantidade\": 1 }\n  ]\n}" },
             "url": { "raw": "{{base_url}}/ordens-servico", "host": ["{{base_url}}"], "path": ["ordens-servico"] }
           },
           "response": []
@@ -1274,11 +1274,11 @@
           "response": []
         },
         {
-          "name": "Atualizar ordem de serviço",
+          "name": "Atualizar ordem de serviço (editar e incluir peças cadastradas)",
           "request": {
             "method": "PUT",
             "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }],
-            "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"diagnostico\": \"Pastilhas e discos de freio desgastados\",\n  \"servicos\": [\n    { \"id\": {{item_servico_os_id}}, \"servico_id\": {{servico_id}}, \"quantidade\": 1 }\n  ],\n  \"pecas\": [\n    { \"id\": {{item_peca_os_id}}, \"descricao\": \"Jogo de pastilhas de freio\", \"quantidade\": 1, \"preco_unitario\": 180.00 }\n  ]\n}" },
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"diagnostico\": \"Pastilhas e discos de freio desgastados\",\n  \"servicos\": [\n    { \"id\": {{item_servico_os_id}}, \"servico_id\": {{servico_id}}, \"quantidade\": 1 }\n  ],\n  \"pecas\": [\n    { \"id\": {{item_peca_os_id}}, \"peca_id\": {{peca_id}}, \"quantidade\": 1 },\n    { \"peca_id\": {{peca_id}}, \"quantidade\": 2 }\n  ]\n}" },
             "url": { "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}", "host": ["{{base_url}}"], "path": ["ordens-servico", "{{ordem_servico_id}}"] }
           },
           "response": []

@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS ordem_servico_servicos (
 CREATE TABLE IF NOT EXISTS ordem_servico_pecas (
     id                   INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     ordem_servico_id     INT UNSIGNED    NOT NULL,
-    peca_id              INT UNSIGNED    NULL COMMENT 'Referência futura para tabela pecas',
+    peca_id              INT UNSIGNED    NULL COMMENT 'FK opcional para tabela de pecas',
     descricao            VARCHAR(150)    NOT NULL,
     quantidade           DECIMAL(10, 2)  NOT NULL DEFAULT 1.00,
     preco_unitario       DECIMAL(10, 2)  NOT NULL DEFAULT 0.00,
@@ -98,10 +98,16 @@ CREATE TABLE IF NOT EXISTS ordem_servico_pecas (
     criado_em            DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     INDEX idx_os_pecas_os (ordem_servico_id),
+    INDEX idx_os_pecas_peca (peca_id),
     CONSTRAINT fk_os_pecas_os
         FOREIGN KEY (ordem_servico_id)
         REFERENCES ordens_servico (id)
         ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_os_pecas_peca
+        FOREIGN KEY (peca_id)
+        REFERENCES pecas (id)
+        ON DELETE RESTRICT
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

@@ -39,7 +39,7 @@ class OrdemServicoController
     #[OA\Post(
         path: "/ordens-servico",
         summary: "Cria uma nova Ordem de Serviço (OS)",
-        description: "Permite abrir uma OS identificando o cliente por ID ou CPF, cadastrando o veículo (placa, marca, modelo, ano), incluindo serviços solicitados e peças/insumos necessários. O orçamento é calculado automaticamente e pode ser enviado de imediato.",
+        description: "Permite abrir uma OS identificando o cliente por ID ou CPF, cadastrando o veículo e incluindo serviços e peças previamente cadastrados. O orçamento é calculado automaticamente e pode ser enviado de imediato.",
         tags: ["Ordens de Serviço"],
         requestBody: new OA\RequestBody(
             required: true,
@@ -75,10 +75,8 @@ class OrdemServicoController
                         type: "array",
                         items: new OA\Items(
                             properties: [
-                                new OA\Property(property: "peca_id", type: "integer", nullable: true, example: null),
-                                new OA\Property(property: "descricao", type: "string", example: "Óleo Sintético 5W30 1L"),
-                                new OA\Property(property: "quantidade", type: "number", format: "float", example: 4.0),
-                                new OA\Property(property: "preco_unitario", type: "number", format: "float", example: 45.00)
+                                new OA\Property(property: "peca_id", type: "integer", example: 1, description: "ID obrigatório de uma peça cadastrada"),
+                                new OA\Property(property: "quantidade", type: "number", format: "float", example: 4.0)
                             ]
                         )
                     )
@@ -186,7 +184,7 @@ class OrdemServicoController
     #[OA\Put(
         path: "/ordens-servico/{id}",
         summary: "Atualiza uma Ordem de Serviço existente",
-        description: "Permite atualizar diagnóstico, relato de problema, serviços e peças. O orçamento é recalculado automaticamente.",
+        description: "Permite atualizar diagnóstico, relato de problema, serviços e peças. Para peças, itens existentes exigem seu ID na OS e novas inclusões exigem um peca_id cadastrado. O orçamento é recalculado automaticamente.",
         tags: ["Ordens de Serviço"],
         parameters: [
             new OA\Parameter(name: "id", in: "path", required: true, description: "ID da Ordem de Serviço", schema: new OA\Schema(type: "integer"))
@@ -199,7 +197,15 @@ class OrdemServicoController
                     new OA\Property(property: "diagnostico", type: "string", nullable: true),
                     new OA\Property(property: "enviar_orcamento", type: "boolean", nullable: true),
                     new OA\Property(property: "servicos", type: "array", items: new OA\Items(type: "object")),
-                    new OA\Property(property: "pecas", type: "array", items: new OA\Items(type: "object"))
+                    new OA\Property(
+                        property: "pecas",
+                        type: "array",
+                        items: new OA\Items(properties: [
+                            new OA\Property(property: "id", type: "integer", nullable: true, description: "ID do item já associado à OS, obrigatório para editá-lo"),
+                            new OA\Property(property: "peca_id", type: "integer", example: 1, description: "ID obrigatório de uma peça cadastrada"),
+                            new OA\Property(property: "quantidade", type: "number", format: "float", example: 1.0)
+                        ])
+                    )
                 ]
             )
         ),

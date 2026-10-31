@@ -6,7 +6,7 @@ namespace Application\OrdemServico;
 
 use Domain\Exceptions\ValidacaoException;
 use Domain\OrdemServico\StatusOrdemServico;
-use Domain\Repositories\OrdemServicoRepositoryInterface;
+use Repositories\OrdemServico\OrdemServicoRepositoryInterface;
 
 class DeletarOrdemServicoUseCase
 {
