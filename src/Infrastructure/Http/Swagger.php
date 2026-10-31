@@ -13,6 +13,17 @@ use OpenApi\Attributes as OA;
     url: "http://localhost:8080",
     description: "Servidor Local (Docker)"
 )]
+#[OA\SecurityScheme(
+    securityScheme: "bearerAuth",
+    type: "http",
+    scheme: "bearer",
+    bearerFormat: "JWT",
+    description: "Insira o token JWT gerado na rota /login para autenticar as requisições protegidas."
+)]
+#[OA\Tag(
+    name: "Autenticação",
+    description: "Endpoints para login e emissão de tokens JWT de acesso"
+)]
 #[OA\Tag(
     name: "Usuários",
     description: "Gerenciamento de clientes e usuários do sistema"

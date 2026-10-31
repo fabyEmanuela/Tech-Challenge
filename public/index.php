@@ -38,11 +38,13 @@ use Application\Veiculo\BuscarVeiculoPorIdUseCase;
 use Application\Veiculo\CriarVeiculoUseCase;
 use Application\Veiculo\DeletarVeiculoUseCase;
 use Application\Veiculo\ListarVeiculosUseCase;
+use Http\Controllers\AuthController;
 use Http\Controllers\PecaController;
 use Http\Controllers\ServicoController;
 use Http\Controllers\UsuarioController;
 use Http\Controllers\VeiculoController;
 use Http\Router;
+use Infrastructure\Auth\JwtService;
 use Infrastructure\Database\Connection;
 use Repositories\Peca\PecaPdoRepository;
 use Repositories\Servico\ServicoPdoRepository;
@@ -60,6 +62,10 @@ $usuarioRepository = new UsuarioPdoRepository($pdo);
 $servicoRepository = new ServicoPdoRepository($pdo);
 $veiculoRepository = new VeiculoPdoRepository($pdo);
 $pecaRepository    = new PecaPdoRepository($pdo);
+
+// Autenticação & JWT
+$jwtSecret = getenv('JWT_SECRET') ?: 'sua-chave-secreta-padrao';
+$jwtService = new JwtService($jwtSecret);
 
 // Use Cases - Usuários
 $criarUsuario     = new CriarUsuarioUseCase($usuarioRepository);
@@ -91,6 +97,11 @@ $atualizarPeca = new AtualizarPecaUseCase($pecaRepository);
 $deletarPeca   = new DeletarPecaUseCase($pecaRepository);
 
 // Controllers
+$authController = new AuthController(
+    $usuarioRepository,
+    $jwtService,
+);
+
 $usuarioController = new UsuarioController(
     $criarUsuario,
     $listarUsuarios,
@@ -129,6 +140,9 @@ $pecaController = new PecaController(
 // -----------------------------------------------------------------------
 
 $router = new Router();
+
+// Autenticação
+$router->add('POST', '/login', [$authController, 'login']);
 
 // Usuários
 $router->add('GET',    '/usuarios',       [$usuarioController, 'listar']);
