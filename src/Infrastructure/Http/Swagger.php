@@ -26,6 +26,10 @@ use OpenApi\Attributes as OA;
     description: "Gerenciamento do catálogo de serviços da oficina mecânica"
 )]
 #[OA\Tag(
+    name: "Peças",
+    description: "Gerenciamento de peças, insumos e controle de estoque"
+)]
+#[OA\Tag(
     name: "Status",
     description: "Verificação de conectividade e saúde da API"
 )]
