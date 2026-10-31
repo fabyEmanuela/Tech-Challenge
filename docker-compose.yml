@@ -13,6 +13,7 @@ services:
         condition: service_healthy
     environment:
       XDEBUG_MODE: debug,develop
+      JWT_SECRET: ${JWT_SECRET} 
 
   db:
     image: mysql:8.4
