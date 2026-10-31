@@ -85,3 +85,12 @@ CREATE TABLE IF NOT EXISTS pecas (
     PRIMARY KEY (id),
     INDEX idx_pecas_ativo (ativo)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------------------
+-- Carga Inicial (Seed de Usuários Padrão para Autenticação e Avaliação)
+-- Senha de acesso para ambos: 123456
+-- -----------------------------------------------------------------------
+INSERT INTO usuarios (nome, email, telefone, cpf, tipo_usuario, senha_hash, ativo) VALUES
+('Administrador Oficina', 'admin@oficina.com', '(11) 98765-4321', '111.444.777-35', 'atendente', '$2y$10$.gp1cxGzaoCRjqEYLiGNjO09IFR4W3IuPs7i8KdnW0DGBgb9daTFK', 1),
+('Mecânico Oficina', 'mecanico@oficina.com', '(11) 98765-4322', '222.555.888-46', 'mecanico', '$2y$10$.gp1cxGzaoCRjqEYLiGNjO09IFR4W3IuPs7i8KdnW0DGBgb9daTFK', 1)
+ON DUPLICATE KEY UPDATE nome = VALUES(nome);
