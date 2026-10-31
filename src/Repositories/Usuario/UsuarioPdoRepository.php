@@ -4,6 +4,7 @@ namespace Repositories\Usuario;
 
 use Domain\Usuario\TipoUsuario;
 use Domain\Usuario\Usuario;
+use Domain\Shared\Validator;
 use PDO;
 
 class UsuarioPdoRepository implements UsuarioRepositoryInterface
@@ -87,6 +88,16 @@ class UsuarioPdoRepository implements UsuarioRepositoryInterface
         return $linha ? $this->montarUsuario($linha) : null;
     }
 
+    public function buscarPorCpf(string $cpf): ?Usuario
+    {
+        $cpfFormatado = Validator::cpf($cpf);
+        $stmt = $this->pdo->prepare('SELECT * FROM usuarios WHERE cpf = :cpf LIMIT 1');
+        $stmt->execute([':cpf' => $cpfFormatado]);
+        $linha = $stmt->fetch();
+
+        return $linha ? $this->montarUsuario($linha) : null;
+    }
+
     public function emailJaCadastrado(string $email, ?int $excluirId = null): bool
     {
         $sql    = 'SELECT COUNT(*) FROM usuarios WHERE email = :email';
@@ -104,8 +115,9 @@ class UsuarioPdoRepository implements UsuarioRepositoryInterface
 
     public function cpfJaCadastrado(string $cpf, ?int $excluirId = null): bool
     {
+        $cpfFormatado = Validator::cpf($cpf);
         $sql    = 'SELECT COUNT(*) FROM usuarios WHERE cpf = :cpf';
-        $params = [':cpf' => $cpf];
+        $params = [':cpf' => $cpfFormatado];
 
         if ($excluirId !== null) {
             $sql .= ' AND id != :id';
