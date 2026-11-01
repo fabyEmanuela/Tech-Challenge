@@ -47,8 +47,8 @@ class AcompanharOrdemServicoUseCase
      */
     public function executarPorFiltros(array $filtros): array
     {
-        if (empty($filtros['cpf']) && empty($filtros['placa']) && empty($filtros['numero_os']) && empty($filtros['id'])) {
-            throw new ValidacaoException('Para consultar o progresso, informe ao menos o CPF, placa do veículo ou número da OS.');
+        if (empty($filtros['cpf']) && empty($filtros['cnpj']) && empty($filtros['placa']) && empty($filtros['numero_os']) && empty($filtros['id'])) {
+            throw new ValidacaoException('Para consultar o progresso, informe ao menos o CPF, CNPJ, placa do veículo ou número da OS.');
         }
 
         if (!empty($filtros['numero_os'])) {

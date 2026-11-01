@@ -16,7 +16,7 @@ class ListarUsuariosUseCase
     /**
      * @return Usuario[]
      */
-    public function executar(?string $tipoFiltro = null, ?string $nome = null, ?string $cpf = null): array
+    public function executar(?string $tipoFiltro = null, ?string $nome = null, ?string $cpf = null, ?string $cnpj = null): array
     {
         $tipo = null;
 
@@ -36,6 +36,8 @@ class ListarUsuariosUseCase
             $cpf = null;
         }
 
-        return $this->repository->listarTodos($tipo, $nome, $cpf);
+        $cnpj = $cnpj === null || trim($cnpj) === '' ? null : Validator::cnpj($cnpj);
+        
+        return $this->repository->listarTodos($tipo, $nome, $cpf, $cnpj);
     }
 }

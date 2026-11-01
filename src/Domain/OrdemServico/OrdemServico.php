@@ -505,6 +505,7 @@ final class OrdemServico
             'cliente'             => $this->dadosCliente ? [
                 'nome' => $this->dadosCliente['nome'] ?? null,
                 'cpf'  => $this->dadosCliente['cpf'] ?? null,
+                'cnpj' => $this->dadosCliente['cnpj'] ?? null,
             ] : null,
             'descricao_problema'  => $this->descricaoProblema,
             'diagnostico'         => $this->diagnostico,

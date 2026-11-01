@@ -39,7 +39,7 @@ class OrdemServicoController
     #[OA\Post(
         path: "/ordens-servico",
         summary: "Cria uma nova Ordem de Serviço (OS)",
-        description: "Permite abrir uma OS identificando o cliente por ID ou CPF, cadastrando o veículo e incluindo serviços e peças previamente cadastrados. O orçamento é calculado automaticamente e pode ser enviado de imediato.",
+        description: "Permite abrir uma OS identificando o cliente por ID, CPF ou CNPJ, cadastrando o veículo e incluindo serviços e peças previamente cadastrados. O orçamento é calculado automaticamente e pode ser enviado de imediato.",
         tags: ["Ordens de Serviço"],
         requestBody: new OA\RequestBody(
             required: true,
@@ -47,6 +47,7 @@ class OrdemServicoController
                 required: ["descricao_problema"],
                 properties: [
                     new OA\Property(property: "cliente_id", type: "integer", nullable: true, example: 1),
+                    new OA\Property(property: "cliente_cnpj", type: "string", nullable: true, example: "11.222.333/0001-81"),
                     new OA\Property(property: "cliente_cpf", type: "string", nullable: true, example: "529.982.247-25"),
                     new OA\Property(property: "cliente_nome", type: "string", nullable: true, example: "João da Silva"),
                     new OA\Property(property: "cliente_email", type: "string", nullable: true, example: "joao.silva@email.com"),
@@ -120,6 +121,7 @@ class OrdemServicoController
             new OA\Parameter(name: "status", in: "query", required: false, description: "Filtrar por status (recebida, em_diagnostico, aguardando_aprovacao, em_execucao, finalizada, entregue)", schema: new OA\Schema(type: "string")),
             new OA\Parameter(name: "cliente_id", in: "query", required: false, description: "Filtrar por ID do cliente", schema: new OA\Schema(type: "integer")),
             new OA\Parameter(name: "veiculo_id", in: "query", required: false, description: "Filtrar por ID do veículo", schema: new OA\Schema(type: "integer")),
+            new OA\Parameter(name: "cnpj", in: "query", required: false, description: "CNPJ do cliente", schema: new OA\Schema(type: "string")),
             new OA\Parameter(name: "cpf", in: "query", required: false, description: "Filtrar por CPF do cliente", schema: new OA\Schema(type: "string")),
             new OA\Parameter(name: "placa", in: "query", required: false, description: "Filtrar por Placa do veículo", schema: new OA\Schema(type: "string"))
         ],
@@ -136,6 +138,7 @@ class OrdemServicoController
                 'cliente_id' => !empty($_GET['cliente_id']) ? (int) $_GET['cliente_id'] : null,
                 'veiculo_id' => !empty($_GET['veiculo_id']) ? (int) $_GET['veiculo_id'] : null,
                 'cpf'        => $_GET['cpf'] ?? null,
+                'cnpj'      => $_GET['cnpj'] ?? null,
                 'placa'      => $_GET['placa'] ?? null,
             ];
 
@@ -261,6 +264,8 @@ class OrdemServicoController
             $id = (int) ($params['id'] ?? 0);
             $this->deletarUseCase->executar($id);
             JsonResponse::send(['mensagem' => 'Ordem de serviço removida com sucesso.'], 200);
+        } catch (\InvalidArgumentException $e) {
+            JsonResponse::send(['erro' => $e->getMessage()], 422);
         } catch (ValidacaoException $e) {
             $statusHttp = str_contains($e->getMessage(), 'não foi encontrada') ? 404 : 400;
             JsonResponse::send(['erro' => $e->getMessage()], $statusHttp);
@@ -308,6 +313,8 @@ class OrdemServicoController
                 'mensagem' => 'Orçamento gerado e enviado ao cliente para aprovação com sucesso.',
                 'ordem_servico' => $os->toArray()
             ], 200);
+        } catch (\InvalidArgumentException $e) {
+            JsonResponse::send(['erro' => $e->getMessage()], 422);
         } catch (ValidacaoException $e) {
             $statusHttp = str_contains($e->getMessage(), 'não foi encontrada') ? 404 : 400;
             JsonResponse::send(['erro' => $e->getMessage()], $statusHttp);
@@ -355,6 +362,8 @@ class OrdemServicoController
                 'mensagem' => 'Orçamento aprovado com sucesso. Status alterado para Em execução.',
                 'ordem_servico' => $os->toArray()
             ], 200);
+        } catch (\InvalidArgumentException $e) {
+            JsonResponse::send(['erro' => $e->getMessage()], 422);
         } catch (ValidacaoException $e) {
             $statusHttp = str_contains($e->getMessage(), 'não foi encontrada') ? 404 : 400;
             JsonResponse::send(['erro' => $e->getMessage()], $statusHttp);
@@ -410,6 +419,8 @@ class OrdemServicoController
                 'mensagem' => sprintf('Status da OS atualizado para "%s" com sucesso.', $os->status()->rotulo()),
                 'ordem_servico' => $os->toArray()
             ], 200);
+        } catch (\InvalidArgumentException $e) {
+            JsonResponse::send(['erro' => $e->getMessage()], 422);
         } catch (ValidacaoException $e) {
             $statusHttp = str_contains($e->getMessage(), 'não foi encontrada') ? 404 : 400;
             JsonResponse::send(['erro' => $e->getMessage()], $statusHttp);
@@ -454,9 +465,10 @@ class OrdemServicoController
     #[OA\Get(
         path: "/acompanhamento-os",
         summary: "Consulta pública/cliente de acompanhamento de OS",
-        description: "Permite ao cliente consultar o progresso de sua OS informando CPF, Placa do veículo ou Número da OS.",
+        description: "Permite ao cliente consultar o progresso de sua OS informando CPF, CNPJ, Placa do veículo ou Número da OS.",
         tags: ["Ordens de Serviço"],
         parameters: [
+            new OA\Parameter(name: "cnpj", in: "query", required: false, description: "CNPJ do cliente", schema: new OA\Schema(type: "string")),
             new OA\Parameter(name: "cpf", in: "query", required: false, description: "CPF do cliente", schema: new OA\Schema(type: "string")),
             new OA\Parameter(name: "placa", in: "query", required: false, description: "Placa do veículo", schema: new OA\Schema(type: "string")),
             new OA\Parameter(name: "numero_os", in: "query", required: false, description: "Número da OS (ex: OS-20261028-0001)", schema: new OA\Schema(type: "string")),
@@ -474,6 +486,7 @@ class OrdemServicoController
         try {
             $filtros = [
                 'cpf'       => $_GET['cpf'] ?? null,
+                'cnpj'      => $_GET['cnpj'] ?? null,
                 'placa'     => $_GET['placa'] ?? null,
                 'numero_os' => $_GET['numero_os'] ?? null,
                 'id'        => !empty($_GET['id']) ? (int) $_GET['id'] : null,
@@ -483,6 +496,8 @@ class OrdemServicoController
             $dados = $this->acompanharUseCase->executarPorFiltros($filtros);
 
             JsonResponse::send($dados, 200);
+        } catch (\InvalidArgumentException $e) {
+            JsonResponse::send(['erro' => $e->getMessage()], 422);
         } catch (ValidacaoException $e) {
             $statusHttp = str_contains($e->getMessage(), 'não localizada') || str_contains($e->getMessage(), 'Nenhuma ordem') ? 404 : 400;
             JsonResponse::send(['erro' => $e->getMessage()], $statusHttp);

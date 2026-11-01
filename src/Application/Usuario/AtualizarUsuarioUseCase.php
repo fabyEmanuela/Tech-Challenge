@@ -21,6 +21,7 @@ class AtualizarUsuarioUseCase
      *   email?: string,
      *   telefone?: string|null,
      *   cpf?: string|null,
+     *   cnpj?: string|null,
      *   tipo_usuario?: string,
      *   senha?: string|null,
      *   ativo?: bool
@@ -34,7 +35,7 @@ class AtualizarUsuarioUseCase
             throw new RuntimeException("Usuário com ID $id não encontrado.");
         }
 
-        $dados = $this->validarESanitizar($dados, $id);
+        $dados = $this->validarESanitizar($dados, $id, $usuario);
         $this->aplicarAlteracoes($usuario, $dados);
 
         return $this->repository->atualizar($usuario);
@@ -45,7 +46,7 @@ class AtualizarUsuarioUseCase
      *
      * @throws InvalidArgumentException
      */
-    private function validarESanitizar(array $dados, int $id): array
+    private function validarESanitizar(array $dados, int $id, Usuario $usuario): array
     {
         // --- nome ---
         if (isset($dados['nome'])) {
@@ -61,19 +62,19 @@ class AtualizarUsuarioUseCase
             }
         }
 
-        // --- cpf ---
-        if (array_key_exists('cpf', $dados) && empty($dados['cpf'])) {
-            throw new InvalidArgumentException('O campo "cpf" é obrigatório.');
-        }
-
-        if (!empty($dados['cpf'])) {
-            $dados['cpf'] = Validator::cpf($dados['cpf']);
-
-            if ($this->repository->cpfJaCadastrado($dados['cpf'], $id)) {
-                throw new InvalidArgumentException('Já existe outro usuário com este CPF.');
+        $documentos = Validator::documentosUsuario(
+            array_key_exists('cpf', $dados) ? $dados['cpf'] : $usuario->getCpf(),
+            array_key_exists('cnpj', $dados) ? $dados['cnpj'] : $usuario->getCnpj(),
+            $dados['tipo_usuario'] ?? $usuario->getTipoUsuario()->value
+        );
+        foreach (['cpf', 'cnpj'] as $campo) {
+            $metodo = $campo.'JaCadastrado';
+            if ($documentos[$campo] !== null && $this->repository->$metodo($documentos[$campo], $id)) {
+                throw new InvalidArgumentException('Já existe outro usuário com este '.strtoupper($campo).'.');
             }
         }
-
+        $dados = array_replace($dados, $documentos);
+        
         // --- telefone ---
         if (!empty($dados['telefone'])) {
             $dados['telefone'] = Validator::telefone($dados['telefone']);
@@ -103,12 +104,7 @@ class AtualizarUsuarioUseCase
         if (array_key_exists('telefone', $dados)) {
             $usuario->setTelefone($dados['telefone']);
         }
-        if (array_key_exists('cpf', $dados)) {
-            $usuario->setCpf($dados['cpf']);
-        }
-        if (isset($dados['tipo_usuario'])) {
-            $usuario->setTipoUsuario(TipoUsuario::from($dados['tipo_usuario']));
-        }
+        $usuario->definirDocumentos($dados['cpf'], $dados['cnpj'], isset($dados['tipo_usuario']) ? TipoUsuario::from($dados['tipo_usuario']) : null);
         if (!empty($dados['senha'])) {
             $usuario->setSenhaHash(password_hash($dados['senha'], PASSWORD_BCRYPT));
         }
