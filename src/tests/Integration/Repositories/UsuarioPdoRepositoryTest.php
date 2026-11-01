@@ -5,7 +5,7 @@ namespace Tests\Integration\Repositories;
 use Domain\Usuario\TipoUsuario;
 use Domain\Usuario\Usuario;
 use Repositories\Usuario\UsuarioPdoRepository;
-use Tests\Integration\IntegrationTestCase;
+use Tests\Integration\IntegrationTestCase; 
 
 class UsuarioPdoRepositoryTest extends IntegrationTestCase
 {

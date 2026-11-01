@@ -36,49 +36,33 @@ docker compose exec app composer install
 | **Banco MySQL 8.4** | `localhost:3307` | Banco de dados da oficina |
 
 ---
-remover isto anteas da entrega 
-## 👩‍💻 Guia para a Equipe: Como Criar e Documentar Novas Rotas
 
-Para que o time mantenha o mesmo padrão arquitetural e o Swagger sempre atualizado:
+## 🧪 Como Executar os Testes Automatizados 
 
-### 1. Padrão de Resposta HTTP
-Use sempre a classe helper `JsonResponse` para emitir as respostas dos seus Controllers:
-```php
-use Infrastructure\Http\JsonResponse;
+A aplicação conta com uma suíte completa de testes automatizados com o **PHPUnit 12**, cobrindo tanto as regras de domínio e casos de uso (Testes Unitários) quanto a persistência no MySQL real (Testes de Integração).
 
-JsonResponse::send(["mensagem" => "Sucesso"], 200);
-```
+Para executar os testes diretamente no container Docker, utilize os comandos abaixo:
 
-### 2. Documentar o Endpoint no Swagger
-Em cima do método do seu Controller, adicione os atributos OpenAPI:
-```php
-use OpenApi\Attributes as OA;
-
-#[OA\Get(
-    path: "/veiculos",
-    summary: "Lista todos os veículos",
-    tags: ["Veículos"],
-    responses: [
-        new OA\Response(response: 200, description: "Lista de veículos retornada com sucesso")
-    ]
-)]
-public function listar(): void
-{
-    // ...
-}
-```
-
-### 3. Como Atualizar a Documentação do Swagger
-Sempre que você criar ou alterar uma rota, rode no terminal:
 ```bash
-docker compose exec app ./vendor/bin/openapi src/ -o docs/swagger.json
+# 1. Rodar TODOS os testes (Unitários + Integração):
+docker compose exec app ./vendor/bin/phpunit --testdox
+
+# 2. Rodar apenas os Testes Unitários:
+docker compose exec app ./vendor/bin/phpunit --testsuite Unit --testdox
+
+# 3. Rodar apenas os Testes de Integração (com o MySQL real):
+docker compose exec app ./vendor/bin/phpunit --testsuite Integration --testdox
 ```
-Depois, basta atualizar a página **[http://localhost:8081](http://localhost:8081)** para ver as novidades no Swagger!
+
+> **Nota para Avaliação:** Os testes de integração utilizam uma base de dados isolada (`oficina_mecanica_test`) criada automaticamente pelo Docker, utilizando transações com rollback para garantir que nenhum dado residual permaneça no banco após os testes.
 
 ---
 
 ## 🏛️ Arquitetura em Camadas (Clean Architecture)
 
-- **`src/Domain/`**: Entidades de negócio, Value Objects e Interfaces (PHP puro, sem SQL/frameworks).
-- **`src/Application/`**: Casos de uso (UseCases) e DTOs de orquestração.
-- **`src/Infrastructure/`**: Conexão com banco (PDO), repositórios SQL, Controllers HTTP e Swagger.
+- **`src/Domain/`**: Entidades de negócio, Value Objects e validações centrais (`Validator.php`).
+- **`src/Application/`**: Casos de uso (UseCases) da aplicação orquestrando regras e interfaces.
+- **`src/Repositories/`**: Interfaces e implementações PDO de persistência em banco.
+- **`src/Http/`**: Roteador, Controllers REST e Middlewares de segurança.
+- **`src/Infrastructure/`**: Conexão com banco (`Connection`), adaptadores externos e Swagger.
+- **`src/tests/`**: Suíte de testes automatizados (Unitários e de Integração).
