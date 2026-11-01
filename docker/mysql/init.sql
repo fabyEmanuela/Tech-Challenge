@@ -94,6 +94,8 @@ INSERT INTO usuarios (nome, email, telefone, cpf, tipo_usuario, senha_hash, ativ
 ('Administrador Oficina', 'admin@oficina.com', '(11) 98765-4321', '111.444.777-35', 'atendente', '$2y$10$.gp1cxGzaoCRjqEYLiGNjO09IFR4W3IuPs7i8KdnW0DGBgb9daTFK', 1),
 ('Mecânico Oficina', 'mecanico@oficina.com', '(11) 98765-4322', '222.555.888-46', 'mecanico', '$2y$10$.gp1cxGzaoCRjqEYLiGNjO09IFR4W3IuPs7i8KdnW0DGBgb9daTFK', 1)
 ON DUPLICATE KEY UPDATE nome = VALUES(nome);
+
+-- -----------------------------------------------------------------------
 -- Tabela: ordens_servico
 -- Gerenciamento de Ordens de Serviço (OS)
 -- -----------------------------------------------------------------------
@@ -221,3 +223,20 @@ CREATE TABLE IF NOT EXISTS ordem_servico_historico (
         ON DELETE CASCADE
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------------------
+-- Base de Dados Exclusiva para Testes de Integração
+-- -----------------------------------------------------------------------
+CREATE DATABASE IF NOT EXISTS oficina_mecanica_test
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS oficina_mecanica_test.usuarios LIKE oficina_mecanica.usuarios;
+CREATE TABLE IF NOT EXISTS oficina_mecanica_test.veiculos LIKE oficina_mecanica.veiculos;
+CREATE TABLE IF NOT EXISTS oficina_mecanica_test.servicos LIKE oficina_mecanica.servicos;
+CREATE TABLE IF NOT EXISTS oficina_mecanica_test.pecas LIKE oficina_mecanica.pecas;
+CREATE TABLE IF NOT EXISTS oficina_mecanica_test.ordens_servico LIKE oficina_mecanica.ordens_servico;
+CREATE TABLE IF NOT EXISTS oficina_mecanica_test.ordem_servico_contadores LIKE oficina_mecanica.ordem_servico_contadores;
+CREATE TABLE IF NOT EXISTS oficina_mecanica_test.ordem_servico_servicos LIKE oficina_mecanica.ordem_servico_servicos;
+CREATE TABLE IF NOT EXISTS oficina_mecanica_test.ordem_servico_pecas LIKE oficina_mecanica.ordem_servico_pecas;
+CREATE TABLE IF NOT EXISTS oficina_mecanica_test.ordem_servico_historico LIKE oficina_mecanica.ordem_servico_historico;

@@ -19,7 +19,7 @@ class OrdemServicoPdoRepository implements OrdemServicoRepositoryInterface
 
     public function salvar(OrdemServico $os): OrdemServico
     {
-        $this->pdo->beginTransaction();
+        $jaEmTransacao = $this->pdo->inTransaction(); if (!$jaEmTransacao) { $this->pdo->beginTransaction(); }
 
         try {
             $os->recalcularTotais();
@@ -109,7 +109,7 @@ class OrdemServicoPdoRepository implements OrdemServicoRepositoryInterface
                 ':observacao'  => 'Ordem de serviço criada com sucesso.',
             ]);
 
-            $this->pdo->commit();
+            if (!$jaEmTransacao && $this->pdo->inTransaction()) { $this->pdo->commit(); }
 
             return $this->buscarPorId($osId) ?? $os;
         } catch (Throwable $e) {
@@ -122,7 +122,7 @@ class OrdemServicoPdoRepository implements OrdemServicoRepositoryInterface
 
     public function atualizar(OrdemServico $os, ?HistoricoStatusOS $historico = null): OrdemServico
     {
-        $this->pdo->beginTransaction();
+        $jaEmTransacao = $this->pdo->inTransaction(); if (!$jaEmTransacao) { $this->pdo->beginTransaction(); }
 
         try {
             $os->recalcularTotais();
@@ -171,7 +171,7 @@ class OrdemServicoPdoRepository implements OrdemServicoRepositoryInterface
                 );
             }
 
-            $this->pdo->commit();
+            if (!$jaEmTransacao && $this->pdo->inTransaction()) { $this->pdo->commit(); }
 
             return $this->buscarPorId($osId) ?? $os;
         } catch (Throwable $e) {
