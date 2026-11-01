@@ -105,14 +105,15 @@ $atualizarServico     = new AtualizarServicoUseCase($servicoRepository);
 $deletarServico       = new DeletarServicoUseCase($servicoRepository);
 
 // Use Cases - Ordens de Serviço
-$criarOrdemServico         = new CriarOrdemServicoUseCase($ordemServicoRepository, $usuarioRepository, $veiculoRepository, $servicoRepository, $pecaRepository);
+$notificadorEmail = new \Infrastructure\Email\NotificadorOrdemServicoEmail();
+$criarOrdemServico         = new CriarOrdemServicoUseCase($ordemServicoRepository, $usuarioRepository, $veiculoRepository, $servicoRepository, $pecaRepository, notificador: $notificadorEmail);
 $listarOrdensServico       = new ListarOrdensServicoUseCase($ordemServicoRepository);
 $buscarOrdemServico        = new BuscarOrdemServicoPorIdUseCase($ordemServicoRepository);
-$atualizarOrdemServico     = new AtualizarOrdemServicoUseCase($ordemServicoRepository, $servicoRepository, $pecaRepository);
+$atualizarOrdemServico     = new AtualizarOrdemServicoUseCase($ordemServicoRepository, $servicoRepository, $pecaRepository, notificador: $notificadorEmail);
 $deletarOrdemServico       = new DeletarOrdemServicoUseCase($ordemServicoRepository);
-$enviarOrcamento           = new EnviarOrcamentoUseCase($ordemServicoRepository);
-$aprovarOrcamento          = new AprovarOrcamentoUseCase($ordemServicoRepository);
-$alterarStatusOrdemServico = new AlterarStatusOrdemServicoUseCase($ordemServicoRepository);
+$enviarOrcamento           = new EnviarOrcamentoUseCase($ordemServicoRepository, notificador: $notificadorEmail);
+$aprovarOrcamento          = new AprovarOrcamentoUseCase($ordemServicoRepository, notificador: $notificadorEmail);
+$alterarStatusOrdemServico = new AlterarStatusOrdemServicoUseCase($ordemServicoRepository, notificador: $notificadorEmail);
 $acompanharOrdemServico    = new AcompanharOrdemServicoUseCase($ordemServicoRepository);
 
 // Use Cases - Peças

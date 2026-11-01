@@ -28,6 +28,7 @@ class CriarOrdemServicoUseCase
         private VeiculoRepositoryInterface      $veiculoRepository,
         private ServicoRepositoryInterface      $servicoRepository,
         private PecaRepositoryInterface         $pecaRepository,
+        private ?NotificadorOrdemServicoInterface $notificador = null,
     ) {}
 
     /**
@@ -109,7 +110,9 @@ class CriarOrdemServicoUseCase
         }
 
         // 8. Persistir no banco de dados
-        return $this->ordemServicoRepository->salvar($os);
+        $resultado = $this->ordemServicoRepository->salvar($os);
+        $this->notificador?->notificar($resultado, null);
+        return $resultado;
     }
 
     private function obterOuCadastrarCliente(array $dados): Usuario

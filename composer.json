@@ -3,7 +3,8 @@
     "description": "Tech Challenge Fase 1 - Oficina Mecânica API",
     "type": "project",
     "require": {
-        "php": "^8.3"
+        "php": "^8.3",
+        "phpmailer/phpmailer": "*"
     },
     "require-dev": {
         "zircote/swagger-php": "^6.18",
