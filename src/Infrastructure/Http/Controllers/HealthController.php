@@ -16,6 +16,7 @@ final class HealthController
         summary: "Verifica a saúde da API e do Banco de Dados",
         description: "Testa a conectividade com o MySQL e retorna as versões do PHP e do banco.",
         tags: ["Status"],
+        security: [],
         responses: [
             new OA\Response(
                 response: 200,

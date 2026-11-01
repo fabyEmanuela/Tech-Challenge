@@ -4,6 +4,9 @@ namespace Infrastructure\Http;
 
 use OpenApi\Attributes as OA;
 
+#[OA\OpenApi(
+    security: [["bearerAuth" => []]]
+)]
 #[OA\Info(
     version: "1.0.0",
     title: "Tech Challenge API - Oficina Mecânica",
@@ -12,6 +15,17 @@ use OpenApi\Attributes as OA;
 #[OA\Server(
     url: "http://localhost:8080",
     description: "Servidor Local (Docker)"
+)]
+#[OA\SecurityScheme(
+    securityScheme: "bearerAuth",
+    type: "http",
+    scheme: "bearer",
+    bearerFormat: "JWT",
+    description: "Insira o token JWT gerado na rota /login para autenticar as requisições protegidas."
+)]
+#[OA\Tag(
+    name: "Autenticação",
+    description: "Endpoints para login e emissão de tokens JWT de acesso"
 )]
 #[OA\Tag(
     name: "Usuários",
