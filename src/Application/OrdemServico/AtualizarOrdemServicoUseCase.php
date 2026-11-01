@@ -20,6 +20,7 @@ class AtualizarOrdemServicoUseCase
         private OrdemServicoRepositoryInterface $ordemServicoRepository,
         private ServicoRepositoryInterface      $servicoRepository,
         private PecaRepositoryInterface         $pecaRepository,
+        private ?NotificadorOrdemServicoInterface $notificador = null,
     ) {}
 
     /**
@@ -100,7 +101,9 @@ class AtualizarOrdemServicoUseCase
             );
         }
 
-        return $this->ordemServicoRepository->atualizar($os, $historico ?? null);
+        $resultado = $this->ordemServicoRepository->atualizar($os, $historico ?? null);
+        $this->notificador?->notificar($resultado, $statusAnterior);
+        return $resultado;
     }
 
     private function processarItemServico(array $item, array $idsExistentes): ItemServicoOS

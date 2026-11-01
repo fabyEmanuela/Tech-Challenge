@@ -12,7 +12,8 @@ use Repositories\OrdemServico\OrdemServicoRepositoryInterface;
 class EnviarOrcamentoUseCase
 {
     public function __construct(
-        private OrdemServicoRepositoryInterface $ordemServicoRepository
+        private OrdemServicoRepositoryInterface $ordemServicoRepository,
+        private ?NotificadorOrdemServicoInterface $notificador = null,
     ) {}
 
     public function executar(int $id, ?string $observacao = null): OrdemServico
@@ -33,7 +34,7 @@ class EnviarOrcamentoUseCase
             number_format($os->valorPecas(), 2, ',', '.')
         );
 
-        return $this->ordemServicoRepository->atualizar(
+        $resultado = $this->ordemServicoRepository->atualizar(
             $os,
             new HistoricoStatusOS(
                 id: null,
@@ -42,5 +43,7 @@ class EnviarOrcamentoUseCase
                 observacao: $obs,
             )
         );
+        $this->notificador?->notificar($resultado, $statusAnterior);
+        return $resultado;
     }
 }

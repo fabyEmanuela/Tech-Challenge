@@ -12,7 +12,8 @@ use Repositories\OrdemServico\OrdemServicoRepositoryInterface;
 class AprovarOrcamentoUseCase
 {
     public function __construct(
-        private OrdemServicoRepositoryInterface $ordemServicoRepository
+        private OrdemServicoRepositoryInterface $ordemServicoRepository,
+        private ?NotificadorOrdemServicoInterface $notificador = null,
     ) {}
 
     public function executar(int $id, ?string $observacao = null): OrdemServico
@@ -28,7 +29,7 @@ class AprovarOrcamentoUseCase
 
         $obs = $observacao ?: 'Orçamento aprovado pelo cliente. Serviços iniciados em execução.';
 
-        return $this->ordemServicoRepository->atualizar(
+        $resultado = $this->ordemServicoRepository->atualizar(
             $os,
             new HistoricoStatusOS(
                 id: null,
@@ -37,5 +38,7 @@ class AprovarOrcamentoUseCase
                 observacao: $obs,
             )
         );
+        $this->notificador?->notificar($resultado, $statusAnterior);
+        return $resultado;
     }
 }
