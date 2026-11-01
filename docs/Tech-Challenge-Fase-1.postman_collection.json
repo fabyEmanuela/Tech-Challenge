@@ -1285,7 +1285,7 @@
         },
         {
           "name": "Enviar orçamento",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"observacao\": \"Orçamento enviado por WhatsApp.\"\n}" }, "url": { "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}/enviar-orcamento", "host": ["{{base_url}}"], "path": ["ordens-servico", "{{ordem_servico_id}}", "enviar-orcamento"] } },
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"observacao\": \"Orçamento enviado por E-mail.\"\n}" }, "url": { "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}/enviar-orcamento", "host": ["{{base_url}}"], "path": ["ordens-servico", "{{ordem_servico_id}}", "enviar-orcamento"] } },
           "response": []
         },
         {

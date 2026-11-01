@@ -2775,7 +2775,7 @@
                                 "properties": {
                                     "observacao": {
                                         "type": "string",
-                                        "example": "Orçamento enviado por WhatsApp e E-mail.",
+                                        "example": "Orçamento enviado por E-mail.",
                                         "nullable": true
                                     }
                                 },

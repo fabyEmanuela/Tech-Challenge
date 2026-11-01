@@ -284,7 +284,7 @@ class OrdemServicoController
             required: false,
             content: new OA\JsonContent(
                 properties: [
-                    new OA\Property(property: "observacao", type: "string", nullable: true, example: "Orçamento enviado por WhatsApp e E-mail.")
+                    new OA\Property(property: "observacao", type: "string", nullable: true, example: "Orçamento enviado por E-mail.")
                 ]
             )
         ),
