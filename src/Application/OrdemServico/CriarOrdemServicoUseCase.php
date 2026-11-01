@@ -110,7 +110,9 @@ class CriarOrdemServicoUseCase
         }
 
         // 8. Persistir no banco de dados
+        $estoque = (new VerificarEstoqueOS($this->pecaRepository))->executar($os);
         $resultado = $this->ordemServicoRepository->salvar($os);
+        $resultado->definirAvisosEstoque($estoque['avisos']);
         $this->notificador?->notificar($resultado, null);
         return $resultado;
     }

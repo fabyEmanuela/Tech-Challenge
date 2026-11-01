@@ -275,4 +275,55 @@ class OrdemServicoPdoRepositoryTest extends IntegrationTestCase
         // Não deve mais encontrar a OS
         $this->assertNull($this->osRepository->buscarPorId($osId));
     }
+    
+    private function criarOsParaBaixa(float $quantidade = 2): array
+    {
+        $cliente = $this->criarClienteFixture();
+        $veiculo = $this->criarVeiculoFixture($cliente->getId());
+        $peca = $this->criarPecaFixture();
+        $os = OrdemServico::criar($this->osRepository->gerarProximoNumeroOs(), $cliente->getId(), $veiculo->getId());
+        $os->adicionarPeca(ItemPecaOS::criar($peca->getId(), $peca->getNome(), $quantidade, 220));
+        $os->enviarOrcamentoParaAprovacao();
+        return [$this->osRepository->salvar($os), $peca];
+    }
+
+    public function testAprovacaoBaixaEstoqueUmaUnicaVez(): void
+    {
+        [$os, $peca] = $this->criarOsParaBaixa();
+        $useCase = new \Application\OrdemServico\AprovarOrcamentoUseCase($this->osRepository);
+        $resultado = $useCase->executar($os->id());
+        $this->assertSame(StatusOrdemServico::EM_EXECUCAO, $resultado->status());
+        $this->assertSame(8, $this->pecaRepository->buscarPorId($peca->getId())->getQuantidadeEstoque());
+        $this->osRepository->atualizar($resultado);
+        $this->assertSame(8, $this->pecaRepository->buscarPorId($peca->getId())->getQuantidadeEstoque());
+        $resultado->alterarStatus(StatusOrdemServico::EM_DIAGNOSTICO);
+        $this->osRepository->atualizar($resultado);
+        $resultado->enviarOrcamentoParaAprovacao();
+        $this->osRepository->atualizar($resultado);
+        $useCase->executar($os->id());
+        $this->assertSame(8, $this->pecaRepository->buscarPorId($peca->getId())->getQuantidadeEstoque());
+    }
+
+    public function testAprovacaoSemSaldoMantemInicioPendenteSemBaixaParcial(): void
+    {
+        [$os, $peca] = $this->criarOsParaBaixa(11);
+        $resultado = (new \Application\OrdemServico\AprovarOrcamentoUseCase($this->osRepository))->executar($os->id());
+        $this->assertTrue($resultado->inicioPendentePorEstoque());
+        $this->assertSame(StatusOrdemServico::EM_DIAGNOSTICO, $resultado->status());
+        $this->assertNotNull($resultado->orcamentoAprovadoEm());
+        $this->assertNotEmpty($resultado->avisosEstoque());
+        $this->assertSame(10, $this->pecaRepository->buscarPorId($peca->getId())->getQuantidadeEstoque());
+        $historico = $resultado->historico();
+        $this->assertSame('em_diagnostico', end($historico)->statusPara());
+    }
+
+    public function testSomaPecasRepetidasEAlertaEstoqueMinimoPelaRotaDeStatus(): void
+    {
+        [$os, $peca] = $this->criarOsParaBaixa(4);
+        $os->adicionarPeca(ItemPecaOS::criar($peca->getId(), $peca->getNome(), 4, 220));
+        $this->osRepository->atualizar($os);
+        $resultado = (new \Application\OrdemServico\AlterarStatusOrdemServicoUseCase($this->osRepository))->executar($os->id(), 'em_execucao');
+        $this->assertSame(2, $this->pecaRepository->buscarPorId($peca->getId())->getQuantidadeEstoque());
+        $this->assertStringContainsString('repor', implode(' ', $resultado->avisosEstoque()));
+    }
 }
