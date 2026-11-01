@@ -1,1366 +1,2006 @@
 {
-  "info": {
-    "_postman_id": "b3c9e691-8f12-42da-91e8-782a2da38291",
-    "name": "Tech Challenge - Fase 1 (Oficina Mecânica)",
-    "description": "Collection do Postman com todas as rotas da API REST da Oficina Mecânica (Tech Challenge - Fase 1).\n\nInclui:\n- CRUD completo de Usuários (clientes, mecânicos e atendentes) + atalho `/clientes`\n- CRUD completo de Veículos (placas Tradicional ABC-1234 e Mercosul ABC1D23, vinculação a cliente e atualização parcial)\n- CRUD completo de Serviços com busca por nome parcial\n- CRUD completo de Peças e Insumos com controle de estoque\n- Cenários de validação via `Validator` e tratamento de erros (422, 404)\n- Scripts de teste que salvam dinamicamente `usuario_id`, `veiculo_id`, `servico_id` e `peca_id` nas variáveis da collection.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "item": [
-    {
-      "name": "1. Usuários",
-      "description": "Endpoints principais de gerenciamento de usuários (clientes, mecânicos e atendentes).",
-      "item": [
-        {
-          "name": "Listar todos os usuários",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/usuarios",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios"]
-            },
-            "description": "Retorna a lista completa de usuários cadastrados."
-          },
-          "response": []
-        },
-        {
-          "name": "Listar usuários - Filtro por tipo (Cliente)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/usuarios?tipo=cliente",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios"],
-              "query": [
-                {
-                  "key": "tipo",
-                  "value": "cliente",
-                  "description": "Filtrar por 'cliente', 'mecanico' ou 'atendente'"
-                }
-              ]
-            },
-            "description": "Filtra usuários pelo tipo 'cliente'."
-          },
-          "response": []
-        },
-        {
-          "name": "Listar usuários - Filtro por tipo (Mecânico)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/usuarios?tipo=mecanico",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios"],
-              "query": [
-                {
-                  "key": "tipo",
-                  "value": "mecanico"
-                }
-              ]
-            },
-            "description": "Filtra usuários pelo tipo 'mecanico'."
-          },
-          "response": []
-        },
-        {
-          "name": "Listar usuários - Filtro por tipo (Atendente)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/usuarios?tipo=atendente",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios"],
-              "query": [
-                {
-                  "key": "tipo",
-                  "value": "atendente"
-                }
-              ]
-            },
-            "description": "Filtra usuários pelo tipo 'atendente'."
-          },
-          "response": []
-        },
-        {
-          "name": "Buscar usuário por ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/usuarios/{{usuario_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios", "{{usuario_id}}"]
-            },
-            "description": "Busca detalhes de um usuário pelo seu ID numérico."
-          },
-          "response": []
-        },
-        {
-          "name": "Buscar usuários por nome",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/usuarios?nome=João",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios"],
-              "query": [
-                {
-                  "key": "nome",
-                  "value": "João",
-                  "description": "Busca parcial pelo nome do usuário"
-                }
-              ]
-            },
-            "description": "Retorna os usuários cujo nome contém o termo informado."
-          },
-          "response": []
-        },
-        {
-          "name": "Buscar usuário por CPF",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/usuarios?cpf=529.982.247-25",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios"],
-              "query": [
-                {
-                  "key": "cpf",
-                  "value": "529.982.247-25",
-                  "description": "Busca exata pelo CPF do usuário"
-                }
-              ]
-            },
-            "description": "Retorna o usuário correspondente ao CPF informado."
-          },
-          "response": []
-        },
-        {
-          "name": "Criar usuário (Cliente)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code é 201\", function () {",
-                  "    pm.response.to.have.status(201);",
-                  "});",
-                  "",
-                  "if (pm.response.code === 201) {",
-                  "    var data = pm.response.json();",
-                  "    if (data.id) {",
-                  "        pm.collectionVariables.set(\"usuario_id\", data.id.toString());",
-                  "        console.log(\"usuario_id atualizado para:\", data.id);",
-                  "    }",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"João da Silva\",\n  \"email\": \"joao.silva@exemplo.com\",\n  \"telefone\": \"(11) 98765-4321\",\n  \"cpf\": \"529.982.247-25\",\n  \"tipo_usuario\": \"cliente\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/usuarios",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios"]
-            },
-            "description": "Cria um novo usuário do tipo cliente com CPF e telefone válidos. O ID gerado é automaticamente salvo na variável `usuario_id`."
-          },
-          "response": []
-        },
-        {
-          "name": "Criar usuário (Mecânico com senha)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code é 201\", function () {",
-                  "    pm.response.to.have.status(201);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Carlos Mecanico\",\n  \"email\": \"carlos.mecanico@oficina.com\",\n  \"telefone\": \"(11) 91234-5678\",\n  \"cpf\": \"111.444.777-35\",\n  \"tipo_usuario\": \"mecanico\",\n  \"senha\": \"senhaForte123\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/usuarios",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios"]
-            },
-            "description": "Cria um usuário mecânico fornecendo senha para login."
-          },
-          "response": []
-        },
-        {
-          "name": "Criar usuário (Atendente com senha)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code é 201\", function () {",
-                  "    pm.response.to.have.status(201);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Ana Atendente\",\n  \"email\": \"ana.atendente@oficina.com\",\n  \"telefone\": \"(11) 97654-3210\",\n  \"cpf\": \"935.411.347-80\",\n  \"tipo_usuario\": \"atendente\",\n  \"senha\": \"senhaForte123\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/usuarios",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios"]
-            },
-            "description": "Cria um usuário atendente."
-          },
-          "response": []
-        },
-        {
-          "name": "Atualizar usuário",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"João da Silva Atualizado\",\n  \"telefone\": \"(11) 99999-8888\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/usuarios/{{usuario_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios", "{{usuario_id}}"]
-            },
-            "description": "Atualiza campos de um usuário existente (PATCH-like). Apenas os campos informados são modificados."
-          },
-          "response": []
-        },
-        {
-          "name": "Deletar usuário",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/usuarios/{{usuario_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios", "{{usuario_id}}"]
-            },
-            "description": "Remove um usuário do banco de dados pelo seu ID."
-          },
-          "response": []
-        }
-      ]
+    "info": {
+        "_postman_id": "b3c9e691-8f12-42da-91e8-782a2da38291",
+        "name": "Tech Challenge - Fase 1 (Oficina Mecânica)",
+        "description": "Collection do Postman com todas as rotas da API REST da Oficina Mecânica (Tech Challenge - Fase 1).\n\nInclui:\n- CRUD completo de Usuários (clientes, mecânicos e atendentes) + atalho `/clientes`\n- CRUD completo de Veículos (placas Tradicional ABC-1234 e Mercosul ABC1D23, vinculação a cliente e atualização parcial)\n- CRUD completo de Serviços com busca por nome parcial\n- CRUD completo de Peças e Insumos com controle de estoque\n- Cenários de validação via `Validator` e tratamento de erros (422, 404)\n- Scripts de teste que salvam dinamicamente `usuario_id`, `veiculo_id`, `servico_id` e `peca_id` nas variáveis da collection.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
-    {
-      "name": "2. Clientes (Alias)",
-      "description": "Rotas específicas e atalhos para consulta de clientes.",
-      "item": [
+    "item": [
         {
-          "name": "Listar clientes via rota /clientes",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/clientes",
-              "host": ["{{base_url}}"],
-              "path": ["clientes"]
-            },
-            "description": "Atalho configurado no router que filtra e retorna exclusivamente usuários com `tipo_usuario = 'cliente'`."
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "3. Veículos",
-      "description": "Endpoints completos para gestão de veículos vinculados a clientes (com validação centralizada via `Validator` e Value Object `Placa`).",
-      "item": [
-        {
-          "name": "Listar todos os veículos",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/veiculos",
-              "host": ["{{base_url}}"],
-              "path": ["veiculos"]
-            },
-            "description": "Retorna todos os veículos cadastrados na oficina mecânica."
-          },
-          "response": []
-        },
-        {
-          "name": "Listar veículos - Filtrar por cliente (query param)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/veiculos?cliente_id={{usuario_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["veiculos"],
-              "query": [
+            "name": "0. Autenticação (JWT)",
+            "description": "Endpoints de autenticação para emissão de tokens Bearer JWT com RBAC.",
+            "item": [
                 {
-                  "key": "cliente_id",
-                  "value": "{{usuario_id}}",
-                  "description": "ID do cliente proprietário"
-                }
-              ]
-            },
-            "description": "Filtra e retorna apenas os veículos pertencentes a um cliente específico."
-          },
-          "response": []
-        },
-        {
-          "name": "Listar veículos do cliente via /clientes/{id}/veiculos",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/clientes/{{usuario_id}}/veiculos",
-              "host": ["{{base_url}}"],
-              "path": ["clientes", "{{usuario_id}}", "veiculos"]
-            },
-            "description": "Rota de atalho RESTful para listar veículos diretamente a partir do ID do cliente."
-          },
-          "response": []
-        },
-        {
-          "name": "Buscar veículo por ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/veiculos/{{veiculo_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["veiculos", "{{veiculo_id}}"]
-            },
-            "description": "Retorna os detalhes de um veículo específico pelo ID."
-          },
-          "response": []
-        },
-        {
-          "name": "Cadastrar veículo (Padrão Mercosul)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code é 201\", function () {",
-                  "    pm.response.to.have.status(201);",
-                  "});",
-                  "",
-                  "if (pm.response.code === 201) {",
-                  "    var jsonData = pm.response.json();",
-                  "    if (jsonData && jsonData.id) {",
-                  "        pm.collectionVariables.set(\"veiculo_id\", jsonData.id.toString());",
-                  "        console.log(\"veiculo_id salvo na collection:\", jsonData.id);",
-                  "    }",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"cliente_id\": {{usuario_id}},\n  \"placa\": \"BRA2E19\",\n  \"marca\": \"Volkswagen\",\n  \"modelo\": \"Gol 1.0\",\n  \"ano\": 2022,\n  \"cor\": \"Branco\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/veiculos",
-              "host": ["{{base_url}}"],
-              "path": ["veiculos"]
-            },
-            "description": "Cadastra um veículo com placa no padrão Mercosul (ex: BRA2E19) e armazena o `veiculo_id` nas variáveis da collection."
-          },
-          "response": []
-        },
-        {
-          "name": "Cadastrar veículo (Padrão Tradicional ABC-1234)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"cliente_id\": {{usuario_id}},\n  \"placa\": \"ABC-1234\",\n  \"marca\": \"Chevrolet\",\n  \"modelo\": \"Onix 1.0 Turbo\",\n  \"ano\": 2020,\n  \"cor\": \"Prata\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/veiculos",
-              "host": ["{{base_url}}"],
-              "path": ["veiculos"]
-            },
-            "description": "Cadastra um veículo com placa tradicional antiga (ex: ABC-1234 com hífen)."
-          },
-          "response": []
-        },
-        {
-          "name": "Atualizar veículo (parcial / completo)",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"modelo\": \"Gol 1.6 MSI\",\n  \"ano\": 2023,\n  \"cor\": \"Cinza Chumbo\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/veiculos/{{veiculo_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["veiculos", "{{veiculo_id}}"]
-            },
-            "description": "Atualiza campos informados de um veículo existente (PATCH-like), validando via `Validator`."
-          },
-          "response": []
-        },
-        {
-          "name": "Deletar veículo",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code é 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "pm.test(\"Mensagem de sucesso retornada\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData.mensagem).to.eql(\"Veículo removido com sucesso.\");",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/veiculos/{{veiculo_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["veiculos", "{{veiculo_id}}"]
-            },
-            "description": "Remove um veículo pelo seu ID."
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "4. Serviços",
-      "description": "Endpoints principais de gerenciamento do catálogo de serviços da oficina mecânica.",
-      "item": [
-        {
-          "name": "Listar todos os serviços",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/servicos",
-              "host": ["{{base_url}}"],
-              "path": ["servicos"]
-            },
-            "description": "Retorna a lista completa de serviços cadastrados."
-          },
-          "response": []
-        },
-        {
-          "name": "Listar serviços - Filtro por nome parcial (/servicos?nome=...)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/servicos?nome=oleo",
-              "host": ["{{base_url}}"],
-              "path": ["servicos"],
-              "query": [
+                    "name": "Login - Atendente (Administrador)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const resposta = pm.response.json();",
+                                    "if (resposta.access_token) {",
+                                    "    pm.collectionVariables.set(\"token\", resposta.access_token);",
+                                    "    pm.test(\"Status 200 e token de atendente salvo\", function () {",
+                                    "        pm.response.to.have.status(200);",
+                                    "        pm.expect(resposta.access_token).to.be.a(\"string\");",
+                                    "    });",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"admin@oficina.com\",\n    \"senha\": \"123456\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "login"
+                            ]
+                        },
+                        "description": "Realiza login como Atendente (admin@oficina.com / 123456) e salva automaticamente o JWT retornado na variável {{token}}."
+                    },
+                    "response": []
+                },
                 {
-                  "key": "nome",
-                  "value": "oleo",
-                  "description": "Termo para busca parcial no nome do serviço"
-                }
-              ]
-            },
-            "description": "Filtra serviços com correspondência parcial no nome através do query parameter ?nome=..."
-          },
-          "response": []
-        },
-        {
-          "name": "Buscar serviços por nome parcial (/servicos/buscar?nome=...)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/servicos/buscar?nome=Troca",
-              "host": ["{{base_url}}"],
-              "path": ["servicos", "buscar"],
-              "query": [
+                    "name": "Login - Mecânico",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const resposta = pm.response.json();",
+                                    "if (resposta.access_token) {",
+                                    "    pm.collectionVariables.set(\"token\", resposta.access_token);",
+                                    "    pm.test(\"Status 200 e token de mecânico salvo\", function () {",
+                                    "        pm.response.to.have.status(200);",
+                                    "        pm.expect(resposta.access_token).to.be.a(\"string\");",
+                                    "    });",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"mecanico@oficina.com\",\n    \"senha\": \"123456\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "login"
+                            ]
+                        },
+                        "description": "Realiza login como Mecânico (mecanico@oficina.com / 123456) e salva automaticamente o JWT retornado na variável {{token}}."
+                    },
+                    "response": []
+                },
                 {
-                  "key": "nome",
-                  "value": "Troca",
-                  "description": "Termo para busca parcial"
+                    "name": "Login - Credenciais Inválidas (Erro 401)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status é 401 Unauthorized\", function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"admin@oficina.com\",\n    \"senha\": \"senha_errada\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "login"
+                            ]
+                        },
+                        "description": "Valida a rejeição com código 401 quando fornecida senha incorreta."
+                    },
+                    "response": []
                 }
-              ]
-            },
-            "description": "Endpoint específico para buscar serviços por correspondência parcial no nome."
-          },
-          "response": []
+            ]
         },
         {
-          "name": "Criar serviço",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code é 201\", function () {",
-                  "    pm.response.to.have.status(201);",
-                  "});",
-                  "",
-                  "if (pm.response.code === 201) {",
-                  "    var data = pm.response.json();",
-                  "    if (data.id) {",
-                  "        pm.collectionVariables.set(\"servico_id\", data.id.toString());",
-                  "        console.log(\"servico_id atualizado para:\", data.id);",
-                  "    }",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Troca de Óleo e Filtro\",\n  \"descricao\": \"Troca de óleo de motor 5W30 e filtro de óleo original\",\n  \"preco\": 250.00,\n  \"tempo_estimado_horas\": 1.0,\n  \"ativo\": true\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/servicos",
-              "host": ["{{base_url}}"],
-              "path": ["servicos"]
-            },
-            "description": "Cadastra um novo serviço na oficina mecânica e armazena o ID na variável servico_id."
-          },
-          "response": []
-        },
-        {
-          "name": "Buscar serviço por ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/servicos/{{servico_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["servicos", "{{servico_id}}"]
-            },
-            "description": "Busca detalhes de um serviço pelo ID numérico."
-          },
-          "response": []
-        },
-        {
-          "name": "Atualizar serviço",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Troca de Óleo, Filtro e Checklist\",\n  \"preco\": 280.00,\n  \"tempo_estimado_horas\": 1.5,\n  \"ativo\": true\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/servicos/{{servico_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["servicos", "{{servico_id}}"]
-            },
-            "description": "Atualiza campos de um serviço existente."
-          },
-          "response": []
-        },
-        {
-          "name": "Deletar serviço",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/servicos/{{servico_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["servicos", "{{servico_id}}"]
-            },
-            "description": "Remove um serviço do banco de dados pelo ID."
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "5. Peças e Estoque",
-      "description": "Endpoints para gerenciamento de peças, insumos automotivos e controle de saldo de estoque.",
-      "item": [
-        {
-          "name": "Listar todas as peças",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/pecas",
-              "host": ["{{base_url}}"],
-              "path": ["pecas"]
-            },
-            "description": "Retorna o catálogo completo de peças e seu saldo em estoque."
-          },
-          "response": []
-        },
-        {
-          "name": "Listar peças ativas (/pecas?ativo=true)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/pecas?ativo=true",
-              "host": ["{{base_url}}"],
-              "path": ["pecas"],
-              "query": [
+            "name": "1. Usuários",
+            "description": "Endpoints principais de gerenciamento de usuários (clientes, mecânicos e atendentes).",
+            "item": [
                 {
-                  "key": "ativo",
-                  "value": "true",
-                  "description": "Filtrar apenas peças ativas"
+                    "name": "Listar todos os usuários",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/usuarios",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios"
+                            ]
+                        },
+                        "description": "Retorna a lista completa de usuários cadastrados."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Listar usuários - Filtro por tipo (Cliente)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/usuarios?tipo=cliente",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios"
+                            ],
+                            "query": [
+                                {
+                                    "key": "tipo",
+                                    "value": "cliente",
+                                    "description": "Filtrar por 'cliente', 'mecanico' ou 'atendente'"
+                                }
+                            ]
+                        },
+                        "description": "Filtra usuários pelo tipo 'cliente'."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Listar usuários - Filtro por tipo (Mecânico)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/usuarios?tipo=mecanico",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios"
+                            ],
+                            "query": [
+                                {
+                                    "key": "tipo",
+                                    "value": "mecanico"
+                                }
+                            ]
+                        },
+                        "description": "Filtra usuários pelo tipo 'mecanico'."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Listar usuários - Filtro por tipo (Atendente)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/usuarios?tipo=atendente",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios"
+                            ],
+                            "query": [
+                                {
+                                    "key": "tipo",
+                                    "value": "atendente"
+                                }
+                            ]
+                        },
+                        "description": "Filtra usuários pelo tipo 'atendente'."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Buscar usuário por ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/usuarios/{{usuario_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios",
+                                "{{usuario_id}}"
+                            ]
+                        },
+                        "description": "Busca detalhes de um usuário pelo seu ID numérico."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Buscar usuários por nome",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/usuarios?nome=João",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios"
+                            ],
+                            "query": [
+                                {
+                                    "key": "nome",
+                                    "value": "João",
+                                    "description": "Busca parcial pelo nome do usuário"
+                                }
+                            ]
+                        },
+                        "description": "Retorna os usuários cujo nome contém o termo informado."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Buscar usuário por CPF",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/usuarios?cpf=529.982.247-25",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cpf",
+                                    "value": "529.982.247-25",
+                                    "description": "Busca exata pelo CPF do usuário"
+                                }
+                            ]
+                        },
+                        "description": "Retorna o usuário correspondente ao CPF informado."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Criar usuário (Cliente)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code é 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "if (pm.response.code === 201) {",
+                                    "    var data = pm.response.json();",
+                                    "    if (data.id) {",
+                                    "        pm.collectionVariables.set(\"usuario_id\", data.id.toString());",
+                                    "        console.log(\"usuario_id atualizado para:\", data.id);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nome\": \"João da Silva\",\n  \"email\": \"joao.silva@exemplo.com\",\n  \"telefone\": \"(11) 98765-4321\",\n  \"cpf\": \"529.982.247-25\",\n  \"tipo_usuario\": \"cliente\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/usuarios",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios"
+                            ]
+                        },
+                        "description": "Cria um novo usuário do tipo cliente com CPF e telefone válidos. O ID gerado é automaticamente salvo na variável `usuario_id`."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Criar usuário (Mecânico com senha)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code é 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nome\": \"Carlos Mecanico\",\n  \"email\": \"carlos.mecanico@oficina.com\",\n  \"telefone\": \"(11) 91234-5678\",\n  \"cpf\": \"111.444.777-35\",\n  \"tipo_usuario\": \"mecanico\",\n  \"senha\": \"senhaForte123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/usuarios",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios"
+                            ]
+                        },
+                        "description": "Cria um usuário mecânico fornecendo senha para login."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Criar usuário (Atendente com senha)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code é 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nome\": \"Ana Atendente\",\n  \"email\": \"ana.atendente@oficina.com\",\n  \"telefone\": \"(11) 97654-3210\",\n  \"cpf\": \"935.411.347-80\",\n  \"tipo_usuario\": \"atendente\",\n  \"senha\": \"senhaForte123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/usuarios",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios"
+                            ]
+                        },
+                        "description": "Cria um usuário atendente."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Atualizar usuário",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nome\": \"João da Silva Atualizado\",\n  \"telefone\": \"(11) 99999-8888\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/usuarios/{{usuario_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios",
+                                "{{usuario_id}}"
+                            ]
+                        },
+                        "description": "Atualiza campos de um usuário existente (PATCH-like). Apenas os campos informados são modificados."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Deletar usuário",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/usuarios/{{usuario_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios",
+                                "{{usuario_id}}"
+                            ]
+                        },
+                        "description": "Remove um usuário do banco de dados pelo seu ID."
+                    },
+                    "response": []
                 }
-              ]
-            },
-            "description": "Filtra as peças pelo status ativo."
-          },
-          "response": []
+            ]
         },
         {
-          "name": "Cadastrar peça",
-          "event": [
+            "name": "2. Clientes (Alias)",
+            "description": "Rotas específicas e atalhos para consulta de clientes.",
+            "item": [
+                {
+                    "name": "Listar clientes via rota /clientes",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/clientes",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "clientes"
+                            ]
+                        },
+                        "description": "Atalho configurado no router que filtra e retorna exclusivamente usuários com `tipo_usuario = 'cliente'`."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "3. Veículos",
+            "description": "Endpoints completos para gestão de veículos vinculados a clientes (com validação centralizada via `Validator` e Value Object `Placa`).",
+            "item": [
+                {
+                    "name": "Listar todos os veículos",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/veiculos",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "veiculos"
+                            ]
+                        },
+                        "description": "Retorna todos os veículos cadastrados na oficina mecânica."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Listar veículos - Filtrar por cliente (query param)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/veiculos?cliente_id={{usuario_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "veiculos"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cliente_id",
+                                    "value": "{{usuario_id}}",
+                                    "description": "ID do cliente proprietário"
+                                }
+                            ]
+                        },
+                        "description": "Filtra e retorna apenas os veículos pertencentes a um cliente específico."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Listar veículos do cliente via /clientes/{id}/veiculos",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/clientes/{{usuario_id}}/veiculos",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "clientes",
+                                "{{usuario_id}}",
+                                "veiculos"
+                            ]
+                        },
+                        "description": "Rota de atalho RESTful para listar veículos diretamente a partir do ID do cliente."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Buscar veículo por ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/veiculos/{{veiculo_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "veiculos",
+                                "{{veiculo_id}}"
+                            ]
+                        },
+                        "description": "Retorna os detalhes de um veículo específico pelo ID."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Cadastrar veículo (Padrão Mercosul)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code é 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "if (pm.response.code === 201) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData && jsonData.id) {",
+                                    "        pm.collectionVariables.set(\"veiculo_id\", jsonData.id.toString());",
+                                    "        console.log(\"veiculo_id salvo na collection:\", jsonData.id);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"cliente_id\": {{usuario_id}},\n  \"placa\": \"BRA2E19\",\n  \"marca\": \"Volkswagen\",\n  \"modelo\": \"Gol 1.0\",\n  \"ano\": 2022,\n  \"cor\": \"Branco\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/veiculos",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "veiculos"
+                            ]
+                        },
+                        "description": "Cadastra um veículo com placa no padrão Mercosul (ex: BRA2E19) e armazena o `veiculo_id` nas variáveis da collection."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Cadastrar veículo (Padrão Tradicional ABC-1234)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"cliente_id\": {{usuario_id}},\n  \"placa\": \"ABC-1234\",\n  \"marca\": \"Chevrolet\",\n  \"modelo\": \"Onix 1.0 Turbo\",\n  \"ano\": 2020,\n  \"cor\": \"Prata\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/veiculos",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "veiculos"
+                            ]
+                        },
+                        "description": "Cadastra um veículo com placa tradicional antiga (ex: ABC-1234 com hífen)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Atualizar veículo (parcial / completo)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"modelo\": \"Gol 1.6 MSI\",\n  \"ano\": 2023,\n  \"cor\": \"Cinza Chumbo\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/veiculos/{{veiculo_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "veiculos",
+                                "{{veiculo_id}}"
+                            ]
+                        },
+                        "description": "Atualiza campos informados de um veículo existente (PATCH-like), validando via `Validator`."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Deletar veículo",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code é 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "pm.test(\"Mensagem de sucesso retornada\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.mensagem).to.eql(\"Veículo removido com sucesso.\");",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/veiculos/{{veiculo_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "veiculos",
+                                "{{veiculo_id}}"
+                            ]
+                        },
+                        "description": "Remove um veículo pelo seu ID."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "4. Serviços",
+            "description": "Endpoints principais de gerenciamento do catálogo de serviços da oficina mecânica.",
+            "item": [
+                {
+                    "name": "Listar todos os serviços",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/servicos",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "servicos"
+                            ]
+                        },
+                        "description": "Retorna a lista completa de serviços cadastrados."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Listar serviços - Filtro por nome parcial (/servicos?nome=...)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/servicos?nome=oleo",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "servicos"
+                            ],
+                            "query": [
+                                {
+                                    "key": "nome",
+                                    "value": "oleo",
+                                    "description": "Termo para busca parcial no nome do serviço"
+                                }
+                            ]
+                        },
+                        "description": "Filtra serviços com correspondência parcial no nome através do query parameter ?nome=..."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Buscar serviços por nome parcial (/servicos/buscar?nome=...)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/servicos/buscar?nome=Troca",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "servicos",
+                                "buscar"
+                            ],
+                            "query": [
+                                {
+                                    "key": "nome",
+                                    "value": "Troca",
+                                    "description": "Termo para busca parcial"
+                                }
+                            ]
+                        },
+                        "description": "Endpoint específico para buscar serviços por correspondência parcial no nome."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Criar serviço",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code é 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "if (pm.response.code === 201) {",
+                                    "    var data = pm.response.json();",
+                                    "    if (data.id) {",
+                                    "        pm.collectionVariables.set(\"servico_id\", data.id.toString());",
+                                    "        console.log(\"servico_id atualizado para:\", data.id);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nome\": \"Troca de Óleo e Filtro\",\n  \"descricao\": \"Troca de óleo de motor 5W30 e filtro de óleo original\",\n  \"preco\": 250.00,\n  \"tempo_estimado_horas\": 1.0,\n  \"ativo\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/servicos",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "servicos"
+                            ]
+                        },
+                        "description": "Cadastra um novo serviço na oficina mecânica e armazena o ID na variável servico_id."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Buscar serviço por ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/servicos/{{servico_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "servicos",
+                                "{{servico_id}}"
+                            ]
+                        },
+                        "description": "Busca detalhes de um serviço pelo ID numérico."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Atualizar serviço",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nome\": \"Troca de Óleo, Filtro e Checklist\",\n  \"preco\": 280.00,\n  \"tempo_estimado_horas\": 1.5,\n  \"ativo\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/servicos/{{servico_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "servicos",
+                                "{{servico_id}}"
+                            ]
+                        },
+                        "description": "Atualiza campos de um serviço existente."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Deletar serviço",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/servicos/{{servico_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "servicos",
+                                "{{servico_id}}"
+                            ]
+                        },
+                        "description": "Remove um serviço do banco de dados pelo ID."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "5. Peças e Estoque",
+            "description": "Endpoints para gerenciamento de peças, insumos automotivos e controle de saldo de estoque.",
+            "item": [
+                {
+                    "name": "Listar todas as peças",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/pecas",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "pecas"
+                            ]
+                        },
+                        "description": "Retorna o catálogo completo de peças e seu saldo em estoque."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Listar peças ativas (/pecas?ativo=true)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/pecas?ativo=true",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "pecas"
+                            ],
+                            "query": [
+                                {
+                                    "key": "ativo",
+                                    "value": "true",
+                                    "description": "Filtrar apenas peças ativas"
+                                }
+                            ]
+                        },
+                        "description": "Filtra as peças pelo status ativo."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Cadastrar peça",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code é 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nome\": \"Filtro de Óleo\",\n  \"descricao\": \"Filtro de óleo para motores 1.0 e 1.6\",\n  \"valor_unitario\": 45.90,\n  \"quantidade_estoque\": 25,\n  \"estoque_minimo\": 5,\n  \"ativo\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/pecas",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "pecas"
+                            ]
+                        },
+                        "description": "Cadastra uma nova peça ou insumo no estoque."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Buscar peça por ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/pecas/{{peca_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "pecas",
+                                "{{peca_id}}"
+                            ]
+                        },
+                        "description": "Busca detalhes de uma peça pelo ID."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Atualizar peça e saldo de estoque",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"valor_unitario\": 49.90,\n  \"quantidade_estoque\": 30\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/pecas/{{peca_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "pecas",
+                                "{{peca_id}}"
+                            ]
+                        },
+                        "description": "Atualiza valor unitário e/ou saldo em estoque de uma peça existente."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Deletar peça",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/pecas/{{peca_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "pecas",
+                                "{{peca_id}}"
+                            ]
+                        },
+                        "description": "Remove uma peça pelo ID."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "6. Ordens de Serviço",
+            "description": "Criação, orçamento, execução e acompanhamento de Ordens de Serviço.",
+            "item": [
+                {
+                    "name": "Listar ordens de serviço",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/ordens-servico",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "ordens-servico"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Criar ordem de serviço",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const resposta = pm.response.json();",
+                                    "if (resposta.id) { pm.collectionVariables.set('ordem_servico_id', resposta.id); }",
+                                    "if (resposta.numero_os) { pm.collectionVariables.set('numero_os', resposta.numero_os); }",
+                                    "if (resposta.servicos?.[0]?.id) { pm.collectionVariables.set('item_servico_os_id', resposta.servicos[0].id); }",
+                                    "if (resposta.pecas?.[0]?.id) { pm.collectionVariables.set('item_peca_os_id', resposta.pecas[0].id); }"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            },
+                            "raw": "{\n  \"cliente_id\": {{usuario_id}},\n  \"veiculo_id\": {{veiculo_id}},\n  \"descricao_problema\": \"Ruído ao frear\",\n  \"diagnostico\": \"Pastilhas de freio desgastadas\",\n  \"servicos\": [\n    { \"servico_id\": {{servico_id}}, \"quantidade\": 1 }\n  ],\n  \"pecas\": [\n    { \"peca_id\": {{peca_id}}, \"quantidade\": 1 }\n  ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/ordens-servico",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "ordens-servico"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Buscar ordem de serviço por ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "ordens-servico",
+                                "{{ordem_servico_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Atualizar ordem de serviço (editar e incluir peças cadastradas)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            },
+                            "raw": "{\n  \"diagnostico\": \"Pastilhas e discos de freio desgastados\",\n  \"servicos\": [\n    { \"id\": {{item_servico_os_id}}, \"servico_id\": {{servico_id}}, \"quantidade\": 1 }\n  ],\n  \"pecas\": [\n    { \"id\": {{item_peca_os_id}}, \"peca_id\": {{peca_id}}, \"quantidade\": 1 },\n    { \"peca_id\": {{peca_id}}, \"quantidade\": 2 }\n  ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "ordens-servico",
+                                "{{ordem_servico_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Enviar orçamento",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            },
+                            "raw": "{\n  \"observacao\": \"Orçamento enviado por WhatsApp.\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}/enviar-orcamento",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "ordens-servico",
+                                "{{ordem_servico_id}}",
+                                "enviar-orcamento"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Aprovar orçamento",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            },
+                            "raw": "{\n  \"observacao\": \"Aprovado pelo cliente.\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}/aprovar-orcamento",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "ordens-servico",
+                                "{{ordem_servico_id}}",
+                                "aprovar-orcamento"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Atualizar status da OS",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            },
+                            "raw": "{\n  \"status\": \"finalizada\",\n  \"observacao\": \"Serviços concluídos e veículo testado.\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}/status",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "ordens-servico",
+                                "{{ordem_servico_id}}",
+                                "status"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Acompanhar ordem de serviço",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}/acompanhamento",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "ordens-servico",
+                                "{{ordem_servico_id}}",
+                                "acompanhamento"
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Consultar acompanhamento por número da OS",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/acompanhamento-os?numero_os={{numero_os}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "acompanhamento-os"
+                            ],
+                            "query": [
+                                {
+                                    "key": "numero_os",
+                                    "value": "{{numero_os}}"
+                                }
+                            ]
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Remover ordem de serviço",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "ordens-servico",
+                                "{{ordem_servico_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "7. Validações e Testes de Erro",
+            "description": "Casos de teste para validar o comportamento da API diante de dados inválidos (422 via `Validator`) ou recursos inexistentes (404).",
+            "item": [
+                {
+                    "name": "Erro 422 - Nome inválido (muito curto)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nome\": \"Jo\",\n  \"email\": \"jo@exemplo.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/usuarios",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios"
+                            ]
+                        },
+                        "description": "Espera status 422: Nome deve ter pelo menos 3 caracteres."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Erro 422 - E-mail com formato inválido",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nome\": \"Nome Valido\",\n  \"email\": \"email-sem-arroba-e-sem-dominio\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/usuarios",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios"
+                            ]
+                        },
+                        "description": "Espera status 422: Formato de e-mail inválido."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Erro 422 - CPF com dígitos verificadores incorretos",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nome\": \"Usuario Cpf Invalido\",\n  \"email\": \"cpf.invalido@exemplo.com\",\n  \"cpf\": \"123.456.789-00\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/usuarios",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios"
+                            ]
+                        },
+                        "description": "Espera status 422: CPF rejeitado pelo algoritmo oficial de dígitos verificadores."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Erro 422 - Tipo de usuário inválido",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nome\": \"Usuario Tipo Invalido\",\n  \"email\": \"tipo.invalido@exemplo.com\",\n  \"cpf\": \"111.444.777-35\",\n  \"tipo_usuario\": \"gerente\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/usuarios",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios"
+                            ]
+                        },
+                        "description": "Espera status 422: Tipo inválido (valores permitidos: cliente, mecanico, atendente)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Erro 404 - Buscar usuário inexistente",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/usuarios/999999",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "usuarios",
+                                "999999"
+                            ]
+                        },
+                        "description": "Espera status 404: Usuário com ID especificado não encontrado."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Erro 422 - Veículo com placa inválida",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"cliente_id\": 1,\n  \"placa\": \"1234-ABC\",\n  \"marca\": \"Volkswagen\",\n  \"modelo\": \"Gol 1.0\",\n  \"ano\": 2022\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/veiculos",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "veiculos"
+                            ]
+                        },
+                        "description": "Espera status 422: Placa fora dos padrões Tradicional (ABC-1234) e Mercosul (ABC1D23)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Erro 422 - Veículo com ano inválido",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"cliente_id\": 1,\n  \"placa\": \"ABC1D23\",\n  \"marca\": \"Volkswagen\",\n  \"modelo\": \"Gol 1.0\",\n  \"ano\": 1850\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/veiculos",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "veiculos"
+                            ]
+                        },
+                        "description": "Espera status 422: Ano do veículo fora do intervalo permitido (1900 até ano atual + 1)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Erro 404 - Buscar veículo inexistente",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/veiculos/999999",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "veiculos",
+                                "999999"
+                            ]
+                        },
+                        "description": "Espera status 404: Veículo com ID especificado não encontrado."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Erro 422 - Serviço com preço negativo",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nome\": \"Serviço Preço Negativo\",\n  \"descricao\": \"Teste com preço abaixo de zero\",\n  \"preco\": -45.00,\n  \"tempo_estimado_horas\": 1.0\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/servicos",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "servicos"
+                            ]
+                        },
+                        "description": "Espera status 422: Validação de preço rejeita valores negativos."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Erro 404 - Buscar serviço inexistente",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/servicos/999999",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "servicos",
+                                "999999"
+                            ]
+                        },
+                        "description": "Espera status 404: Serviço com ID inexistente."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Erro 422 - Peça com valor unitário negativo",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nome\": \"Filtro de Ar\",\n  \"valor_unitario\": -20.00\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/pecas",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "pecas"
+                            ]
+                        },
+                        "description": "Espera status 422: Valor unitário da peça não pode ser negativo."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Erro 404 - Buscar peça inexistente",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/pecas/999999",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "pecas",
+                                "999999"
+                            ]
+                        },
+                        "description": "Espera status 404: Peça com ID inexistente."
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8080",
+            "type": "string"
+        },
+        {
+            "key": "usuario_id",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "veiculo_id",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "servico_id",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "ordem_servico_id",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "numero_os",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "item_servico_os_id",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "item_peca_os_id",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "peca_id",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
             {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code é 201\", function () {",
-                  "    pm.response.to.have.status(201);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
+                "key": "token",
+                "value": "{{token}}",
+                "type": "string"
             }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Filtro de Óleo\",\n  \"descricao\": \"Filtro de óleo para motores 1.0 e 1.6\",\n  \"valor_unitario\": 45.90,\n  \"quantidade_estoque\": 25,\n  \"estoque_minimo\": 5,\n  \"ativo\": true\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/pecas",
-              "host": ["{{base_url}}"],
-              "path": ["pecas"]
-            },
-            "description": "Cadastra uma nova peça ou insumo no estoque."
-          },
-          "response": []
-        },
-        {
-          "name": "Buscar peça por ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/pecas/{{peca_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["pecas", "{{peca_id}}"]
-            },
-            "description": "Busca detalhes de uma peça pelo ID."
-          },
-          "response": []
-        },
-        {
-          "name": "Atualizar peça e saldo de estoque",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"valor_unitario\": 49.90,\n  \"quantidade_estoque\": 30\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/pecas/{{peca_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["pecas", "{{peca_id}}"]
-            },
-            "description": "Atualiza valor unitário e/ou saldo em estoque de uma peça existente."
-          },
-          "response": []
-        },
-        {
-          "name": "Deletar peça",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/pecas/{{peca_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["pecas", "{{peca_id}}"]
-            },
-            "description": "Remove uma peça pelo ID."
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "6. Validações e Testes de Erro",
-      "description": "Casos de teste para validar o comportamento da API diante de dados inválidos (422 via `Validator`) ou recursos inexistentes (404).",
-      "item": [
-        {
-          "name": "Erro 422 - Nome inválido (muito curto)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Jo\",\n  \"email\": \"jo@exemplo.com\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/usuarios",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios"]
-            },
-            "description": "Espera status 422: Nome deve ter pelo menos 3 caracteres."
-          },
-          "response": []
-        },
-        {
-          "name": "Erro 422 - E-mail com formato inválido",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Nome Valido\",\n  \"email\": \"email-sem-arroba-e-sem-dominio\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/usuarios",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios"]
-            },
-            "description": "Espera status 422: Formato de e-mail inválido."
-          },
-          "response": []
-        },
-        {
-          "name": "Erro 422 - CPF com dígitos verificadores incorretos",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Usuario Cpf Invalido\",\n  \"email\": \"cpf.invalido@exemplo.com\",\n  \"cpf\": \"123.456.789-00\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/usuarios",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios"]
-            },
-            "description": "Espera status 422: CPF rejeitado pelo algoritmo oficial de dígitos verificadores."
-          },
-          "response": []
-        },
-        {
-          "name": "Erro 422 - Tipo de usuário inválido",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Usuario Tipo Invalido\",\n  \"email\": \"tipo.invalido@exemplo.com\",\n  \"cpf\": \"111.444.777-35\",\n  \"tipo_usuario\": \"gerente\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/usuarios",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios"]
-            },
-            "description": "Espera status 422: Tipo inválido (valores permitidos: cliente, mecanico, atendente)."
-          },
-          "response": []
-        },
-        {
-          "name": "Erro 404 - Buscar usuário inexistente",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/usuarios/999999",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios", "999999"]
-            },
-            "description": "Espera status 404: Usuário com ID especificado não encontrado."
-          },
-          "response": []
-        },
-        {
-          "name": "Erro 422 - Veículo com placa inválida",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"cliente_id\": 1,\n  \"placa\": \"1234-ABC\",\n  \"marca\": \"Volkswagen\",\n  \"modelo\": \"Gol 1.0\",\n  \"ano\": 2022\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/veiculos",
-              "host": ["{{base_url}}"],
-              "path": ["veiculos"]
-            },
-            "description": "Espera status 422: Placa fora dos padrões Tradicional (ABC-1234) e Mercosul (ABC1D23)."
-          },
-          "response": []
-        },
-        {
-          "name": "Erro 422 - Veículo com ano inválido",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"cliente_id\": 1,\n  \"placa\": \"ABC1D23\",\n  \"marca\": \"Volkswagen\",\n  \"modelo\": \"Gol 1.0\",\n  \"ano\": 1850\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/veiculos",
-              "host": ["{{base_url}}"],
-              "path": ["veiculos"]
-            },
-            "description": "Espera status 422: Ano do veículo fora do intervalo permitido (1900 até ano atual + 1)."
-          },
-          "response": []
-        },
-        {
-          "name": "Erro 404 - Buscar veículo inexistente",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/veiculos/999999",
-              "host": ["{{base_url}}"],
-              "path": ["veiculos", "999999"]
-            },
-            "description": "Espera status 404: Veículo com ID especificado não encontrado."
-          },
-          "response": []
-        },
-        {
-          "name": "Erro 422 - Serviço com preço negativo",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Serviço Preço Negativo\",\n  \"descricao\": \"Teste com preço abaixo de zero\",\n  \"preco\": -45.00,\n  \"tempo_estimado_horas\": 1.0\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/servicos",
-              "host": ["{{base_url}}"],
-              "path": ["servicos"]
-            },
-            "description": "Espera status 422: Validação de preço rejeita valores negativos."
-          },
-          "response": []
-        },
-        {
-          "name": "Erro 404 - Buscar serviço inexistente",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/servicos/999999",
-              "host": ["{{base_url}}"],
-              "path": ["servicos", "999999"]
-            },
-            "description": "Espera status 404: Serviço com ID inexistente."
-          },
-          "response": []
-        },
-        {
-          "name": "Erro 422 - Peça com valor unitário negativo",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Filtro de Ar\",\n  \"valor_unitario\": -20.00\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/pecas",
-              "host": ["{{base_url}}"],
-              "path": ["pecas"]
-            },
-            "description": "Espera status 422: Valor unitário da peça não pode ser negativo."
-          },
-          "response": []
-        },
-        {
-          "name": "Erro 404 - Buscar peça inexistente",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/pecas/999999",
-              "host": ["{{base_url}}"],
-              "path": ["pecas", "999999"]
-            },
-            "description": "Espera status 404: Peça com ID inexistente."
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "5. Ordens de Serviço",
-      "description": "Criação, orçamento, execução e acompanhamento de Ordens de Serviço.",
-      "item": [
-        {
-          "name": "Listar ordens de serviço",
-          "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": { "raw": "{{base_url}}/ordens-servico", "host": ["{{base_url}}"], "path": ["ordens-servico"] } },
-          "response": []
-        },
-        {
-          "name": "Criar ordem de serviço",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const resposta = pm.response.json();", "if (resposta.id) { pm.collectionVariables.set('ordem_servico_id', resposta.id); }", "if (resposta.numero_os) { pm.collectionVariables.set('numero_os', resposta.numero_os); }", "if (resposta.servicos?.[0]?.id) { pm.collectionVariables.set('item_servico_os_id', resposta.servicos[0].id); }", "if (resposta.pecas?.[0]?.id) { pm.collectionVariables.set('item_peca_os_id', resposta.pecas[0].id); }"] } }],
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }],
-            "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"cliente_id\": {{usuario_id}},\n  \"veiculo_id\": {{veiculo_id}},\n  \"descricao_problema\": \"Ruído ao frear\",\n  \"diagnostico\": \"Pastilhas de freio desgastadas\",\n  \"servicos\": [\n    { \"servico_id\": {{servico_id}}, \"quantidade\": 1 }\n  ],\n  \"pecas\": [\n    { \"peca_id\": {{peca_id}}, \"quantidade\": 1 }\n  ]\n}" },
-            "url": { "raw": "{{base_url}}/ordens-servico", "host": ["{{base_url}}"], "path": ["ordens-servico"] }
-          },
-          "response": []
-        },
-        {
-          "name": "Buscar ordem de serviço por ID",
-          "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": { "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}", "host": ["{{base_url}}"], "path": ["ordens-servico", "{{ordem_servico_id}}"] } },
-          "response": []
-        },
-        {
-          "name": "Atualizar ordem de serviço (editar e incluir peças cadastradas)",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }],
-            "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"diagnostico\": \"Pastilhas e discos de freio desgastados\",\n  \"servicos\": [\n    { \"id\": {{item_servico_os_id}}, \"servico_id\": {{servico_id}}, \"quantidade\": 1 }\n  ],\n  \"pecas\": [\n    { \"id\": {{item_peca_os_id}}, \"peca_id\": {{peca_id}}, \"quantidade\": 1 },\n    { \"peca_id\": {{peca_id}}, \"quantidade\": 2 }\n  ]\n}" },
-            "url": { "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}", "host": ["{{base_url}}"], "path": ["ordens-servico", "{{ordem_servico_id}}"] }
-          },
-          "response": []
-        },
-        {
-          "name": "Enviar orçamento",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"observacao\": \"Orçamento enviado por WhatsApp.\"\n}" }, "url": { "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}/enviar-orcamento", "host": ["{{base_url}}"], "path": ["ordens-servico", "{{ordem_servico_id}}", "enviar-orcamento"] } },
-          "response": []
-        },
-        {
-          "name": "Aprovar orçamento",
-          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"observacao\": \"Aprovado pelo cliente.\"\n}" }, "url": { "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}/aprovar-orcamento", "host": ["{{base_url}}"], "path": ["ordens-servico", "{{ordem_servico_id}}", "aprovar-orcamento"] } },
-          "response": []
-        },
-        {
-          "name": "Atualizar status da OS",
-          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }], "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"status\": \"finalizada\",\n  \"observacao\": \"Serviços concluídos e veículo testado.\"\n}" }, "url": { "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}/status", "host": ["{{base_url}}"], "path": ["ordens-servico", "{{ordem_servico_id}}", "status"] } },
-          "response": []
-        },
-        {
-          "name": "Acompanhar ordem de serviço",
-          "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": { "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}/acompanhamento", "host": ["{{base_url}}"], "path": ["ordens-servico", "{{ordem_servico_id}}", "acompanhamento"] } },
-          "response": []
-        },
-        {
-          "name": "Consultar acompanhamento por número da OS",
-          "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": { "raw": "{{base_url}}/acompanhamento-os?numero_os={{numero_os}}", "host": ["{{base_url}}"], "path": ["acompanhamento-os"], "query": [{ "key": "numero_os", "value": "{{numero_os}}" }] } },
-          "response": []
-        },
-        {
-          "name": "Remover ordem de serviço",
-          "request": { "method": "DELETE", "header": [{ "key": "Accept", "value": "application/json" }], "url": { "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}", "host": ["{{base_url}}"], "path": ["ordens-servico", "{{ordem_servico_id}}"] } },
-          "response": []
-        }
-      ]
+        ]
     }
-  ],
-  "variable": [
-    {
-      "key": "base_url",
-      "value": "http://localhost:8080",
-      "type": "string"
-    },
-    {
-      "key": "usuario_id",
-      "value": "1",
-      "type": "string"
-    },
-    {
-      "key": "veiculo_id",
-      "value": "1",
-      "type": "string"
-    },
-    {
-      "key": "servico_id",
-      "value": "1",
-      "type": "string"
-    },
-    {
-      "key": "ordem_servico_id",
-      "value": "1",
-      "type": "string"
-    },
-    {
-      "key": "numero_os",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "item_servico_os_id",
-      "value": "1",
-      "type": "string"
-    },
-    {
-      "key": "item_peca_os_id",
-      "value": "1",
-      "type": "string"
-    },
-    {
-      "key": "peca_id",
-      "value": "1",
-      "type": "string"
-    }
-  ]
 }
