@@ -1,4 +1,4 @@
-# 🚗 Tech Challenge — Sistema de Gestão de Oficina Mecânica (SOAT - Fase 1)
+# 🚗  Sistema de Gestão de Oficina Mecânica
 
 Projeto desenvolvido para a pós-graduação em **Software Architecture (SOAT)** da **FIAP**.
 
