@@ -236,18 +236,22 @@ $router->add('GET',    '/pecas/{id}',  [$pecaController, 'exibir'],    [$equipeI
 $router->add('POST',   '/pecas',       [$pecaController, 'criar'],     [$equipeInterna]);
 $router->add('PUT',    '/pecas/{id}',  [$pecaController, 'atualizar'], [$equipeInterna]);
 $router->add('DELETE', '/pecas/{id}',  [$pecaController, 'remover'],   [$apenasAtendente]);
-// Ordens de Serviço (OS)
-$router->add('GET',    '/ordens-servico',                       [$ordemServicoController, 'listar']);
-$router->add('GET',    '/ordens-servico/{id}',                  [$ordemServicoController, 'exibir']);
-$router->add('POST',   '/ordens-servico',                       [$ordemServicoController, 'criar']);
-$router->add('PUT',    '/ordens-servico/{id}',                  [$ordemServicoController, 'atualizar']);
-$router->add('DELETE', '/ordens-servico/{id}',                  [$ordemServicoController, 'remover']);
-$router->add('POST',   '/ordens-servico/{id}/enviar-orcamento', [$ordemServicoController, 'enviarOrcamento']);
+// =======================================================================
+// 7. Rotas de Ordens de Servico (OS)
+// =======================================================================
+// Rotas Administrativas e Operacionais (Protegidas por JWT)
+$router->add('GET',    '/ordens-servico',                       [$ordemServicoController, 'listar'],           [$equipeInterna]);
+$router->add('GET',    '/ordens-servico/{id}',                  [$ordemServicoController, 'exibir'],           [$equipeInterna]);
+$router->add('POST',   '/ordens-servico',                       [$ordemServicoController, 'criar'],            [$equipeInterna]);
+$router->add('PUT',    '/ordens-servico/{id}',                  [$ordemServicoController, 'atualizar'],        [$equipeInterna]);
+$router->add('DELETE', '/ordens-servico/{id}',                  [$ordemServicoController, 'remover'],          [$apenasAtendente]);
+$router->add('POST',   '/ordens-servico/{id}/enviar-orcamento', [$ordemServicoController, 'enviarOrcamento'], [$equipeInterna]);
+$router->add('PATCH',  '/ordens-servico/{id}/status',           [$ordemServicoController, 'atualizarStatus'],   [$equipeInterna]);
+
+// Rotas do Cliente (Acesso publico para consulta e aprovacao de orcamento)
 $router->add('POST',   '/ordens-servico/{id}/aprovar-orcamento',[$ordemServicoController, 'aprovarOrcamento']);
-$router->add('PATCH',  '/ordens-servico/{id}/status',           [$ordemServicoController, 'atualizarStatus']);
 $router->add('GET',    '/ordens-servico/{id}/acompanhamento',   [$ordemServicoController, 'acompanhar']);
 $router->add('GET',    '/acompanhamento-os',                    [$ordemServicoController, 'consultarAcompanhamento']);
-
 
 
 // -----------------------------------------------------------------------

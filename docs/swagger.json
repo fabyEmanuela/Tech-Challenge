@@ -103,6 +103,614 @@
                 "security": []
             }
         },
+        "/ordens-servico": {
+            "get": {
+                "tags": [
+                    "Ordens de Serviço"
+                ],
+                "summary": "Lista todas as Ordens de Serviço ou filtra por parâmetros",
+                "operationId": "da007fb466dbacc5f33621063a4daadb",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filtrar por status (recebida, em_diagnostico, aguardando_aprovacao, em_execucao, finalizada, entregue)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "cliente_id",
+                        "in": "query",
+                        "description": "Filtrar por ID do cliente",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "veiculo_id",
+                        "in": "query",
+                        "description": "Filtrar por ID do veículo",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "cpf",
+                        "in": "query",
+                        "description": "Filtrar por CPF do cliente",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "placa",
+                        "in": "query",
+                        "description": "Filtrar por Placa do veículo",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de Ordens de Serviço retornada com sucesso"
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Ordens de Serviço"
+                ],
+                "summary": "Cria uma nova Ordem de Serviço (OS)",
+                "description": "Permite abrir uma OS identificando o cliente por ID ou CPF, cadastrando o veículo e incluindo serviços e peças previamente cadastrados. O orçamento é calculado automaticamente e pode ser enviado de imediato.",
+                "operationId": "230ea7052c4b62d8e45390b0542425ff",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "descricao_problema"
+                                ],
+                                "properties": {
+                                    "cliente_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    },
+                                    "cliente_cpf": {
+                                        "type": "string",
+                                        "example": "529.982.247-25",
+                                        "nullable": true
+                                    },
+                                    "cliente_nome": {
+                                        "type": "string",
+                                        "example": "João da Silva",
+                                        "nullable": true
+                                    },
+                                    "cliente_email": {
+                                        "type": "string",
+                                        "example": "joao.silva@email.com",
+                                        "nullable": true
+                                    },
+                                    "cliente_telefone": {
+                                        "type": "string",
+                                        "example": "(11) 98765-4321",
+                                        "nullable": true
+                                    },
+                                    "veiculo_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    },
+                                    "veiculo_placa": {
+                                        "type": "string",
+                                        "example": "ABC1D23",
+                                        "nullable": true
+                                    },
+                                    "veiculo_marca": {
+                                        "type": "string",
+                                        "example": "Volkswagen",
+                                        "nullable": true
+                                    },
+                                    "veiculo_modelo": {
+                                        "type": "string",
+                                        "example": "Gol 1.0",
+                                        "nullable": true
+                                    },
+                                    "veiculo_ano": {
+                                        "type": "integer",
+                                        "example": 2022,
+                                        "nullable": true
+                                    },
+                                    "veiculo_cor": {
+                                        "type": "string",
+                                        "example": "Prata",
+                                        "nullable": true
+                                    },
+                                    "descricao_problema": {
+                                        "type": "string",
+                                        "example": "Barulho na suspensão dianteira e troca de óleo"
+                                    },
+                                    "diagnostico": {
+                                        "type": "string",
+                                        "example": "Necessário troca de amortecedores dianteiros e troca de óleo motor 5w30",
+                                        "nullable": true
+                                    },
+                                    "enviar_orcamento": {
+                                        "type": "boolean",
+                                        "example": false,
+                                        "nullable": true
+                                    },
+                                    "servicos": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "servico_id": {
+                                                    "description": "ID obrigatório de um serviço cadastrado",
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "quantidade": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "pecas": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "peca_id": {
+                                                    "description": "ID obrigatório de uma peça cadastrada",
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "quantidade": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 4
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Ordem de Serviço criada com sucesso"
+                    },
+                    "400": {
+                        "description": "Dados inválidos"
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor"
+                    }
+                }
+            }
+        },
+        "/ordens-servico/{id}": {
+            "get": {
+                "tags": [
+                    "Ordens de Serviço"
+                ],
+                "summary": "Busca os detalhes completos de uma Ordem de Serviço pelo ID",
+                "operationId": "39709f744eece787a2ed843c658c2660",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID da Ordem de Serviço",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalhes da OS retornados com sucesso"
+                    },
+                    "404": {
+                        "description": "OS não encontrada"
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Ordens de Serviço"
+                ],
+                "summary": "Atualiza uma Ordem de Serviço existente",
+                "description": "Permite atualizar diagnóstico, relato de problema, serviços e peças. Para peças, itens existentes exigem seu ID na OS e novas inclusões exigem um peca_id cadastrado. O orçamento é recalculado automaticamente.",
+                "operationId": "6a06db1d292fdb7eed20216a086d0da8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID da Ordem de Serviço",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "descricao_problema": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "diagnostico": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "enviar_orcamento": {
+                                        "type": "boolean",
+                                        "nullable": true
+                                    },
+                                    "servicos": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "pecas": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "id": {
+                                                    "description": "ID do item já associado à OS, obrigatório para editá-lo",
+                                                    "type": "integer",
+                                                    "nullable": true
+                                                },
+                                                "peca_id": {
+                                                    "description": "ID obrigatório de uma peça cadastrada",
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "quantidade": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ordem de Serviço atualizada com sucesso"
+                    },
+                    "400": {
+                        "description": "Dados inválidos"
+                    },
+                    "404": {
+                        "description": "OS não encontrada"
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Ordens de Serviço"
+                ],
+                "summary": "Remove uma Ordem de Serviço",
+                "operationId": "b889857a8effe131dabee8b40b5644e4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID da Ordem de Serviço",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ordem de Serviço removida com sucesso"
+                    },
+                    "400": {
+                        "description": "Operação não permitida"
+                    },
+                    "404": {
+                        "description": "OS não encontrada"
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor"
+                    }
+                }
+            }
+        },
+        "/ordens-servico/{id}/enviar-orcamento": {
+            "post": {
+                "tags": [
+                    "Ordens de Serviço"
+                ],
+                "summary": "Envia o orçamento da OS ao cliente para aprovação",
+                "description": "Calcula automaticamente o orçamento com base nos serviços e peças e altera o status para 'Aguardando aprovação'.",
+                "operationId": "349c63641616782ba1a3d452ae21f0d7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID da Ordem de Serviço",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "observacao": {
+                                        "type": "string",
+                                        "example": "Orçamento enviado por WhatsApp e E-mail.",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Orçamento enviado com sucesso"
+                    },
+                    "400": {
+                        "description": "Operação não permitida"
+                    },
+                    "404": {
+                        "description": "OS não encontrada"
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor"
+                    }
+                }
+            }
+        },
+        "/ordens-servico/{id}/aprovar-orcamento": {
+            "post": {
+                "tags": [
+                    "Ordens de Serviço"
+                ],
+                "summary": "Registra a aprovação do orçamento pelo cliente",
+                "description": "Altera o status automaticamente de 'Aguardando aprovação' para 'Em execução'.",
+                "operationId": "a2d96017fd8838eb9073fd322a0b5dd4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID da Ordem de Serviço",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "observacao": {
+                                        "type": "string",
+                                        "example": "Aprovado via telefone pelo cliente.",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Orçamento aprovado com sucesso"
+                    },
+                    "400": {
+                        "description": "Operação não permitida"
+                    },
+                    "404": {
+                        "description": "OS não encontrada"
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor"
+                    }
+                }
+            }
+        },
+        "/ordens-servico/{id}/status": {
+            "patch": {
+                "tags": [
+                    "Ordens de Serviço"
+                ],
+                "summary": "Atualiza o status da Ordem de Serviço",
+                "description": "Permite transicionar o status da OS com validação de fluxo (recebida, em_diagnostico, aguardando_aprovacao, em_execucao, finalizada, entregue).",
+                "operationId": "c771b7fd84ac6e2f0a58931a311a1ca1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID da Ordem de Serviço",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "example": "finalizada"
+                                    },
+                                    "observacao": {
+                                        "type": "string",
+                                        "example": "Serviços de suspensão finalizados e testados.",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status atualizado com sucesso"
+                    },
+                    "400": {
+                        "description": "Transição de status inválida"
+                    },
+                    "404": {
+                        "description": "OS não encontrada"
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor"
+                    }
+                }
+            }
+        },
+        "/ordens-servico/{id}/acompanhamento": {
+            "get": {
+                "tags": [
+                    "Ordens de Serviço"
+                ],
+                "summary": "Acompanhamento do progresso da OS pelo cliente",
+                "description": "Retorna a linha do tempo completa, percentual de conclusão, status atual, orçamento e itens para que o cliente acompanhe pela API.",
+                "operationId": "2bf4e7076e38a65d9112cbd1e7ef005b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID da Ordem de Serviço",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Acompanhamento retornado com sucesso"
+                    },
+                    "404": {
+                        "description": "OS não encontrada"
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor"
+                    }
+                }
+            }
+        },
+        "/acompanhamento-os": {
+            "get": {
+                "tags": [
+                    "Ordens de Serviço"
+                ],
+                "summary": "Consulta pública/cliente de acompanhamento de OS",
+                "description": "Permite ao cliente consultar o progresso de sua OS informando CPF, Placa do veículo ou Número da OS.",
+                "operationId": "ff46bd0c567beb789c86b2254a5669dc",
+                "parameters": [
+                    {
+                        "name": "cpf",
+                        "in": "query",
+                        "description": "CPF do cliente",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "placa",
+                        "in": "query",
+                        "description": "Placa do veículo",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "numero_os",
+                        "in": "query",
+                        "description": "Número da OS (ex: OS-20261028-0001)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "ID da OS",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Acompanhamento retornado com sucesso"
+                    },
+                    "400": {
+                        "description": "Parâmetros insuficientes"
+                    },
+                    "404": {
+                        "description": "Nenhuma OS encontrada"
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor"
+                    }
+                }
+            }
+        },
         "/pecas": {
             "get": {
                 "tags": [
@@ -2420,7 +3028,7 @@
                             "application/json": {
                                 "schema": {
                                     "type": "array",
-                                    "items": []
+                                    "items": {}
                                 }
                             }
                         }
@@ -2487,614 +3095,6 @@
                     }
                 },
                 "security": []
-            }
-        },
-        "/ordens-servico": {
-            "get": {
-                "tags": [
-                    "Ordens de Serviço"
-                ],
-                "summary": "Lista todas as Ordens de Serviço ou filtra por parâmetros",
-                "operationId": "da007fb466dbacc5f33621063a4daadb",
-                "parameters": [
-                    {
-                        "name": "status",
-                        "in": "query",
-                        "description": "Filtrar por status (recebida, em_diagnostico, aguardando_aprovacao, em_execucao, finalizada, entregue)",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "cliente_id",
-                        "in": "query",
-                        "description": "Filtrar por ID do cliente",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "veiculo_id",
-                        "in": "query",
-                        "description": "Filtrar por ID do veículo",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "cpf",
-                        "in": "query",
-                        "description": "Filtrar por CPF do cliente",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "placa",
-                        "in": "query",
-                        "description": "Filtrar por Placa do veículo",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Lista de Ordens de Serviço retornada com sucesso"
-                    },
-                    "500": {
-                        "description": "Erro interno no servidor"
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Ordens de Serviço"
-                ],
-                "summary": "Cria uma nova Ordem de Serviço (OS)",
-                "description": "Permite abrir uma OS identificando o cliente por ID ou CPF, cadastrando o veículo (placa, marca, modelo, ano), incluindo serviços solicitados e peças/insumos necessários. O orçamento é calculado automaticamente e pode ser enviado de imediato.",
-                "operationId": "230ea7052c4b62d8e45390b0542425ff",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "descricao_problema"
-                                ],
-                                "properties": {
-                                    "cliente_id": {
-                                        "type": "integer",
-                                        "example": 1,
-                                        "nullable": true
-                                    },
-                                    "cliente_cpf": {
-                                        "type": "string",
-                                        "example": "123.456.789-00",
-                                        "nullable": true
-                                    },
-                                    "cliente_nome": {
-                                        "type": "string",
-                                        "example": "João da Silva",
-                                        "nullable": true
-                                    },
-                                    "cliente_email": {
-                                        "type": "string",
-                                        "example": "joao.silva@email.com",
-                                        "nullable": true
-                                    },
-                                    "cliente_telefone": {
-                                        "type": "string",
-                                        "example": "(11) 98765-4321",
-                                        "nullable": true
-                                    },
-                                    "veiculo_id": {
-                                        "type": "integer",
-                                        "example": 1,
-                                        "nullable": true
-                                    },
-                                    "veiculo_placa": {
-                                        "type": "string",
-                                        "example": "ABC1D23",
-                                        "nullable": true
-                                    },
-                                    "veiculo_marca": {
-                                        "type": "string",
-                                        "example": "Volkswagen",
-                                        "nullable": true
-                                    },
-                                    "veiculo_modelo": {
-                                        "type": "string",
-                                        "example": "Gol 1.0",
-                                        "nullable": true
-                                    },
-                                    "veiculo_ano": {
-                                        "type": "integer",
-                                        "example": 2022,
-                                        "nullable": true
-                                    },
-                                    "veiculo_cor": {
-                                        "type": "string",
-                                        "example": "Prata",
-                                        "nullable": true
-                                    },
-                                    "descricao_problema": {
-                                        "type": "string",
-                                        "example": "Barulho na suspensão dianteira e troca de óleo"
-                                    },
-                                    "diagnostico": {
-                                        "type": "string",
-                                        "example": "Necessário troca de amortecedores dianteiros e troca de óleo motor 5w30",
-                                        "nullable": true
-                                    },
-                                    "enviar_orcamento": {
-                                        "type": "boolean",
-                                        "example": false,
-                                        "nullable": true
-                                    },
-                                    "servicos": {
-                                        "type": "array",
-                                        "items": {
-                                            "properties": {
-                                                "servico_id": {
-                                                    "type": "integer",
-                                                    "example": 1,
-                                                    "description": "ID obrigatório de um serviço cadastrado"
-                                                },
-                                                "quantidade": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "pecas": {
-                                        "type": "array",
-                                        "items": {
-                                            "properties": {
-                                                "peca_id": {
-                                                    "type": "integer",
-                                                    "description": "ID obrigatório de uma peça cadastrada",
-                                                    "example": 1
-                                                },
-                                                "quantidade": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 4
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Ordem de Serviço criada com sucesso"
-                    },
-                    "400": {
-                        "description": "Dados inválidos"
-                    },
-                    "500": {
-                        "description": "Erro interno no servidor"
-                    }
-                }
-            }
-        },
-        "/ordens-servico/{id}": {
-            "get": {
-                "tags": [
-                    "Ordens de Serviço"
-                ],
-                "summary": "Busca os detalhes completos de uma Ordem de Serviço pelo ID",
-                "operationId": "39709f744eece787a2ed843c658c2660",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID da Ordem de Serviço",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Detalhes da OS retornados com sucesso"
-                    },
-                    "404": {
-                        "description": "OS não encontrada"
-                    },
-                    "500": {
-                        "description": "Erro interno no servidor"
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "Ordens de Serviço"
-                ],
-                "summary": "Atualiza uma Ordem de Serviço existente",
-                "description": "Permite atualizar diagnóstico, relato de problema, serviços e peças. Para peças, itens existentes exigem seu ID na OS e novas inclusões exigem um peca_id cadastrado. O orçamento é recalculado automaticamente.",
-                "operationId": "6a06db1d292fdb7eed20216a086d0da8",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID da Ordem de Serviço",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "descricao_problema": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "diagnostico": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "enviar_orcamento": {
-                                        "type": "boolean",
-                                        "nullable": true
-                                    },
-                                    "servicos": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "pecas": {
-                                        "type": "array",
-                                        "items": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "description": "ID do item já associado à OS, obrigatório para editá-lo",
-                                                    "nullable": true
-                                                },
-                                                "peca_id": {
-                                                    "type": "integer",
-                                                    "description": "ID obrigatório de uma peça cadastrada",
-                                                    "example": 1
-                                                },
-                                                "quantidade": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 1
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Ordem de Serviço atualizada com sucesso"
-                    },
-                    "400": {
-                        "description": "Dados inválidos"
-                    },
-                    "404": {
-                        "description": "OS não encontrada"
-                    },
-                    "500": {
-                        "description": "Erro interno no servidor"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Ordens de Serviço"
-                ],
-                "summary": "Remove uma Ordem de Serviço",
-                "operationId": "b889857a8effe131dabee8b40b5644e4",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID da Ordem de Serviço",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Ordem de Serviço removida com sucesso"
-                    },
-                    "400": {
-                        "description": "Operação não permitida"
-                    },
-                    "404": {
-                        "description": "OS não encontrada"
-                    },
-                    "500": {
-                        "description": "Erro interno no servidor"
-                    }
-                }
-            }
-        },
-        "/ordens-servico/{id}/enviar-orcamento": {
-            "post": {
-                "tags": [
-                    "Ordens de Serviço"
-                ],
-                "summary": "Envia o orçamento da OS ao cliente para aprovação",
-                "description": "Calcula automaticamente o orçamento com base nos serviços e peças e altera o status para 'Aguardando aprovação'.",
-                "operationId": "349c63641616782ba1a3d452ae21f0d7",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID da Ordem de Serviço",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": false,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "observacao": {
-                                        "type": "string",
-                                        "example": "Orçamento enviado por WhatsApp e E-mail.",
-                                        "nullable": true
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Orçamento enviado com sucesso"
-                    },
-                    "400": {
-                        "description": "Operação não permitida"
-                    },
-                    "404": {
-                        "description": "OS não encontrada"
-                    },
-                    "500": {
-                        "description": "Erro interno no servidor"
-                    }
-                }
-            }
-        },
-        "/ordens-servico/{id}/aprovar-orcamento": {
-            "post": {
-                "tags": [
-                    "Ordens de Serviço"
-                ],
-                "summary": "Registra a aprovação do orçamento pelo cliente",
-                "description": "Altera o status automaticamente de 'Aguardando aprovação' para 'Em execução'.",
-                "operationId": "a2d96017fd8838eb9073fd322a0b5dd4",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID da Ordem de Serviço",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": false,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "observacao": {
-                                        "type": "string",
-                                        "example": "Aprovado via telefone pelo cliente.",
-                                        "nullable": true
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Orçamento aprovado com sucesso"
-                    },
-                    "400": {
-                        "description": "Operação não permitida"
-                    },
-                    "404": {
-                        "description": "OS não encontrada"
-                    },
-                    "500": {
-                        "description": "Erro interno no servidor"
-                    }
-                }
-            }
-        },
-        "/ordens-servico/{id}/status": {
-            "patch": {
-                "tags": [
-                    "Ordens de Serviço"
-                ],
-                "summary": "Atualiza o status da Ordem de Serviço",
-                "description": "Permite transicionar o status da OS com validação de fluxo (recebida, em_diagnostico, aguardando_aprovacao, em_execucao, finalizada, entregue).",
-                "operationId": "c771b7fd84ac6e2f0a58931a311a1ca1",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID da Ordem de Serviço",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "status"
-                                ],
-                                "properties": {
-                                    "status": {
-                                        "type": "string",
-                                        "example": "finalizada"
-                                    },
-                                    "observacao": {
-                                        "type": "string",
-                                        "example": "Serviços de suspensão finalizados e testados.",
-                                        "nullable": true
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Status atualizado com sucesso"
-                    },
-                    "400": {
-                        "description": "Transição de status inválida"
-                    },
-                    "404": {
-                        "description": "OS não encontrada"
-                    },
-                    "500": {
-                        "description": "Erro interno no servidor"
-                    }
-                }
-            }
-        },
-        "/ordens-servico/{id}/acompanhamento": {
-            "get": {
-                "tags": [
-                    "Ordens de Serviço"
-                ],
-                "summary": "Acompanhamento do progresso da OS pelo cliente",
-                "description": "Retorna a linha do tempo completa, percentual de conclusão, status atual, orçamento e itens para que o cliente acompanhe pela API.",
-                "operationId": "2bf4e7076e38a65d9112cbd1e7ef005b",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID da Ordem de Serviço",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Acompanhamento retornado com sucesso"
-                    },
-                    "404": {
-                        "description": "OS não encontrada"
-                    },
-                    "500": {
-                        "description": "Erro interno no servidor"
-                    }
-                }
-            }
-        },
-        "/acompanhamento-os": {
-            "get": {
-                "tags": [
-                    "Ordens de Serviço"
-                ],
-                "summary": "Consulta pública/cliente de acompanhamento de OS",
-                "description": "Permite ao cliente consultar o progresso de sua OS informando CPF, Placa do veículo ou Número da OS.",
-                "operationId": "ff46bd0c567beb789c86b2254a5669dc",
-                "parameters": [
-                    {
-                        "name": "cpf",
-                        "in": "query",
-                        "description": "CPF do cliente",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "placa",
-                        "in": "query",
-                        "description": "Placa do veículo",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "numero_os",
-                        "in": "query",
-                        "description": "Número da OS (ex: OS-20261028-0001)",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "id",
-                        "in": "query",
-                        "description": "ID da OS",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Acompanhamento retornado com sucesso"
-                    },
-                    "400": {
-                        "description": "Parâmetros insuficientes"
-                    },
-                    "404": {
-                        "description": "Nenhuma OS encontrada"
-                    },
-                    "500": {
-                        "description": "Erro interno no servidor"
-                    }
-                }
             }
         }
     },
