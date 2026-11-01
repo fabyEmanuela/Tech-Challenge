@@ -13,6 +13,8 @@ interface UsuarioRepositoryInterface
 
     public function buscarPorEmail(string $email): ?Usuario;
 
+    public function buscarPorCpf(string $cpf): ?Usuario;
+
     public function salvar(Usuario $usuario): Usuario;
 
     public function atualizar(Usuario $usuario): Usuario;

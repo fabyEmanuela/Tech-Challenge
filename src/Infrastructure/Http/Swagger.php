@@ -47,6 +47,10 @@ use OpenApi\Attributes as OA;
     name: "Status",
     description: "Verificação de conectividade e saúde da API"
 )]
+#[OA\Tag(
+    name: "Ordens de Serviço",
+    description: "Gerenciamento completo do ciclo de vida das Ordens de Serviço (OS), orçamentos e acompanhamento"
+)]
 class Swagger
 {
 }

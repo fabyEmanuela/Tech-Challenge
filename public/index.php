@@ -9,7 +9,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 // Pro Swagger (porta 8081) consuma a API (porta 8080)
 // -----------------------------------------------------------------------
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Accept");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -17,6 +17,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
+use Application\OrdemServico\AcompanharOrdemServicoUseCase;
+use Application\OrdemServico\AlterarStatusOrdemServicoUseCase;
+use Application\OrdemServico\AprovarOrcamentoUseCase;
+use Application\OrdemServico\AtualizarOrdemServicoUseCase;
+use Application\OrdemServico\BuscarOrdemServicoPorIdUseCase;
+use Application\OrdemServico\CriarOrdemServicoUseCase;
+use Application\OrdemServico\DeletarOrdemServicoUseCase;
+use Application\OrdemServico\EnviarOrcamentoUseCase;
+use Application\OrdemServico\ListarOrdensServicoUseCase;
 use Application\Peca\AtualizarPecaUseCase;
 use Application\Peca\BuscarPecaPorIdUseCase;
 use Application\Peca\CriarPecaUseCase;
@@ -39,6 +48,7 @@ use Application\Veiculo\CriarVeiculoUseCase;
 use Application\Veiculo\DeletarVeiculoUseCase;
 use Application\Veiculo\ListarVeiculosUseCase;
 use Http\Controllers\AuthController;
+use Http\Controllers\OrdemServicoController;
 use Http\Controllers\PecaController;
 use Http\Controllers\ServicoController;
 use Http\Controllers\UsuarioController;
@@ -48,6 +58,7 @@ use Http\Router;
 use Infrastructure\Auth\JwtService;
 use Infrastructure\Database\Connection;
 use Infrastructure\Http\Controllers\HealthController;
+use Repositories\OrdemServico\OrdemServicoPdoRepository;
 use Repositories\Peca\PecaPdoRepository;
 use Repositories\Servico\ServicoPdoRepository;
 use Repositories\Usuario\UsuarioPdoRepository;
@@ -60,9 +71,10 @@ use Repositories\Veiculo\VeiculoPdoRepository;
 $pdo = Connection::getInstance();
 
 // Repositórios
-$usuarioRepository = new UsuarioPdoRepository($pdo);
-$servicoRepository = new ServicoPdoRepository($pdo);
-$veiculoRepository = new VeiculoPdoRepository($pdo);
+$usuarioRepository      = new UsuarioPdoRepository($pdo);
+$servicoRepository      = new ServicoPdoRepository($pdo);
+$veiculoRepository      = new VeiculoPdoRepository($pdo);
+$ordemServicoRepository = new OrdemServicoPdoRepository($pdo);
 $pecaRepository    = new PecaPdoRepository($pdo);
 
 // Autenticação & JWT
@@ -91,6 +103,17 @@ $buscarServicoPorId   = new BuscarServicoPorIdUseCase($servicoRepository);
 $buscarServicoPorNome = new BuscarServicoPorNomeUseCase($servicoRepository);
 $atualizarServico     = new AtualizarServicoUseCase($servicoRepository);
 $deletarServico       = new DeletarServicoUseCase($servicoRepository);
+
+// Use Cases - Ordens de Serviço
+$criarOrdemServico         = new CriarOrdemServicoUseCase($ordemServicoRepository, $usuarioRepository, $veiculoRepository, $servicoRepository, $pecaRepository);
+$listarOrdensServico       = new ListarOrdensServicoUseCase($ordemServicoRepository);
+$buscarOrdemServico        = new BuscarOrdemServicoPorIdUseCase($ordemServicoRepository);
+$atualizarOrdemServico     = new AtualizarOrdemServicoUseCase($ordemServicoRepository, $servicoRepository, $pecaRepository);
+$deletarOrdemServico       = new DeletarOrdemServicoUseCase($ordemServicoRepository);
+$enviarOrcamento           = new EnviarOrcamentoUseCase($ordemServicoRepository);
+$aprovarOrcamento          = new AprovarOrcamentoUseCase($ordemServicoRepository);
+$alterarStatusOrdemServico = new AlterarStatusOrdemServicoUseCase($ordemServicoRepository);
+$acompanharOrdemServico    = new AcompanharOrdemServicoUseCase($ordemServicoRepository);
 
 // Use Cases - Peças
 $criarPeca     = new CriarPecaUseCase($pecaRepository);
@@ -130,6 +153,18 @@ $servicoController = new ServicoController(
     $buscarServicoPorNome,
     $atualizarServico,
     $deletarServico,
+);
+
+$ordemServicoController = new OrdemServicoController(
+    $criarOrdemServico,
+    $listarOrdensServico,
+    $buscarOrdemServico,
+    $atualizarOrdemServico,
+    $deletarOrdemServico,
+    $enviarOrcamento,
+    $aprovarOrcamento,
+    $alterarStatusOrdemServico,
+    $acompanharOrdemServico,
 );
 
 $pecaController = new PecaController(
@@ -201,6 +236,19 @@ $router->add('GET',    '/pecas/{id}',  [$pecaController, 'exibir'],    [$equipeI
 $router->add('POST',   '/pecas',       [$pecaController, 'criar'],     [$equipeInterna]);
 $router->add('PUT',    '/pecas/{id}',  [$pecaController, 'atualizar'], [$equipeInterna]);
 $router->add('DELETE', '/pecas/{id}',  [$pecaController, 'remover'],   [$apenasAtendente]);
+// Ordens de Serviço (OS)
+$router->add('GET',    '/ordens-servico',                       [$ordemServicoController, 'listar']);
+$router->add('GET',    '/ordens-servico/{id}',                  [$ordemServicoController, 'exibir']);
+$router->add('POST',   '/ordens-servico',                       [$ordemServicoController, 'criar']);
+$router->add('PUT',    '/ordens-servico/{id}',                  [$ordemServicoController, 'atualizar']);
+$router->add('DELETE', '/ordens-servico/{id}',                  [$ordemServicoController, 'remover']);
+$router->add('POST',   '/ordens-servico/{id}/enviar-orcamento', [$ordemServicoController, 'enviarOrcamento']);
+$router->add('POST',   '/ordens-servico/{id}/aprovar-orcamento',[$ordemServicoController, 'aprovarOrcamento']);
+$router->add('PATCH',  '/ordens-servico/{id}/status',           [$ordemServicoController, 'atualizarStatus']);
+$router->add('GET',    '/ordens-servico/{id}/acompanhamento',   [$ordemServicoController, 'acompanhar']);
+$router->add('GET',    '/acompanhamento-os',                    [$ordemServicoController, 'consultarAcompanhamento']);
+
+
 
 // -----------------------------------------------------------------------
 // Dispatch
