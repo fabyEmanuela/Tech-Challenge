@@ -57,6 +57,7 @@ class NotificadorOrdemServicoEmail implements NotificadorOrdemServicoInterface
                 }
 
                 $mail->Body .= "\nTotal: R$ " . number_format($os->valorTotal(), 2, ',', '.');
+                $mail->Body .= "\nTempo estimado de serviço: " . number_format($os->tempoEstimadoTotalHoras(), 2, ':', '.') . ' horas';
                 $mail->Body .= "\nEntre em contato com a oficina para aprovar o orçamento.";
             }
             $mail->send();

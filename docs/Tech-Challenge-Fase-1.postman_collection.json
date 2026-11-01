@@ -1414,7 +1414,7 @@
                                     "language": "json"
                                 }
                             },
-                            "raw": "{\n  \"observacao\": \"Orçamento enviado por WhatsApp.\"\n}"
+                            "raw": "{\n  \"observacao\": \"Orçamento enviado por E-mail.\"\n}"
                         },
                         "url": {
                             "raw": "{{base_url}}/ordens-servico/{{ordem_servico_id}}/enviar-orcamento",
