@@ -19,6 +19,7 @@ class ListarOrdensServicoUseCase
      *     cliente_id?: int,
      *     veiculo_id?: int,
      *     cpf?: string,
+     *     cnpj?: string|null,
      *     placa?: string
      * } $filtros
      * @return OrdemServico[]

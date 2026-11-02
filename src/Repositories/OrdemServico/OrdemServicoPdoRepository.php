@@ -303,7 +303,7 @@ class OrdemServicoPdoRepository implements OrdemServicoRepositoryInterface
     public function listar(array $filtros = []): array
     {
         $sql = "SELECT os.*, 
-                       u.nome AS cliente_nome, u.cpf AS cliente_cpf, u.email AS cliente_email, u.telefone AS cliente_telefone,
+                       u.nome AS cliente_nome, u.cpf AS cliente_cpf, u.cnpj AS cliente_cnpj, u.email AS cliente_email, u.telefone AS cliente_telefone,
                        v.placa AS veiculo_placa, v.marca AS veiculo_marca, v.modelo AS veiculo_modelo, 
                        COALESCE(v.ano_modelo, v.ano_fabricacao) AS veiculo_ano, v.cor AS veiculo_cor
                 FROM ordens_servico os
@@ -331,6 +331,11 @@ class OrdemServicoPdoRepository implements OrdemServicoRepositoryInterface
         if (!empty($filtros['cpf'])) {
             $where[] = 'u.cpf = :cpf';
             $params[':cpf'] = Validator::cpf((string) $filtros['cpf']);
+        }
+
+        if (!empty($filtros['cnpj'])) {
+            $where[] = 'u.cnpj = :cnpj';
+            $params[':cnpj'] = Validator::cnpj((string) $filtros['cnpj']);
         }
 
         if (!empty($filtros['placa'])) {
@@ -544,11 +549,12 @@ class OrdemServicoPdoRepository implements OrdemServicoRepositoryInterface
                 'id'       => (int) $row['cliente_id'],
                 'nome'     => $row['cliente_nome'],
                 'cpf'      => $row['cliente_cpf'],
+                'cnpj'     => $row['cliente_cnpj'],
                 'email'    => $row['cliente_email'],
                 'telefone' => $row['cliente_telefone'],
             ]);
         } else {
-            $stmtCli = $this->pdo->prepare("SELECT id, nome, email, telefone, cpf FROM usuarios WHERE id = :id");
+            $stmtCli = $this->pdo->prepare("SELECT id, nome, email, telefone, cpf, cnpj FROM usuarios WHERE id = :id");
             $stmtCli->execute([':id' => $row['cliente_id']]);
             $cli = $stmtCli->fetch(PDO::FETCH_ASSOC);
             if ($cli) {

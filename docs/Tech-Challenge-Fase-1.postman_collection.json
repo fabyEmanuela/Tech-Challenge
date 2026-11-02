@@ -1939,6 +1939,86 @@
                     "response": []
                 }
             ]
+        },
+        {
+            "name": "Clientes com CNPJ",
+            "description": "Cliente deve possuir exatamente um documento: CPF ou CNPJ. Na troca, envie null para remover o documento anterior.",
+            "item": [
+                {
+                    "name": "Cadastrar cliente com CNPJ",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/usuarios",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nome\": \"Empresa Teste\",\n    \"email\": \"empresa@example.com\",\n    \"cnpj\": \"11.222.333\\/0001-81\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Trocar CPF por CNPJ",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/usuarios/{{usuario_id}}",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"cpf\": null,\n    \"cnpj\": \"12.ABC.345\\/01DE-35\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Buscar cliente por CNPJ",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/usuarios?cnpj=11222333000181"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Acompanhar OS por CNPJ",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/acompanhamento-os?cnpj=11222333000181"
+                    },
+                    "response": []
+                }
+            ]
         }
     ],
     "variable": [

@@ -7,11 +7,15 @@ use Domain\Usuario\Usuario;
 
 interface UsuarioRepositoryInterface
 {
-    public function listarTodos(?TipoUsuario $tipo = null, ?string $nome = null, ?string $cpf = null): array;
+    public function listarTodos(?TipoUsuario $tipo = null, ?string $nome = null, ?string $cpf = null, ?string $cnpj = null): array;
 
     public function buscarPorId(int $id): ?Usuario;
 
     public function buscarPorEmail(string $email): ?Usuario;
+
+    public function buscarPorCnpj(string $cnpj): ?Usuario;
+
+    public function cnpjJaCadastrado(string $cnpj, ?int $excluirId = null): bool;
 
     public function buscarPorCpf(string $cpf): ?Usuario;
 

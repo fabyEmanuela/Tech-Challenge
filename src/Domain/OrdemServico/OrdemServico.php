@@ -418,8 +418,8 @@ final class OrdemServico
     public function toArray(): array
     {
         return [
-            'avisos_estoque'              => $this->avisosEstoque,
-            'inicio_pendente_por_estoque' => $this->inicioPendentePorEstoque,
+            ...($this->avisosEstoque !== [] ? ['avisos_estoque' => $this->avisosEstoque] : []),
+            ...($this->inicioPendentePorEstoque ? ['inicio_pendente_por_estoque' => true] : []),
             'id'                   => $this->id,
             'numero_os'            => $this->numeroOs,
             'cliente_id'           => $this->clienteId,
@@ -505,6 +505,7 @@ final class OrdemServico
             'cliente'             => $this->dadosCliente ? [
                 'nome' => $this->dadosCliente['nome'] ?? null,
                 'cpf'  => $this->dadosCliente['cpf'] ?? null,
+                'cnpj' => $this->dadosCliente['cnpj'] ?? null,
             ] : null,
             'descricao_problema'  => $this->descricaoProblema,
             'diagnostico'         => $this->diagnostico,

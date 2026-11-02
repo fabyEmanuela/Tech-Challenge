@@ -15,7 +15,20 @@ class Usuario
         private bool       $ativo,
         private ?string    $criadoEm,
         private ?string    $atualizadoEm,
-    ) {}
+        private ?string    $cnpj = null,
+    ) {
+        $this->definirDocumentos($cpf, $cnpj);
+    }
+
+    public function getCnpj(): ?string { return $this->cnpj; }
+
+    public function definirDocumentos(?string $cpf, ?string $cnpj, ?TipoUsuario $tipo = null): void
+    {
+        $documentos = \Domain\Shared\Validator::documentosUsuario($cpf, $cnpj, ($tipo ?? $this->tipoUsuario)->value, permitirFuncionarioSemCpf: true);
+        $this->cpf = $documentos['cpf'];
+        $this->cnpj = $documentos['cnpj'];
+        $this->tipoUsuario = $tipo ?? $this->tipoUsuario;
+    }
 
     // --- Getters ---
 
@@ -88,11 +101,12 @@ class Usuario
 
     public function setCpf(?string $cpf): void
     {
-        $this->cpf = $cpf;
+        $this->definirDocumentos($cpf, $this->cnpj);
     }
 
     public function setTipoUsuario(TipoUsuario $tipoUsuario): void
     {
+        \Domain\Shared\Validator::documentosUsuario($this->cpf, $this->cnpj, $tipoUsuario->value, permitirFuncionarioSemCpf: true);
         $this->tipoUsuario = $tipoUsuario;
     }
 
@@ -117,6 +131,7 @@ class Usuario
             'email'        => $this->email,
             'telefone'     => $this->telefone,
             'cpf'          => $this->cpf,
+            'cnpj'         => $this->cnpj,
             'tipo_usuario' => $this->tipoUsuario->value,
             'ativo'        => $this->ativo,
             'criado_em'    => $this->criadoEm,

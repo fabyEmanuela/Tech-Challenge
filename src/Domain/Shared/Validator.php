@@ -28,6 +28,50 @@ class Validator
     private const ANO_MINIMO_VEICULO = 1900;
 
     // ------------------------------------------------------------------
+    /** Normaliza e valida CNPJ numérico ou alfanumérico, com ou sem máscara. */
+    public static function cnpj(string $cnpj): string
+    {
+        $cnpj = strtoupper(trim($cnpj));
+        if (!preg_match('/^(?:[A-Z0-9]{12}[0-9]{2}|[A-Z0-9]{2}\.[A-Z0-9]{3}\.[A-Z0-9]{3}\/[A-Z0-9]{4}-[0-9]{2})$/D', $cnpj)) {
+            throw new InvalidArgumentException('CNPJ inválido: formato incorreto.');
+        }
+        $valor = str_replace(['.', '/', '-'], '', $cnpj);
+        if (preg_match('/^(\d)\1{13}$/D', $valor)) {
+            throw new InvalidArgumentException('CNPJ inválido: sequência repetida.');
+        }
+        foreach ([[5,4,3,2,9,8,7,6,5,4,3,2], [6,5,4,3,2,9,8,7,6,5,4,3,2]] as $indice => $pesos) {
+            $soma = 0;
+            foreach ($pesos as $i => $peso) {
+                $soma += (ord($valor[$i]) - 48) * $peso;
+            }
+            $resto = $soma % 11;
+            $digito = $resto < 2 ? 0 : 11 - $resto;
+            if ((int) $valor[12 + $indice] !== $digito) {
+                throw new InvalidArgumentException('CNPJ inválido: dígito verificador incorreto.');
+            }
+        }
+        return substr($valor, 0, 2).'.'.substr($valor, 2, 3).'.'.substr($valor, 5, 3).'/'.substr($valor, 8, 4).'-'.substr($valor, 12);
+    }
+
+    /** Retorna exatamente um documento normalizado; funcionários continuam usando CPF. */
+    public static function documentosUsuario(mixed $cpf, mixed $cnpj, string $tipo = 'cliente', bool $permitirFuncionarioSemCpf = false): array
+    {
+        if (($cpf !== null && !is_string($cpf)) || ($cnpj !== null && !is_string($cnpj))) {
+            throw new InvalidArgumentException('CPF e CNPJ devem ser informados como texto.');
+        }
+        $cpf = $cpf === null || trim($cpf) === '' ? null : trim($cpf);
+        $cnpj = $cnpj === null || trim($cnpj) === '' ? null : trim($cnpj);
+        if ($permitirFuncionarioSemCpf && $tipo !== 'cliente' && $cpf === null && $cnpj === null) {
+            return ['cpf' => null, 'cnpj' => null];
+        }
+        if (($cpf === null) === ($cnpj === null)) {
+            throw new InvalidArgumentException('Informe exatamente um documento: CPF ou CNPJ.');
+        }
+        if ($tipo !== 'cliente' && $cnpj !== null) {
+            throw new InvalidArgumentException('Mecânicos e atendentes devem informar CPF.');
+        }
+        return ['cpf' => $cpf === null ? null : self::cpf($cpf), 'cnpj' => $cnpj === null ? null : self::cnpj($cnpj)];
+    }
     // CPF
     // ------------------------------------------------------------------
 
@@ -43,6 +87,9 @@ class Validator
      */
     public static function cpf(string $cpf): string
     {
+        if (!preg_match('/^(?:[0-9]{11}|[0-9]{3}\.[0-9]{3}\.[0-9]{3}-[0-9]{2})$/D', trim($cpf))) {
+            throw new InvalidArgumentException('CPF inválido: formato incorreto.');
+        }
         // Remove máscara
         $apenas_digitos = self::normalizarCpf($cpf);
 

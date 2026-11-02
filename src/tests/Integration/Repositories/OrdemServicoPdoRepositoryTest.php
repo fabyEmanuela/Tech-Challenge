@@ -48,7 +48,7 @@ class OrdemServicoPdoRepositoryTest extends IntegrationTestCase
             nome:         'Cliente Teste OS',
             email:        'cliente.os.' . uniqid() . '@gmail.com',
             telefone:     '(11) 97777-2222',
-            cpf:          '448.241.690-30',
+            cpf:          '529.982.247-25',
             tipoUsuario:  TipoUsuario::CLIENTE,
             senhaHash:    null,
             ativo:        true,
