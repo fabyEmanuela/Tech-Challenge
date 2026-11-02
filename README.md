@@ -148,11 +148,43 @@ docker compose exec -e XDEBUG_MODE=coverage app ./vendor/bin/phpunit --coverage-
 > **Como visualizar o relatório HTML:** Após executar o comando acima, basta abrir o arquivo `coverage/index.html` em qualquer navegador web.
 > 
 > **Resultado da suíte:**
-> - **Camada de Domínio (`Domain`):** **92.81%** de linhas e **91.21%** de métodos (Nível Verde / High).
-> - **Agregado Crítico (`Domain\OrdemServico`):** **99.43%** de cobertura de linhas.
-> - **Total de asserções:** 147 testes e 557 asserções com 100% de sucesso (0 falhas).
+> - **Camada de Domínio (`Domain`):** **92.67%** de linhas e **91.01%** de métodos (Nível Verde / High).
+> - **Agregado Crítico (`Domain\OrdemServico`):** **99.12%** de cobertura de linhas.
+> - **Total de asserções:** 187 testes e 643 asserções com 100% de sucesso (0 falhas).
 
 > **Nota para Avaliação:** Os testes de integração utilizam uma base de dados isolada (`oficina_mecanica_test`) criada automaticamente pelo Docker, utilizando transações com rollback para garantir que nenhum dado residual permaneça no banco após os testes.
+
+---
+
+### 🛡️ Análise de Qualidade e Segurança (SonarQube)
+
+O projeto está configurado para análise estática contínua de código e segurança via arquivo [`sonar-project.properties`](file:///sonar-project.properties), focado no núcleo de domínio da aplicação (**Clean Architecture / DDD**).
+
+**Resultados do SonarQube (Quality Gate: PASSED):**
+- **Quality Gate:** ✅ **Passed (Verde)**
+- **Coverage (Domínio Crítico):** **93.8%** (Exigência FIAP: $\ge$ 80%)
+- **Bugs:** **0** (Rating A)
+- **Vulnerabilities:** **0** (Rating A)
+- **Security Hotspots:** **0** (Rating A)
+- **Duplicações:** **0.0%**
+
+#### Como Reproduzir a Análise Localmente no SonarQube (Opcional):
+
+1. **Gerar o arquivo de cobertura Clover (`coverage.xml`):**
+   ```bash
+   docker compose exec -e XDEBUG_MODE=coverage app ./vendor/bin/phpunit --coverage-clover coverage.xml
+   ```
+
+2. **Subir o servidor SonarQube (caso não esteja em execução):**
+   ```bash
+   docker run -d --name sonarqube -p 9000:9000 sonarqube:lts-community
+   ```
+   *(Acesse `http://localhost:9000`)*
+
+3. **Disparar o SonarScanner via Docker:**
+   ```bash
+   docker run --rm -e SONAR_HOST_URL="http://host.docker.internal:9000" -v "${PWD}:/usr/src" sonarsource/sonar-scanner-cli -Dsonar.login=<SEU_TOKEN_SONAR>
+   ```
 
 ---
 

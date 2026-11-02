@@ -411,9 +411,15 @@ final class OrdemServico
         $this->inicioPendentePorEstoque = $pendente;
     }
 
-    public function avisosEstoque(): array { return $this->avisosEstoque; }
+    public function avisosEstoque(): array
+    {
+        return $this->avisosEstoque;
+    }
 
-    public function inicioPendentePorEstoque(): bool { return $this->inicioPendentePorEstoque; }
+    public function inicioPendentePorEstoque(): bool
+    {
+        return $this->inicioPendentePorEstoque;
+    }
 
     public function toArray(): array
     {
