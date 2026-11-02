@@ -36,6 +36,7 @@ class CriarOrdemServicoUseCase
      *     cliente_id?: int,
      *     cliente_cpf?: string,
      *     cpf?: string,
+     *     cnpj?: string|null,
      *     cliente_nome?: string,
      *     cliente_email?: string,
      *     cliente_telefone?: string,
@@ -110,7 +111,9 @@ class CriarOrdemServicoUseCase
         }
 
         // 8. Persistir no banco de dados
+        $estoque = (new VerificarEstoqueOS($this->pecaRepository))->executar($os);
         $resultado = $this->ordemServicoRepository->salvar($os);
+        $resultado->definirAvisosEstoque($estoque['avisos']);
         $this->notificador?->notificar($resultado, null);
         return $resultado;
     }
@@ -126,15 +129,16 @@ class CriarOrdemServicoUseCase
             return $cliente;
         }
 
-        // Identificação por CPF
-        $documento = $dados['cliente_cpf'] ?? $dados['cpf'] ?? null;
-        if (!$documento) {
-            throw new ValidacaoException('Identificação do cliente é obrigatória (informe cliente_id ou CPF).');
-        }
-
-        $cpfNormalizado = Validator::cpf($documento);
-        $cliente        = $this->usuarioRepository->buscarPorCpf($cpfNormalizado);
-
+        $documentos = Validator::documentosUsuario(
+            $dados['cliente_cpf'] ?? $dados['cpf'] ?? null,
+            $dados['cliente_cnpj'] ?? $dados['cnpj'] ?? null
+        );
+        $cpfNormalizado = $documentos['cpf'];
+        $cnpjNormalizado = $documentos['cnpj'];
+        $documento = $cpfNormalizado ?? $cnpjNormalizado;
+        $cliente = $cpfNormalizado !== null
+            ? $this->usuarioRepository->buscarPorCpf($cpfNormalizado)
+            : $this->usuarioRepository->buscarPorCnpj($cnpjNormalizado);
         if ($cliente) {
             return $cliente;
         }
@@ -146,26 +150,20 @@ class CriarOrdemServicoUseCase
 
         if (!$nome || !$email) {
             throw new ValidacaoException(
-                sprintf('Cliente com CPF "%s" não localizado. Para cadastrá-lo automaticamente, informe "cliente_nome" e "cliente_email".', $documento)
+                sprintf('Cliente com documento "%s" não localizado. Para cadastrá-lo automaticamente, informe "cliente_nome" e "cliente_email".', $documento)
             );
         }
 
-        $novoCliente = new Usuario(
-            id: null,
-            nome: Validator::nome($nome),
-            email: Validator::email($email),
-            telefone: $telefone ? Validator::telefone($telefone) : null,
-            cpf: $cpfNormalizado,
-            tipoUsuario: TipoUsuario::CLIENTE,
-            senhaHash: null,
-            ativo: true,
-            criadoEm: null,
-            atualizadoEm: null,
-        );
-
-        return $this->usuarioRepository->salvar($novoCliente);
+        return (new \Application\Usuario\CriarUsuarioUseCase($this->usuarioRepository))->executar([
+            'nome' => $nome,
+            'email' => $email,
+            'telefone' => $telefone,
+            'cpf' => $cpfNormalizado,
+            'cnpj' => $cnpjNormalizado,
+            'tipo_usuario' => 'cliente',
+        ]);
     }
-
+    
     private function obterOuCadastrarVeiculo(array $dados, int $clienteId): Veiculo
     {
         // Se informado veiculo_id direto

@@ -139,6 +139,15 @@
                         }
                     },
                     {
+                        "name": "cnpj",
+                        "in": "query",
+                        "description": "CNPJ do cliente",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
                         "name": "cpf",
                         "in": "query",
                         "description": "Filtrar por CPF do cliente",
@@ -171,7 +180,7 @@
                     "Ordens de Serviço"
                 ],
                 "summary": "Cria uma nova Ordem de Serviço (OS)",
-                "description": "Permite abrir uma OS identificando o cliente por ID ou CPF, cadastrando o veículo e incluindo serviços e peças previamente cadastrados. O orçamento é calculado automaticamente e pode ser enviado de imediato.",
+                "description": "Permite abrir uma OS identificando o cliente por ID, CPF ou CNPJ, cadastrando o veículo e incluindo serviços e peças previamente cadastrados. O orçamento é calculado automaticamente e pode ser enviado de imediato.",
                 "operationId": "230ea7052c4b62d8e45390b0542425ff",
                 "requestBody": {
                     "required": true,
@@ -185,6 +194,11 @@
                                     "cliente_id": {
                                         "type": "integer",
                                         "example": 1,
+                                        "nullable": true
+                                    },
+                                    "cliente_cnpj": {
+                                        "type": "string",
+                                        "example": "11.222.333/0001-81",
                                         "nullable": true
                                     },
                                     "cliente_cpf": {
@@ -655,9 +669,18 @@
                     "Ordens de Serviço"
                 ],
                 "summary": "Consulta pública/cliente de acompanhamento de OS",
-                "description": "Permite ao cliente consultar o progresso de sua OS informando CPF, Placa do veículo ou Número da OS.",
+                "description": "Permite ao cliente consultar o progresso de sua OS informando CPF, CNPJ, Placa do veículo ou Número da OS.",
                 "operationId": "ff46bd0c567beb789c86b2254a5669dc",
                 "parameters": [
+                    {
+                        "name": "cnpj",
+                        "in": "query",
+                        "description": "CNPJ do cliente",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     {
                         "name": "cpf",
                         "in": "query",
@@ -1873,6 +1896,15 @@
                         }
                     },
                     {
+                        "name": "cnpj",
+                        "in": "query",
+                        "description": "CNPJ do cliente para busca exata",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
                         "name": "cpf",
                         "in": "query",
                         "description": "CPF do usuário para busca exata",
@@ -1912,6 +1944,11 @@
                                             "cpf": {
                                                 "type": "string",
                                                 "example": "123.456.789-00",
+                                                "nullable": true
+                                            },
+                                            "cnpj": {
+                                                "type": "string",
+                                                "example": "11.222.333/0001-81",
                                                 "nullable": true
                                             },
                                             "tipo_usuario": {
@@ -1973,10 +2010,10 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "description": "Clientes: exatamente um documento. Mecânicos e atendentes: CPF obrigatório.",
                                 "required": [
                                     "nome",
-                                    "email",
-                                    "cpf"
+                                    "email"
                                 ],
                                 "properties": {
                                     "nome": {
@@ -1995,7 +2032,13 @@
                                     },
                                     "cpf": {
                                         "type": "string",
-                                        "example": "529.982.247-25"
+                                        "example": "529.982.247-25",
+                                        "nullable": true
+                                    },
+                                    "cnpj": {
+                                        "type": "string",
+                                        "example": "11.222.333/0001-81",
+                                        "nullable": true
                                     },
                                     "tipo_usuario": {
                                         "type": "string",
@@ -2019,7 +2062,53 @@
                                         "default": true
                                     }
                                 },
-                                "type": "object"
+                                "type": "object",
+                                "oneOf": [
+                                    {
+                                        "required": [
+                                            "cpf"
+                                        ],
+                                        "properties": {
+                                            "cpf": {
+                                                "type": "string",
+                                                "minLength": 1
+                                            },
+                                            "cnpj": {
+                                                "type": "string",
+                                                "nullable": true,
+                                                "enum": [
+                                                    null
+                                                ]
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "required": [
+                                            "cnpj"
+                                        ],
+                                        "properties": {
+                                            "cnpj": {
+                                                "type": "string",
+                                                "minLength": 1
+                                            },
+                                            "cpf": {
+                                                "type": "string",
+                                                "nullable": true,
+                                                "enum": [
+                                                    null
+                                                ]
+                                            },
+                                            "tipo_usuario": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "cliente"
+                                                ]
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                ]
                             }
                         }
                     }
@@ -2051,6 +2140,11 @@
                                         "cpf": {
                                             "type": "string",
                                             "example": "123.456.789-00",
+                                            "nullable": true
+                                        },
+                                        "cnpj": {
+                                            "type": "string",
+                                            "example": "11.222.333/0001-81",
                                             "nullable": true
                                         },
                                         "tipo_usuario": {
@@ -2150,6 +2244,11 @@
                                                 "example": "123.456.789-00",
                                                 "nullable": true
                                             },
+                                            "cnpj": {
+                                                "type": "string",
+                                                "example": "11.222.333/0001-81",
+                                                "nullable": true
+                                            },
                                             "tipo_usuario": {
                                                 "type": "string",
                                                 "example": "cliente"
@@ -2226,6 +2325,11 @@
                                         "cpf": {
                                             "type": "string",
                                             "example": "123.456.789-00",
+                                            "nullable": true
+                                        },
+                                        "cnpj": {
+                                            "type": "string",
+                                            "example": "11.222.333/0001-81",
                                             "nullable": true
                                         },
                                         "tipo_usuario": {
@@ -2329,6 +2433,11 @@
                                         "example": "123.456.789-00",
                                         "nullable": true
                                     },
+                                    "cnpj": {
+                                        "type": "string",
+                                        "example": "11.222.333/0001-81",
+                                        "nullable": true
+                                    },
                                     "tipo_usuario": {
                                         "type": "string",
                                         "example": "cliente",
@@ -2381,6 +2490,11 @@
                                         "cpf": {
                                             "type": "string",
                                             "example": "123.456.789-00",
+                                            "nullable": true
+                                        },
+                                        "cnpj": {
+                                            "type": "string",
+                                            "example": "11.222.333/0001-81",
                                             "nullable": true
                                         },
                                         "tipo_usuario": {

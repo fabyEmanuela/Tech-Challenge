@@ -47,6 +47,7 @@ class UsuarioController
                 required: false,
                 schema: new OA\Schema(type: "string", example: "João")
             ),
+            new OA\Parameter(name: "cnpj", in: "query", required: false, description: "CNPJ do cliente para busca exata", schema: new OA\Schema(type: "string")),
             new OA\Parameter(
                 name: "cpf",
                 description: "CPF do usuário para busca exata",
@@ -68,6 +69,7 @@ class UsuarioController
                             new OA\Property(property: "email", type: "string", example: "joao@email.com"),
                             new OA\Property(property: "telefone", type: "string", nullable: true, example: "11987654321"),
                             new OA\Property(property: "cpf", type: "string", nullable: true, example: "123.456.789-00"),
+                            new OA\Property(property: "cnpj", type: "string", nullable: true, example: "11.222.333/0001-81"),
                             new OA\Property(property: "tipo_usuario", type: "string", enum: ["cliente", "mecanico", "atendente"], example: "cliente"),
                             new OA\Property(property: "ativo", type: "boolean", example: true),
                             new OA\Property(property: "criado_em", type: "string", example: "2026-10-22 10:00:00"),
@@ -105,6 +107,7 @@ class UsuarioController
                             new OA\Property(property: "email", type: "string", example: "maria@email.com"),
                             new OA\Property(property: "telefone", type: "string", nullable: true, example: "11987654321"),
                             new OA\Property(property: "cpf", type: "string", nullable: true, example: "123.456.789-00"),
+                            new OA\Property(property: "cnpj", type: "string", nullable: true, example: "11.222.333/0001-81"),
                             new OA\Property(property: "tipo_usuario", type: "string", example: "cliente"),
                             new OA\Property(property: "ativo", type: "boolean", example: true),
                             new OA\Property(property: "criado_em", type: "string", example: "2026-10-22 10:00:00"),
@@ -124,10 +127,13 @@ class UsuarioController
         $tipo = $_GET['tipo'] ?? null;
         $nome = $_GET['nome'] ?? null;
         $cpf  = $_GET['cpf'] ?? null;
+        $cnpj = $_GET['cnpj'] ?? null;
 
         try {
-            $usuarios = $this->listarUseCase->executar($tipo, $nome, $cpf);
+            $usuarios = $this->listarUseCase->executar($tipo, $nome, $cpf, $cnpj);
             JsonResponse::send(array_map(fn($u) => $u->paraArray(), $usuarios));
+        } catch (InvalidArgumentException $e) {
+            JsonResponse::send(['erro' => $e->getMessage()], 422);
         } catch (Throwable $e) {
             JsonResponse::send(['erro' => $e->getMessage()], 500);
         }
@@ -160,6 +166,7 @@ class UsuarioController
                         new OA\Property(property: "email", type: "string", example: "joao@email.com"),
                         new OA\Property(property: "telefone", type: "string", nullable: true, example: "11987654321"),
                         new OA\Property(property: "cpf", type: "string", nullable: true, example: "123.456.789-00"),
+                        new OA\Property(property: "cnpj", type: "string", nullable: true, example: "11.222.333/0001-81"),
                         new OA\Property(property: "tipo_usuario", type: "string", example: "cliente"),
                         new OA\Property(property: "ativo", type: "boolean", example: true),
                         new OA\Property(property: "criado_em", type: "string", example: "2026-10-22 10:00:00"),
@@ -210,12 +217,25 @@ class UsuarioController
             required: true,
             description: "Dados para cadastro do usuário",
             content: new OA\JsonContent(
-                required: ["nome", "email", "cpf"],
+                required: ["nome", "email"],
+                description: "Clientes: exatamente um documento. Mecânicos e atendentes: CPF obrigatório.",
+                oneOf: [
+                    new OA\Schema(required: ["cpf"], properties: [
+                        new OA\Property(property: "cpf", type: "string", minLength: 1),
+                        new OA\Property(property: "cnpj", type: "string", nullable: true, enum: [null])
+                    ]),
+                    new OA\Schema(required: ["cnpj"], properties: [
+                        new OA\Property(property: "cnpj", type: "string", minLength: 1),
+                        new OA\Property(property: "cpf", type: "string", nullable: true, enum: [null]),
+                        new OA\Property(property: "tipo_usuario", type: "string", enum: ["cliente"])
+                    ])
+                ],
                 properties: [
                     new OA\Property(property: "nome", type: "string", example: "João Silva"),
                     new OA\Property(property: "email", type: "string", format: "email", example: "joao@email.com"),
                     new OA\Property(property: "telefone", type: "string", nullable: true, example: "11987654321"),
-                    new OA\Property(property: "cpf", type: "string", example: "529.982.247-25"),
+                    new OA\Property(property: "cpf", type: "string", nullable: true, example: "529.982.247-25"),
+                    new OA\Property(property: "cnpj", type: "string", nullable: true, example: "11.222.333/0001-81"),
                     new OA\Property(property: "tipo_usuario", type: "string", enum: ["cliente", "mecanico", "atendente"], default: "cliente", example: "cliente"),
                     new OA\Property(property: "senha", type: "string", format: "password", nullable: true, example: "senha123"),
                     new OA\Property(property: "ativo", type: "boolean", default: true, example: true)
@@ -233,6 +253,7 @@ class UsuarioController
                         new OA\Property(property: "email", type: "string", example: "joao@email.com"),
                         new OA\Property(property: "telefone", type: "string", nullable: true, example: "11987654321"),
                         new OA\Property(property: "cpf", type: "string", nullable: true, example: "123.456.789-00"),
+                        new OA\Property(property: "cnpj", type: "string", nullable: true, example: "11.222.333/0001-81"),
                         new OA\Property(property: "tipo_usuario", type: "string", example: "cliente"),
                         new OA\Property(property: "ativo", type: "boolean", example: true),
                         new OA\Property(property: "criado_em", type: "string", example: "2026-10-22 10:00:00"),
@@ -298,6 +319,7 @@ class UsuarioController
                     new OA\Property(property: "email", type: "string", format: "email", example: "joao.silva@email.com"),
                     new OA\Property(property: "telefone", type: "string", nullable: true, example: "11999998888"),
                     new OA\Property(property: "cpf", type: "string", nullable: true, example: "123.456.789-00"),
+                    new OA\Property(property: "cnpj", type: "string", nullable: true, example: "11.222.333/0001-81"),
                     new OA\Property(property: "tipo_usuario", type: "string", enum: ["cliente", "mecanico", "atendente"], example: "cliente"),
                     new OA\Property(property: "senha", type: "string", format: "password", nullable: true, example: "nova_senha123"),
                     new OA\Property(property: "ativo", type: "boolean", example: true)
@@ -315,6 +337,7 @@ class UsuarioController
                         new OA\Property(property: "email", type: "string", example: "joao.silva@email.com"),
                         new OA\Property(property: "telefone", type: "string", nullable: true, example: "11999998888"),
                         new OA\Property(property: "cpf", type: "string", nullable: true, example: "123.456.789-00"),
+                        new OA\Property(property: "cnpj", type: "string", nullable: true, example: "11.222.333/0001-81"),
                         new OA\Property(property: "tipo_usuario", type: "string", example: "cliente"),
                         new OA\Property(property: "ativo", type: "boolean", example: true),
                         new OA\Property(property: "criado_em", type: "string", example: "2026-10-22 10:00:00"),

@@ -20,6 +20,7 @@ class CriarUsuarioUseCase
      *   email: string,
      *   telefone?: string|null,
      *   cpf: string,
+     *   cnpj?: string|null,
      *   tipo_usuario?: string,
      *   senha?: string|null,
      *   ativo?: bool
@@ -42,6 +43,7 @@ class CriarUsuarioUseCase
             email:        $dados['email'],
             telefone:     $dados['telefone'] ?? null,
             cpf:          $dados['cpf'] ?? null,
+            cnpj:         $dados['cnpj'] ?? null,
             tipoUsuario:  $tipo,
             senhaHash:    $senhaHash,
             ativo:        $dados['ativo'] ?? true,
@@ -72,11 +74,7 @@ class CriarUsuarioUseCase
         }
         $dados['email'] = Validator::email($dados['email']);
 
-        // --- cpf (obrigatório) ---
-        if (empty($dados['cpf'])) {
-            throw new InvalidArgumentException('O campo "cpf" é obrigatório.');
-        }
-        $dados['cpf'] = Validator::cpf($dados['cpf']);
+        $dados = array_replace($dados, Validator::documentosUsuario($dados['cpf'] ?? null, $dados['cnpj'] ?? null, $dados['tipo_usuario'] ?? 'cliente'));
 
         // --- telefone (opcional, mas validado se informado) ---
         if (!empty($dados['telefone'])) {
@@ -98,10 +96,13 @@ class CriarUsuarioUseCase
             throw new InvalidArgumentException('Já existe um usuário com este e-mail.');
         }
 
-        if ($this->repository->cpfJaCadastrado($dados['cpf'])) {
+        if ($dados['cpf'] !== null && $this->repository->cpfJaCadastrado($dados['cpf'])) {
             throw new InvalidArgumentException('Já existe um usuário com este CPF.');
         }
 
+        if ($dados['cnpj'] !== null && $this->repository->cnpjJaCadastrado($dados['cnpj'])) {
+            throw new InvalidArgumentException('Já existe um usuário com este CNPJ.');
+        }
         return $dados;
     }
 }

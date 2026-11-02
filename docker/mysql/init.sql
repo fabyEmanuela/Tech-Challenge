@@ -16,12 +16,18 @@ CREATE TABLE IF NOT EXISTS usuarios (
     nome          VARCHAR(100)    NOT NULL,
     email         VARCHAR(150)    NOT NULL UNIQUE,
     telefone      VARCHAR(20)     NULL,
-    cpf           VARCHAR(14)     NOT NULL UNIQUE,
+    cpf           VARCHAR(14)     NULL UNIQUE,
+    cnpj          VARCHAR(18)     NULL UNIQUE,
     tipo_usuario  ENUM('cliente', 'mecanico', 'atendente') NOT NULL DEFAULT 'cliente',
     senha_hash    VARCHAR(255)    NULL COMMENT 'Hash bcrypt — usado apenas por mecânico e atendente',
     ativo         TINYINT(1)      NOT NULL DEFAULT 1,
     criado_em     DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     atualizado_em DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT chk_usuarios_documento CHECK (
+        (tipo_usuario = 'cliente' AND ((cpf IS NOT NULL AND cnpj IS NULL) OR (cpf IS NULL AND cnpj IS NOT NULL)))
+        OR (tipo_usuario <> 'cliente' AND cnpj IS NULL)
+    ),
+    CONSTRAINT chk_usuarios_documento_vazio CHECK ((cpf IS NULL OR TRIM(cpf) <> '') AND (cnpj IS NULL OR TRIM(cnpj) <> '')),
     PRIMARY KEY (id),
     INDEX idx_tipo_usuario (tipo_usuario),
     INDEX idx_email (email)
@@ -94,6 +100,8 @@ INSERT INTO usuarios (nome, email, telefone, cpf, tipo_usuario, senha_hash, ativ
 ('Administrador Oficina', 'admin@oficina.com', '(11) 98765-4321', '111.444.777-35', 'atendente', '$2y$10$.gp1cxGzaoCRjqEYLiGNjO09IFR4W3IuPs7i8KdnW0DGBgb9daTFK', 1),
 ('Mecânico Oficina', 'mecanico@oficina.com', '(11) 98765-4322', '222.555.888-46', 'mecanico', '$2y$10$.gp1cxGzaoCRjqEYLiGNjO09IFR4W3IuPs7i8KdnW0DGBgb9daTFK', 1)
 ON DUPLICATE KEY UPDATE nome = VALUES(nome);
+
+-- -----------------------------------------------------------------------
 -- Tabela: ordens_servico
 -- Gerenciamento de Ordens de Serviço (OS)
 -- -----------------------------------------------------------------------
@@ -221,3 +229,20 @@ CREATE TABLE IF NOT EXISTS ordem_servico_historico (
         ON DELETE CASCADE
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------------------
+-- Base de Dados Exclusiva para Testes de Integração
+-- -----------------------------------------------------------------------
+CREATE DATABASE IF NOT EXISTS oficina_mecanica_test
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS oficina_mecanica_test.usuarios LIKE oficina_mecanica.usuarios;
+CREATE TABLE IF NOT EXISTS oficina_mecanica_test.veiculos LIKE oficina_mecanica.veiculos;
+CREATE TABLE IF NOT EXISTS oficina_mecanica_test.servicos LIKE oficina_mecanica.servicos;
+CREATE TABLE IF NOT EXISTS oficina_mecanica_test.pecas LIKE oficina_mecanica.pecas;
+CREATE TABLE IF NOT EXISTS oficina_mecanica_test.ordens_servico LIKE oficina_mecanica.ordens_servico;
+CREATE TABLE IF NOT EXISTS oficina_mecanica_test.ordem_servico_contadores LIKE oficina_mecanica.ordem_servico_contadores;
+CREATE TABLE IF NOT EXISTS oficina_mecanica_test.ordem_servico_servicos LIKE oficina_mecanica.ordem_servico_servicos;
+CREATE TABLE IF NOT EXISTS oficina_mecanica_test.ordem_servico_pecas LIKE oficina_mecanica.ordem_servico_pecas;
+CREATE TABLE IF NOT EXISTS oficina_mecanica_test.ordem_servico_historico LIKE oficina_mecanica.ordem_servico_historico;

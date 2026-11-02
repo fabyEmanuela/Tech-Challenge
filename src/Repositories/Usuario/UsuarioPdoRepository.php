@@ -23,6 +23,7 @@ class UsuarioPdoRepository implements UsuarioRepositoryInterface
             email:        $linha['email'],
             telefone:     $linha['telefone'] ?? null,
             cpf:          $linha['cpf'] ?? null,
+            cnpj:         $linha['cnpj'] ?? null,
             tipoUsuario:  TipoUsuario::from($linha['tipo_usuario']),
             senhaHash:    $linha['senha_hash'] ?? null,
             ativo:        (bool) $linha['ativo'],
@@ -35,7 +36,7 @@ class UsuarioPdoRepository implements UsuarioRepositoryInterface
     // Consultas
     // ------------------------------------------------------------------
 
-    public function listarTodos(?TipoUsuario $tipo = null, ?string $nome = null, ?string $cpf = null): array
+    public function listarTodos(?TipoUsuario $tipo = null, ?string $nome = null, ?string $cpf = null, ?string $cnpj = null): array
     {
         $condicoes = [];
         $params    = [];
@@ -55,6 +56,11 @@ class UsuarioPdoRepository implements UsuarioRepositoryInterface
             $params[':cpf'] = $cpf;
         }
 
+        if ($cnpj !== null) {
+            $condicoes[] = 'cnpj = :cnpj';
+            $params[':cnpj'] = Validator::cnpj($cnpj);
+        }
+        
         $sql = 'SELECT * FROM usuarios';
         if ($condicoes !== []) {
             $sql .= ' WHERE ' . implode(' AND ', $condicoes);
@@ -86,6 +92,32 @@ class UsuarioPdoRepository implements UsuarioRepositoryInterface
         $linha = $stmt->fetch();
 
         return $linha ? $this->montarUsuario($linha) : null;
+    }
+
+    public function buscarPorCnpj(string $cnpj): ?Usuario
+    {
+        $cnpjFormatado = Validator::cnpj($cnpj);
+        $stmt = $this->pdo->prepare('SELECT * FROM usuarios WHERE cnpj = :cnpj LIMIT 1');
+        $stmt->execute([':cnpj' => $cnpjFormatado]);
+        $linha = $stmt->fetch();
+
+        return $linha ? $this->montarUsuario($linha) : null;
+    }
+
+    public function cnpjJaCadastrado(string $cnpj, ?int $excluirId = null): bool
+    {
+        $cnpjFormatado = Validator::cnpj($cnpj);
+        $sql    = 'SELECT COUNT(*) FROM usuarios WHERE cnpj = :cnpj';
+        $params = [':cnpj' => $cnpjFormatado];
+
+        if ($excluirId !== null) {
+            $sql .= ' AND id != :id';
+            $params[':id'] = $excluirId;
+        }
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        return (int) $stmt->fetchColumn() > 0;
     }
 
     public function buscarPorCpf(string $cpf): ?Usuario
@@ -136,8 +168,8 @@ class UsuarioPdoRepository implements UsuarioRepositoryInterface
     public function salvar(Usuario $usuario): Usuario
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO usuarios (nome, email, telefone, cpf, tipo_usuario, senha_hash, ativo)
-             VALUES (:nome, :email, :telefone, :cpf, :tipo_usuario, :senha_hash, :ativo)'
+            'INSERT INTO usuarios (nome, email, telefone, cpf, cnpj, tipo_usuario, senha_hash, ativo)
+             VALUES (:nome, :email, :telefone, :cpf, :cnpj, :tipo_usuario, :senha_hash, :ativo)'
         );
 
         $stmt->execute([
@@ -145,6 +177,7 @@ class UsuarioPdoRepository implements UsuarioRepositoryInterface
             ':email'        => $usuario->getEmail(),
             ':telefone'     => $usuario->getTelefone(),
             ':cpf'          => $usuario->getCpf(),
+            ':cnpj'         => $usuario->getCnpj(),
             ':tipo_usuario' => $usuario->getTipoUsuario()->value,
             ':senha_hash'   => $usuario->getSenhaHash(),
             ':ativo'        => (int) $usuario->isAtivo(),
@@ -161,6 +194,7 @@ class UsuarioPdoRepository implements UsuarioRepositoryInterface
                  email = :email,
                  telefone = :telefone,
                  cpf = :cpf,
+                 cnpj = :cnpj,
                  tipo_usuario = :tipo_usuario,
                  senha_hash = :senha_hash,
                  ativo = :ativo
@@ -173,6 +207,7 @@ class UsuarioPdoRepository implements UsuarioRepositoryInterface
             ':email'        => $usuario->getEmail(),
             ':telefone'     => $usuario->getTelefone(),
             ':cpf'          => $usuario->getCpf(),
+            ':cnpj'         => $usuario->getCnpj(),
             ':tipo_usuario' => $usuario->getTipoUsuario()->value,
             ':senha_hash'   => $usuario->getSenhaHash(),
             ':ativo'        => (int) $usuario->isAtivo(),

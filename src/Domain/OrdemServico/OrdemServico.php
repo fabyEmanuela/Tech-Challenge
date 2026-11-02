@@ -402,9 +402,24 @@ final class OrdemServico
     // Serialização
     // ------------------------------------------------------------------
 
+    private array $avisosEstoque = [];
+    private bool $inicioPendentePorEstoque = false;
+
+    public function definirAvisosEstoque(array $avisos, bool $pendente = false): void
+    {
+        $this->avisosEstoque = $avisos;
+        $this->inicioPendentePorEstoque = $pendente;
+    }
+
+    public function avisosEstoque(): array { return $this->avisosEstoque; }
+
+    public function inicioPendentePorEstoque(): bool { return $this->inicioPendentePorEstoque; }
+
     public function toArray(): array
     {
         return [
+            ...($this->avisosEstoque !== [] ? ['avisos_estoque' => $this->avisosEstoque] : []),
+            ...($this->inicioPendentePorEstoque ? ['inicio_pendente_por_estoque' => true] : []),
             'id'                   => $this->id,
             'numero_os'            => $this->numeroOs,
             'cliente_id'           => $this->clienteId,
@@ -490,6 +505,7 @@ final class OrdemServico
             'cliente'             => $this->dadosCliente ? [
                 'nome' => $this->dadosCliente['nome'] ?? null,
                 'cpf'  => $this->dadosCliente['cpf'] ?? null,
+                'cnpj' => $this->dadosCliente['cnpj'] ?? null,
             ] : null,
             'descricao_problema'  => $this->descricaoProblema,
             'diagnostico'         => $this->diagnostico,

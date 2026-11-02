@@ -101,7 +101,9 @@ class AtualizarOrdemServicoUseCase
             );
         }
 
+        $estoque = (new VerificarEstoqueOS($this->pecaRepository))->executar($os);
         $resultado = $this->ordemServicoRepository->atualizar($os, $historico ?? null);
+        $resultado->definirAvisosEstoque($estoque['avisos']);
         $this->notificador?->notificar($resultado, $statusAnterior);
         return $resultado;
     }
