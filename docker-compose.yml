@@ -13,6 +13,11 @@ services:
         condition: service_healthy
     environment:
       XDEBUG_MODE: debug,develop
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${MYSQL_DATABASE}
+      DB_USER: root
+      DB_PASS: ${MYSQL_ROOT_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       MAIL_HOST: mailpit
       MAIL_PORT: 1025
