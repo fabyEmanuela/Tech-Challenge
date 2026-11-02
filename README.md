@@ -4,10 +4,37 @@ Projeto desenvolvido para a pós-graduação em **Software Architecture (SOAT)**
 
 ---
 
+## Objetivo do Projeto
+
+Centralizar a gestão de uma oficina mecânica, organizando o atendimento, os cadastros, o estoque e o acompanhamento das ordens de serviço.
+
+## Descrição da Solução
+
+API REST para gerenciar clientes, usuários, veículos, serviços, peças e ordens de serviço. A solução contempla controle de estoque, envio de orçamentos por e-mail, aprovação e acompanhamento dos reparos, com autenticação JWT e permissões por perfil.
+
+## Tecnologias Utilizadas
+
+- **PHP 8.3 e Apache:** execução da API.
+- **Composer e PSR-4:** gerenciamento de dependências e autoload.
+- **MySQL 8.4 e PDO:** persistência dos dados.
+- **JWT:** autenticação e controle de acesso por perfil.
+- **PHPMailer e Mailpit:** envio e captura de e-mails no ambiente local.
+- **OpenAPI, swagger-php e Swagger UI:** documentação da API.
+- **PHPUnit 12 e Xdebug:** testes automatizados e cobertura de código.
+- **Docker e Docker Compose:** configuração e execução do ambiente.
+
+## Escolha do Banco de Dados
+
+Escolhemos o **MySQL** porque a equipe já o utiliza no dia a dia no trabalho e tem familiaridade com sua configuração e manutenção.
+
+---
+
 ## 🚀 Como Executar o Projeto Localmente (Para a Equipe e Avaliadores)
 
 ### Pré-requisitos
 - Ter o **Docker** e o **Docker Compose** instalados na sua máquina.
+- Ter o **Git** instalado para clonar o repositório.
+- Manter disponíveis as portas **8080**, **8081**, **8025**, **1025** e **3307**.
 
 ### 1. Clonar e Configurar o Ambiente
 ```bash
@@ -18,6 +45,9 @@ cd Tech-Challenge
 # 2. Crie o arquivo .env a partir do exemplo (se ainda não existir)
 cp .env.example .env
 
+# Antes de continuar, ajuste o .env: MYSQL_ROOT_PASSWORD=sua_senha_aqui,
+# MYSQL_DATABASE=oficina_mecanica e uma chave para JWT_SECRET.
+
 # 3. Suba todos os containers (PHP/Apache, MySQL, Swagger UI e Mailpit)
 docker compose up -d --build
 
@@ -26,6 +56,8 @@ docker compose exec app composer install
 ```
 
 ---
+
+No PowerShell, a cópia do arquivo pode ser feita com `Copy-Item .env.example .env`. O script `docker/mysql/init.sql` inicializa os bancos e usuários somente quando o volume MySQL está vazio.
 
 ## 🌐 Serviços Disponíveis
 
@@ -46,6 +78,8 @@ A API utiliza autenticação **Bearer Token (JWT)** para proteger as rotas de ne
 | :--- | :--- | :--- | :--- |
 | **Atendente (Admin)** | `admin@oficina.com` | `123456` | Gerenciamento de clientes, veículos, serviços e peças |
 | **Mecânico** | `mecanico@oficina.com` | `123456` | Consulta e execução de serviços e movimentação de peças |
+
+A especificação OpenAPI está disponível em `docs/swagger.json`.
 
 ### Como se autenticar pelo Swagger UI:
 1. Acesse **[http://localhost:8081](http://localhost:8081)**.
@@ -124,9 +158,14 @@ docker compose exec -e XDEBUG_MODE=coverage app ./vendor/bin/phpunit --coverage-
 
 ## 🏛️ Arquitetura em Camadas (Clean Architecture)
 
+A aplicação é um monólito organizado em camadas: o domínio concentra as regras de negócio, os casos de uso coordenam as operações, a camada HTTP recebe as requisições e os repositórios e a infraestrutura implementam a persistência e as integrações.
+
 - **`src/Domain/`**: Entidades de negócio, Value Objects e validações centrais (`Validator.php`).
 - **`src/Application/`**: Casos de uso (UseCases) da aplicação orquestrando regras e interfaces.
 - **`src/Repositories/`**: Interfaces e implementações PDO de persistência em banco.
 - **`src/Http/`**: Roteador, Controllers REST e Middlewares de segurança (`AuthMiddleware`).
 - **`src/Infrastructure/`**: Conexão com banco (`Connection`), serviço de JWT (`JwtService`), adaptadores externos e Swagger.
 - **`src/tests/`**: Suíte de testes automatizados (Unitários e de Integração com PHPUnit).
+- **`public/`**: Entrada da API e composição das dependências em `index.php`.
+- **`docker/`**: Configuração do PHP e script de inicialização do MySQL.
+- **`docs/`**: Especificação Swagger e documentos de apoio.

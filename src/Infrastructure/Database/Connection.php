@@ -18,7 +18,7 @@ class Connection
                 $port    = getenv('DB_PORT') ?: (PHP_OS_FAMILY === 'Windows' ? '3307' : '3306');
                 $db      = getenv('DB_NAME') ?: 'oficina_mecanica';
                 $user    = getenv('DB_USER') ?: 'root';
-                $pass    = getenv('DB_PASS') ?: 'root_dev_password';
+                $pass    = getenv('DB_PASS') ?: 'sua_senha_aqui';
                 $charset = 'utf8mb4';
 
                 $dsn = "mysql:host={$host};port={$port};dbname={$db};charset={$charset}";
