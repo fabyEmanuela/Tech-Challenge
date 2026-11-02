@@ -359,7 +359,7 @@ class OrdemServicoController
 
             $os = $this->aprovarOrcamentoUseCase->executar($id, $observacao);
             JsonResponse::send([
-                'mensagem' => 'Orçamento aprovado com sucesso. Status alterado para Em execução.',
+                'mensagem' => $os->inicioPendentePorEstoque() ? 'Orçamento aprovado. Início pendente por falta de peças. A OS permanece em diagnóstico.' : 'Orçamento aprovado com sucesso. Status alterado para Em execução.',
                 'ordem_servico' => $os->toArray()
             ], 200);
         } catch (\InvalidArgumentException $e) {
