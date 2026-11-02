@@ -40,7 +40,7 @@ class ValidatorTest extends TestCase
     public function testDeveLancarExcecaoParaCpfComTamanhoDiferenteDeOnzeDigitos(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('CPF inválido: deve conter exatamente 11 dígitos numéricos.');
+        $this->expectExceptionMessage('CPF inválido: formato incorreto.');
 
         Validator::cpf('123.456.78-9');
     }

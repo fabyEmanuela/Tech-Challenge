@@ -13,20 +13,20 @@ class UsuarioTest extends TestCase
     public function testDeveInstanciarUsuarioCorretamente(): void
     {
         $usuario = new Usuario(
-            id:           1,
-            nome:         'Administrador Oficina',
-            email:        'admin@oficina.com',
-            telefone:     '(11) 98765-4321',
-            cpf:          '111.444.777-35',
-            tipoUsuario:  TipoUsuario::ATENDENTE,
-            senhaHash:    '$2y$10$abcdef...',
-            ativo:        true,
-            criadoEm:     '2026-11-01 10:00:00',
-            atualizadoEm: '2026-11-01 10:00:00',
+            id:          1,
+            nome:        'Carlos Atendente',
+            email:       'admin@oficina.com',
+            telefone:    '(11) 98765-4321',
+            cpf:         '111.444.777-35',
+            tipoUsuario: TipoUsuario::ATENDENTE,
+            senhaHash:   '$2y$10$abcdef...',
+            ativo:       true,
+            criadoEm:    '2026-11-01 10:00:00',
+            atualizadoEm:'2026-11-01 10:00:00'
         );
 
         $this->assertSame(1, $usuario->getId());
-        $this->assertSame('Administrador Oficina', $usuario->getNome());
+        $this->assertSame('Carlos Atendente', $usuario->getNome());
         $this->assertSame('admin@oficina.com', $usuario->getEmail());
         $this->assertSame('(11) 98765-4321', $usuario->getTelefone());
         $this->assertSame('111.444.777-35', $usuario->getCpf());
@@ -44,7 +44,7 @@ class UsuarioTest extends TestCase
             nome:        'Nome Inicial',
             email:       'inicial@oficina.com',
             telefone:    null,
-            cpf:         null,
+            cpf:         '111.444.777-35',
             tipoUsuario: TipoUsuario::CLIENTE,
             senhaHash:   null,
             ativo:       true,
@@ -69,27 +69,28 @@ class UsuarioTest extends TestCase
         $this->assertFalse($usuario->isAtivo());
     }
 
-    public function testDeveConverterParaArraySemExporSenhaHash(): void
+    public function testDeveExportarParaArraySemExporSenha(): void
     {
         $usuario = new Usuario(
-            id:          5,
-            nome:        'Carlos Mecânico',
-            email:       'carlos@oficina.com',
-            telefone:    '(11) 98765-1111',
-            cpf:         '333.666.999-57',
+            id:          10,
+            nome:        'Roberto Mecânico',
+            email:       'mecanico@oficina.com',
+            telefone:    '(11) 91234-5678',
+            cpf:         '111.444.777-35',
             tipoUsuario: TipoUsuario::MECANICO,
-            senhaHash:   'hash_super_secreto',
+            senhaHash:   '$2y$10$senhaUltraSecretaHashBcrypt',
             ativo:       true,
             criadoEm:    '2026-11-01 12:00:00',
-            atualizadoEm:null,
+            atualizadoEm:'2026-11-01 12:00:00'
         );
 
         $array = $usuario->paraArray();
 
-        $this->assertSame(5, $array['id']);
-        $this->assertSame('Carlos Mecânico', $array['nome']);
-        $this->assertSame('carlos@oficina.com', $array['email']);
+        $this->assertSame(10, $array['id']);
+        $this->assertSame('Roberto Mecânico', $array['nome']);
+        $this->assertSame('mecanico@oficina.com', $array['email']);
         $this->assertSame('mecanico', $array['tipo_usuario']);
+        $this->assertTrue($array['ativo']);
         $this->assertArrayNotHasKey('senha_hash', $array);
         $this->assertArrayNotHasKey('senha', $array);
     }
