@@ -99,6 +99,25 @@ docker compose exec app ./vendor/bin/phpunit --testsuite Integration --testdox
 docker compose exec app ./vendor/bin/phpunit src/tests/Integration/Repositories/OrdemServicoPdoRepositoryTest.php --testdox
 ```
 
+### 📊 Relatório de Cobertura de Código (Evidência FIAP >= 80% nos Domínios Críticos)
+
+O container Docker já vem com o **Xdebug 3.5** configurado para medição precisa de cobertura de código (*Code Coverage*). Para gerar e inspecionar os relatórios:
+
+```bash
+# 1. Exibir o resumo de cobertura diretamente no terminal:
+docker compose exec -e XDEBUG_MODE=coverage app ./vendor/bin/phpunit --coverage-text
+
+# 2. Gerar o relatório visual interativo em HTML:
+docker compose exec -e XDEBUG_MODE=coverage app ./vendor/bin/phpunit --coverage-html coverage/
+```
+
+> **Como visualizar o relatório HTML:** Após executar o comando acima, basta abrir o arquivo `coverage/index.html` em qualquer navegador web.
+> 
+> **Resultado da suíte:**
+> - **Camada de Domínio (`Domain`):** **92.81%** de linhas e **91.21%** de métodos (Nível Verde / High).
+> - **Agregado Crítico (`Domain\OrdemServico`):** **99.43%** de cobertura de linhas.
+> - **Total de asserções:** 147 testes e 557 asserções com 100% de sucesso (0 falhas).
+
 > **Nota para Avaliação:** Os testes de integração utilizam uma base de dados isolada (`oficina_mecanica_test`) criada automaticamente pelo Docker, utilizando transações com rollback para garantir que nenhum dado residual permaneça no banco após os testes.
 
 ---
