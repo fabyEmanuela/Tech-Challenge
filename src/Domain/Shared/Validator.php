@@ -32,7 +32,8 @@ class Validator
     public static function cnpj(string $cnpj): string
     {
         $cnpj = strtoupper(trim($cnpj));
-        if (!preg_match('/^(?:[A-Z0-9]{12}[0-9]{2}|[A-Z0-9]{2}\.[A-Z0-9]{3}\.[A-Z0-9]{3}\/[A-Z0-9]{4}-[0-9]{2})$/D', $cnpj)) {
+        $regexCnpj = '/^(?:[A-Z0-9]{12}\d{2}|[A-Z0-9]{2}\.[A-Z0-9]{3}\.[A-Z0-9]{3}\/[A-Z0-9]{4}-\d{2})$/D';
+        if (!preg_match($regexCnpj, $cnpj)) {
             throw new InvalidArgumentException('CNPJ inválido: formato incorreto.');
         }
         $valor = str_replace(['.', '/', '-'], '', $cnpj);
