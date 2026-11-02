@@ -127,6 +127,14 @@ class OrdemServicoPdoRepository implements OrdemServicoRepositoryInterface
         try {
             $os->recalcularTotais();
             $osId = $os->id();
+            $iniciouExecucao = $this->baixarEstoqueAoIniciar($os);
+
+            if ($os->inicioPendentePorEstoque()) {
+                $historico = new HistoricoStatusOS(null, $historico?->statusDe(), $os->status()->value,
+                    'Orçamento aprovado pelo cliente. Início pendente por falta de peças.');
+            } elseif ($iniciouExecucao && $historico === null) {
+                $historico = new HistoricoStatusOS(null, null, $os->status()->value, 'Execução iniciada com baixa de estoque.');
+            }
 
             $sql = "UPDATE ordens_servico SET
                         status = :status,
@@ -173,13 +181,97 @@ class OrdemServicoPdoRepository implements OrdemServicoRepositoryInterface
 
             if (!$jaEmTransacao && $this->pdo->inTransaction()) { $this->pdo->commit(); }
 
-            return $this->buscarPorId($osId) ?? $os;
+            $resultado = $this->buscarPorId($osId) ?? $os;
+            $resultado->definirAvisosEstoque($os->avisosEstoque(), $os->inicioPendentePorEstoque());
+            return $resultado;
         } catch (Throwable $e) {
             if ($this->pdo->inTransaction()) {
                 $this->pdo->rollBack();
             }
             throw $e;
         }
+    }
+
+    private function baixarEstoqueAoIniciar(OrdemServico $os): bool
+    {
+        // Bloqueia a OS para impedir duas baixas simultâneas.
+        $stmt = $this->pdo->prepare('SELECT status FROM ordens_servico WHERE id = :id FOR UPDATE');
+        $stmt->execute([':id' => $os->id()]);
+
+        $registro = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$registro) {
+            throw new \Domain\Exceptions\ValidacaoException('OS não encontrada.');
+        }
+
+        // O histórico identifica uma execução anterior, inclusive após retorno ao diagnóstico.
+        $stmt = $this->pdo->prepare('SELECT 1 FROM ordem_servico_historico WHERE ordem_servico_id = :id AND status_para = :status LIMIT 1');
+        $stmt->execute([':id' => $os->id(), ':status' => StatusOrdemServico::EM_EXECUCAO->value]);
+
+        $jaBaixou = $stmt->fetchColumn() !== false || in_array($registro['status'], ['em_execucao', 'finalizada', 'entregue'], true);
+        if (!$jaBaixou && $os->status() !== StatusOrdemServico::EM_EXECUCAO) {
+            return false;
+        }
+
+        // Agrupa itens repetidos para descontar a quantidade total de cada peça.
+        $quantidades = [];
+        foreach ($os->pecas() as $item) {
+            if ($item->pecaId() === null || $item->quantidade() != floor($item->quantidade())) {
+                throw new \Domain\Exceptions\ValidacaoException('A baixa exige peças cadastradas e quantidades inteiras.');
+            }
+            $id = $item->pecaId();
+            $quantidades[$id] = ($quantidades[$id] ?? 0) + (int) $item->quantidade();
+        }
+        ksort($quantidades);
+
+        if ($jaBaixou) {
+            // Impede mudanças nas peças já consumidas e não desconta novamente.
+            $stmt = $this->pdo->prepare('SELECT peca_id, SUM(quantidade) AS quantidade FROM ordem_servico_pecas WHERE ordem_servico_id = :id GROUP BY peca_id ORDER BY peca_id');
+            $stmt->execute([':id' => $os->id()]);
+            $anteriores = [];
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $item) {
+                $anteriores[(int) $item['peca_id']] = (int) $item['quantidade'];
+            }
+            if ($anteriores !== $quantidades) {
+                throw new \Domain\Exceptions\ValidacaoException('Não é possível alterar peças ou quantidades após a baixa do estoque.');
+            }
+            return false;
+        }
+
+        // Bloqueia as peças em ordem fixa e verifica todas antes de descontar qualquer saldo.
+        $pecasBloqueadas = [];
+        $consulta = $this->pdo->prepare('SELECT * FROM pecas WHERE id = :id FOR UPDATE');
+        foreach ($quantidades as $id => $quantidade) {
+            $consulta->execute([':id' => $id]);
+            $linha = $consulta->fetch(PDO::FETCH_ASSOC);
+            if ($linha) {
+                $pecasBloqueadas[$id] = new \Domain\Peca\Peca(
+                    (int) $linha['id'], $linha['nome'], $linha['descricao'], (float) $linha['valor_unitario'],
+                    (int) $linha['quantidade_estoque'], (int) $linha['estoque_minimo'], (bool) $linha['ativo'],
+                    $linha['criado_em'], $linha['atualizado_em']
+                );
+            }
+        }
+
+        $estoque = (new \Application\OrdemServico\VerificarEstoqueOS(new \Repositories\Peca\PecaPdoRepository($this->pdo)))->executar($os, $pecasBloqueadas);
+        $pendente = $estoque['faltas'] !== [];
+        $os->definirAvisosEstoque($estoque['avisos'], $pendente);
+
+        if ($pendente) {
+            // Mantém a aprovação registrada, mas não inicia a execução sem peças.
+            $os->alterarStatus(StatusOrdemServico::EM_DIAGNOSTICO);
+            return false;
+        }
+
+        // A baixa e a mudança de status são confirmadas ou desfeitas juntas.
+        $baixa = $this->pdo->prepare('UPDATE pecas SET quantidade_estoque = quantidade_estoque - :quantidade WHERE id = :id AND quantidade_estoque >= :necessaria');
+        foreach ($quantidades as $id => $quantidade) {
+            $baixa->execute([':id' => $id, ':quantidade' => $quantidade, ':necessaria' => $quantidade]);
+            if ($baixa->rowCount() !== 1) {
+                throw new \Domain\Exceptions\ValidacaoException('Estoque insuficiente para iniciar a execução.');
+            }
+        }
+        
+        return true;
     }
 
     public function buscarPorId(int $id): ?OrdemServico
@@ -211,7 +303,7 @@ class OrdemServicoPdoRepository implements OrdemServicoRepositoryInterface
     public function listar(array $filtros = []): array
     {
         $sql = "SELECT os.*, 
-                       u.nome AS cliente_nome, u.cpf AS cliente_cpf, u.email AS cliente_email, u.telefone AS cliente_telefone,
+                       u.nome AS cliente_nome, u.cpf AS cliente_cpf, u.cnpj AS cliente_cnpj, u.email AS cliente_email, u.telefone AS cliente_telefone,
                        v.placa AS veiculo_placa, v.marca AS veiculo_marca, v.modelo AS veiculo_modelo, 
                        COALESCE(v.ano_modelo, v.ano_fabricacao) AS veiculo_ano, v.cor AS veiculo_cor
                 FROM ordens_servico os
@@ -239,6 +331,11 @@ class OrdemServicoPdoRepository implements OrdemServicoRepositoryInterface
         if (!empty($filtros['cpf'])) {
             $where[] = 'u.cpf = :cpf';
             $params[':cpf'] = Validator::cpf((string) $filtros['cpf']);
+        }
+
+        if (!empty($filtros['cnpj'])) {
+            $where[] = 'u.cnpj = :cnpj';
+            $params[':cnpj'] = Validator::cnpj((string) $filtros['cnpj']);
         }
 
         if (!empty($filtros['placa'])) {
@@ -452,11 +549,12 @@ class OrdemServicoPdoRepository implements OrdemServicoRepositoryInterface
                 'id'       => (int) $row['cliente_id'],
                 'nome'     => $row['cliente_nome'],
                 'cpf'      => $row['cliente_cpf'],
+                'cnpj'     => $row['cliente_cnpj'],
                 'email'    => $row['cliente_email'],
                 'telefone' => $row['cliente_telefone'],
             ]);
         } else {
-            $stmtCli = $this->pdo->prepare("SELECT id, nome, email, telefone, cpf FROM usuarios WHERE id = :id");
+            $stmtCli = $this->pdo->prepare("SELECT id, nome, email, telefone, cpf, cnpj FROM usuarios WHERE id = :id");
             $stmtCli->execute([':id' => $row['cliente_id']]);
             $cli = $stmtCli->fetch(PDO::FETCH_ASSOC);
             if ($cli) {

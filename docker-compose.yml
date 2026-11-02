@@ -16,6 +16,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       MAIL_HOST: mailpit
       MAIL_PORT: 1025
+      MAIL_OFICINA: ${MAIL_OFICINA:-admin@oficina.com}
 
   mailpit:
     image: axllent/mailpit:latest

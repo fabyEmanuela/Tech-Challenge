@@ -37,6 +37,7 @@ interface OrdemServicoRepositoryInterface
      *     veiculo_id?: int,
      *     status?: string,
      *     cpf?: string,
+     *     cnpj?: string|null,
      *     placa?: string
      * } $filtros
      * @return OrdemServico[]
